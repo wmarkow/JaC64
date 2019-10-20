@@ -20,10 +20,10 @@
  * @author Ken Händel
  *
  */
-package resid;
+package com.dreamfabric.resid;
 
-import resid.ISIDDefs.chip_model;
-import resid.ISIDDefs.sampling_method;
+import com.dreamfabric.resid.ISIDDefs.chip_model;
+import com.dreamfabric.resid.ISIDDefs.sampling_method;
 
 public class SID {
 

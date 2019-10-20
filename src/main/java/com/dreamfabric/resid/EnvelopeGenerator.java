@@ -20,7 +20,7 @@
  * @author Ken Händel
  *
  */
-package resid;
+package com.dreamfabric.resid;
 
 /**
  * A 15 bit counter is used to implement the envelope rates, in effect dividing

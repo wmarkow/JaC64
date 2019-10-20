@@ -20,9 +20,9 @@
  * @author Ken Händel
  *
  */
-package resid;
+package com.dreamfabric.resid;
 
-import resid.ISIDDefs.chip_model;
+import com.dreamfabric.resid.ISIDDefs.chip_model;
 
 /**
  * 

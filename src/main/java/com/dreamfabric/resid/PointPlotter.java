@@ -20,7 +20,7 @@
  * @author Ken Händel
  *
  */
-package resid;
+package com.dreamfabric.resid;
 
 /**
  * Class for plotting integers into an array.

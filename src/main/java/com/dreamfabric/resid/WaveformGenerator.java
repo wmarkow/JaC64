@@ -20,10 +20,10 @@
  * @author Ken Händel
  *
  */
-package resid;
+package com.dreamfabric.resid;
 
-import static resid.SID.ANTTI_LANKILA_PATCH;
-import resid.ISIDDefs.chip_model;
+import static com.dreamfabric.resid.SID.ANTTI_LANKILA_PATCH;
+import com.dreamfabric.resid.ISIDDefs.chip_model;
 
 /**
  * A 24 bit accumulator is the basis for waveform generation. FREQ is added to

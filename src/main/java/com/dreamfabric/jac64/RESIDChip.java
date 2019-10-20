@@ -8,9 +8,9 @@
  */
 package com.dreamfabric.jac64;
 
-import resid.ISIDDefs;
-import resid.SID;
-import resid.ISIDDefs.sampling_method;
+import com.dreamfabric.resid.ISIDDefs;
+import com.dreamfabric.resid.SID;
+import com.dreamfabric.resid.ISIDDefs.sampling_method;
 
 /**
  * SIDChip - implements all neccessary control and set-up for the SID

@@ -1,4 +1,4 @@
-package resid;
+package com.dreamfabric.resid;
 
 public class Util {
   public static int[] unpack(int[] data) {

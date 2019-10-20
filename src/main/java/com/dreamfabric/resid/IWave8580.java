@@ -20,7 +20,7 @@
  * @author Ken Händel
  *
  */
-package resid;
+package com.dreamfabric.resid;
 
 public interface IWave8580 {
 	static int /* reg8 */wave8580__ST[] = Util.unpack(new int[] {

@@ -20,7 +20,7 @@
  * @author Ken Händel
  *
  */
-package resid;
+package com.dreamfabric.resid;
 
 public class Potentiometer {
 	public int /* reg8 */readPOT() {
