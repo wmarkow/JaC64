@@ -8,6 +8,8 @@
  * @author Joakim Eriksson, Dreamfabric / joakime@sics.se
  * @version 1.0
  */
+package com.dreamfabric;
+
 import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
