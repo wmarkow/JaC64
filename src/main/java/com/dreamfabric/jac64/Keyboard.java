@@ -43,10 +43,10 @@ public class Keyboard {
 
   public static final char[][] KEYMAPS = new char[][] {
     { 's','v',  // Keymap for language "sv"
-      ';', 'ö',
-      '\'','ä',
-      '[','å',
-      '`', '§',
+      ';', ';',
+      '\'','\'',
+      '[','[',
+      '`', '`',
       '\\', (char) 222,
       '/', '-',
       ']', (char) 135,
@@ -54,10 +54,10 @@ public class Keyboard {
       '=', (char) 129
     },
     { 'd','e',  // Keymap for language "de"
-      ';', 'ö',
-      '\'','ä',
-      '[','ü',
-      '`', '^',
+      ';', ';',
+      '\'','\'',
+      '[','[',
+      '`', '`',
       '\\', (char) 520,
       '/', '-',
       ']', (char) 521,
