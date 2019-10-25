@@ -7,9 +7,9 @@
  */
 package com.dreamfabric.jac64.emu.cia;
 
-import com.dreamfabric.jac64.ExtChip;
 import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.emu.TimeEvent;
+import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 
 /**

@@ -6,10 +6,11 @@
  * ---------------------------------------------------
  */
 
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.chip;
 
 import java.util.Hashtable;
 
+import com.dreamfabric.jac64.Observer;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 
 /**

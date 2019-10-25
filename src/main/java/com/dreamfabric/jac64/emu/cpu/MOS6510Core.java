@@ -11,10 +11,10 @@
 package com.dreamfabric.jac64.emu.cpu;
 import java.io.*;
 
-import com.dreamfabric.jac64.ExtChip;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.emu.EventQueue;
+import com.dreamfabric.jac64.emu.chip.ExtChip;
 
 /**
  * MOS6510Core "implements" the 6510 processor in java code.
