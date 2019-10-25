@@ -7,6 +7,7 @@
  */
 package com.dreamfabric.jac64;
 
+import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 
 /**
@@ -124,7 +125,7 @@ int ddra = 0;
     timerA = new CIATimer("TimerA", 1, true, null);
     timerB = new CIATimer("TimerB", 2, false, timerA);
     timerA.otherTimer = timerB;
-    todEvent.time = cpu.cycles + 10000;
+    todEvent.setTime(cpu.cycles + 10000);
     cpu.getScheduler().addEvent(todEvent);
   }
 
@@ -459,7 +460,7 @@ int ddra = 0;
 
     void writeCR(long cycles, int data) {
       writeCR = data;
-      if (nextUpdate > cycles + 1 || !updateEvent.scheduled) {
+      if (nextUpdate > cycles + 1 || !updateEvent.isScheduled()) {
         nextUpdate = cycles + 1;
         cpu.getScheduler().addEvent(updateEvent, nextUpdate);
       }

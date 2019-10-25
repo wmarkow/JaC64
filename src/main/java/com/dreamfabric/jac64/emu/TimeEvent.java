@@ -1,11 +1,12 @@
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu;
 
 public abstract class TimeEvent {
   // For linking events...
   TimeEvent nextEvent;
   TimeEvent prevEvent;
   boolean scheduled = false;
-  String name;
+
+String name;
   
   protected long time;
 
@@ -33,4 +34,7 @@ public abstract class TimeEvent {
     return "" + time + (name != null ? ": " + name : "");
   }
 
+  public boolean isScheduled() {
+      return scheduled;
+  }
 } // TimeEvent

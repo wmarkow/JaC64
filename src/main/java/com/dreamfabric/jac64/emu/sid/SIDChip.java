@@ -11,7 +11,7 @@ package com.dreamfabric.jac64.emu.sid;
 
 import com.dreamfabric.jac64.AudioDriver;
 import com.dreamfabric.jac64.ExtChip;
-import com.dreamfabric.jac64.TimeEvent;
+import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 
