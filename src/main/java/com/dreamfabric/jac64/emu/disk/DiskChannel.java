@@ -1,4 +1,4 @@
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.disk;
 /**
  * Very simple implementation of a disk channel
  * (can only handle read on a good way).

@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.*;
 
 import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.disk.DiskListener;
 
 import java.io.OutputStream;
 import java.io.FileOutputStream;

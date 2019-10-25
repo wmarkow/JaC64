@@ -1,4 +1,9 @@
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.disk;
+
+import com.dreamfabric.jac64.C64Reader;
+import com.dreamfabric.jac64.C64Screen;
+import com.dreamfabric.jac64.ExtChip;
+
 /**
  * Describe class C1541Chips here.
  *
@@ -132,7 +137,7 @@ public class C1541Chips extends ExtChip implements DiskListener {
   C64Screen cia2;
   int iecLines;
 
-  public C1541Chips(C1541Emu emu) {
+public C1541Chips(C1541Emu emu) {
     cpu = emu;
     init(cpu);
   }
@@ -151,9 +156,9 @@ public class C1541Chips extends ExtChip implements DiskListener {
     switch (address) {
     case 0x1800: // VIA1 PB - IEEE Serial Bus / IEC
       return (via1PB & 0x1a
-          | ((iecLines & cia2.iecLines) >> 7) & 0x01    // DATA
-          | ((iecLines & cia2.iecLines) >> 4) & 0x04    // CLK
-          | (cia2.iecLines << 3) & 0x80) ^ 0x85;        // ATN
+          | ((iecLines & cia2.getIecLines()) >> 7) & 0x01    // DATA
+          | ((iecLines & cia2.getIecLines()) >> 4) & 0x04    // CLK
+          | (cia2.getIecLines() << 3) & 0x80) ^ 0x85;        // ATN
     case 0x1801: // VIA1 PA
     case 0x180f: // VIA1 PA
       via1IFlag &= ~2;
@@ -467,7 +472,7 @@ public class C1541Chips extends ExtChip implements DiskListener {
 
   public void updateIECLines() {
     int data = ~via1PB & via1CB;
-    iecLines = (data << 6) & ((~data ^ cia2.iecLines) << 3) & 0x80
+    iecLines = (data << 6) & ((~data ^ cia2.getIecLines()) << 3) & 0x80
     | (data << 3) & 0x40;
   }
 
@@ -959,4 +964,7 @@ public class C1541Chips extends ExtChip implements DiskListener {
     System.out.println("C1541: " + text);
   }
 
+  public int getIecLines() {
+      return iecLines;
+  }
 }

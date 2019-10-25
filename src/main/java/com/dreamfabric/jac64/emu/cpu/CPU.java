@@ -12,13 +12,13 @@
  */
 package com.dreamfabric.jac64.emu.cpu;
 import com.dreamfabric.c64utils.*;
-import com.dreamfabric.jac64.C1541Emu;
 import com.dreamfabric.jac64.DefaultIMon;
 import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Loader;
 import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.TimeEvent;
+import com.dreamfabric.jac64.emu.disk.C1541Emu;
 /**
  * CPU "implements" the C64s 6510 processor in java code. reimplemented from old
  * CPU.java

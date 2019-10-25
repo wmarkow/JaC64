@@ -1,8 +1,9 @@
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.disk;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Observable;
 
+import com.dreamfabric.jac64.C64Reader;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 
 /**

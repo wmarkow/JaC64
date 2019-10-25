@@ -15,6 +15,7 @@ import java.applet.*;
 import javax.swing.JPanel;
 
 import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.disk.C1541Chips;
 import com.dreamfabric.jac64.emu.sid.RESIDChip;
 import com.dreamfabric.jac64.emu.sid.SIDChip;
 
@@ -111,7 +112,8 @@ MouseMotionListener {
   TFE_CS8900 tfe;
 
   int iecLines = 0;
-  // for disk emulation...
+
+// for disk emulation...
   int cia2PRA = 0;
   int cia2DDRA = 0;
 
@@ -599,7 +601,7 @@ MouseMotionListener {
       //       System.out.print("Read dd00 IEC1: ");
       // Try the frodo way... again...
       val = (cia2PRA | ~cia2DDRA) & 0x3f
-      | iecLines & c1541Chips.iecLines;
+      | iecLines & c1541Chips.getIecLines();
 
       val &= 0xff;
       return val;
@@ -946,15 +948,15 @@ MouseMotionListener {
     System.out.print(" D" + sdata);
 
     // The 1541 has id = 2
-    sdata = ((c1541Chips.iecLines & 0x40) == 0) ? 1 : 0;
+    sdata = ((c1541Chips.getIecLines() & 0x40) == 0) ? 1 : 0;
     System.out.print(" c" + sdata);
-    sdata = ((c1541Chips.iecLines & 0x80) == 0) ? 1 : 0;
+    sdata = ((c1541Chips.getIecLines() & 0x80) == 0) ? 1 : 0;
     System.out.print(" d" + sdata);
 
     System.out.println(" => C" +
-        ((iecLines & c1541Chips.iecLines & 0x80) == 0 ? 1 : 0)
+        ((iecLines & c1541Chips.getIecLines() & 0x80) == 0 ? 1 : 0)
         + " D" +
-        ((iecLines & c1541Chips.iecLines & 0x40) == 0 ? 1 : 0));
+        ((iecLines & c1541Chips.getIecLines() & 0x40) == 0 ? 1 : 0));
   }
 
   private void setVideoMem() {
@@ -2025,5 +2027,9 @@ MouseMotionListener {
     // Emulate stick button
     keyboard.setButtonval(0xff - (button1 | button2 ? 0x10 : 0));
     //    keyboard.setButtonval(0xff - (button1 ? 0x4 : 0) - (button2 ? 0x8 : 0));
+  }
+  
+  public int getIecLines() {
+      return iecLines;
   }
 }

@@ -1,9 +1,12 @@
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.disk;
 
 import java.io.BufferedReader;
 
 import java.net.URL;
 
+import com.dreamfabric.jac64.C64Reader;
+import com.dreamfabric.jac64.IMonitor;
+import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 
 import java.io.DataInputStream;
