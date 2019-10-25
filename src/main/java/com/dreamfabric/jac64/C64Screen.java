@@ -14,6 +14,7 @@ import java.awt.image.*;
 import java.applet.*;
 import javax.swing.JPanel;
 
+import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.disk.C1541Chips;
 import com.dreamfabric.jac64.emu.keyboard.Keyboard;
