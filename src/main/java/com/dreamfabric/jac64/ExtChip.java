@@ -37,7 +37,7 @@ public abstract class ExtChip {
   // One InterruptManager per named CPU.
   private static Hashtable<String, InterruptManager> managers = 
     new Hashtable<String, InterruptManager>();
-  MOS6510Core cpu;
+  protected MOS6510Core cpu;
   private Observer observer;
   private InterruptManager im;
   

@@ -6,7 +6,7 @@
  * ---------------------------------------------------
  */
 
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.sid;
 
 /**
  * Waveform lookup tables borrowed from the Re-Sid SID emulator

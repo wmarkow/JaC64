@@ -6,8 +6,12 @@
  * http://www.dreamfabric.com/c64
  * ---------------------------------------------------
  */
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.sid;
 
+import com.dreamfabric.jac64.AudioDriver;
+import com.dreamfabric.jac64.C64Screen;
+import com.dreamfabric.jac64.ExtChip;
+import com.dreamfabric.jac64.TimeEvent;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 import com.dreamfabric.resid.ISIDDefs;
@@ -78,7 +82,7 @@ public class RESIDChip extends ExtChip {
     clocksPerSampleRest = (int) ((CPUFrq * 1000L) / SAMPLE_RATE);
     clocksPerSampleRest -= clocksPerSample * 1000;
     System.out.println("ClocksPer Sample: " + clocksPerSample + "." + clocksPerSampleRest);
-    sampleEvent.time = cpu.cycles + 5;
+    sampleEvent.setTime(cpu.cycles + 5);
     cpu.getScheduler().addEvent(sampleEvent);
   }
 

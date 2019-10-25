@@ -22,6 +22,7 @@ import javax.swing.table.TableModel;
 import java.net.*;
 import com.dreamfabric.jac64.*;
 import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.sid.SIDMixer;
 import com.dreamfabric.c64utils.*;
 
 public class JaC64 implements ActionListener, KeyEventDispatcher {

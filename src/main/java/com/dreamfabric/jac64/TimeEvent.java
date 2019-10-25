@@ -21,6 +21,11 @@ public abstract class TimeEvent {
   public final long getTime() {
     return time;
   }
+  
+  public void setTime(long time)
+  {
+      this.time = time;
+  }
 
   public abstract void execute(long t);
 

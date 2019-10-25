@@ -15,6 +15,8 @@ import java.applet.*;
 import javax.swing.JPanel;
 
 import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.sid.RESIDChip;
+import com.dreamfabric.jac64.emu.sid.SIDChip;
 
 /**
  * Implements the VIC chip + some other HW

@@ -6,7 +6,7 @@
  * ---------------------------------------------------
  */
 
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.sid;
 public interface SIDMixerListener {
   public void updateValues();
 }

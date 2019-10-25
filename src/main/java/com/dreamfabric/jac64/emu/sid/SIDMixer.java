@@ -7,7 +7,9 @@
  * ---------------------------------------------------
  */
 
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.sid;
+
+import com.dreamfabric.jac64.AudioDriver;
 
 /**
  * This mixes four channels of SID sounds (or three)

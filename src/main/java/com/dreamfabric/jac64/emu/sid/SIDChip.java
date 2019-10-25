@@ -7,8 +7,11 @@
  * ---------------------------------------------------
  */
 
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.sid;
 
+import com.dreamfabric.jac64.AudioDriver;
+import com.dreamfabric.jac64.ExtChip;
+import com.dreamfabric.jac64.TimeEvent;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 
@@ -55,7 +58,7 @@ public class SIDChip extends ExtChip {
         sid[2].next = sid[1];
         mixer = new SIDMixer(sid, null, driver);
         driver.setMasterVolume(100);
-        sidEvent.time = cpu.cycles + 10;
+        sidEvent.setTime(cpu.cycles + 10);
         cpu.getScheduler().addEvent(sidEvent);
       } catch (Throwable e) {
         e.printStackTrace();
@@ -144,7 +147,7 @@ public class SIDChip extends ExtChip {
     
   public void reset() {
     mixer.reset();
-    sidEvent.time = cpu.cycles;
+    sidEvent.setTime(cpu.cycles);
   }
 
   public void stop() {
