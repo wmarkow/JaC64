@@ -238,7 +238,7 @@ public class C1541Chips extends ExtChip implements DiskListener {
     if (DEBUG_WRITE) {
       log("Writing to " + Integer.toHexString(address)
           + " = " + Integer.toHexString(data) + " pc = " +
-          Integer.toHexString(cpu.pc));
+          Integer.toHexString(cpu.getPc()));
     }
     switch (address) {
 
@@ -413,7 +413,7 @@ public class C1541Chips extends ExtChip implements DiskListener {
   private void writeByte(int data) {
     currentByte = data;
     log("CPU Writes byte: " + Integer.toString(data, 16) +
-        " at " + Integer.toString(cpu.pc, 16));
+        " at " + Integer.toString(cpu.getPc(), 16));
     //    forward();
   }
 
@@ -646,7 +646,7 @@ public class C1541Chips extends ExtChip implements DiskListener {
       System.out.println("C1541: Read byte from: " + sectorPos + " => " +
           Integer.toString(data, 16) + " " +
           i2c(data) + " " + cpu.cycles + " pc = " +
-          Integer.toString(cpu.pc, 16));
+          Integer.toString(cpu.getPc(), 16));
     }
     //    forward();
     return data;
@@ -661,7 +661,7 @@ public class C1541Chips extends ExtChip implements DiskListener {
         System.out.println("#### Write byte: " +
             Integer.toString(currentByte, 16) + " ("
             + Integer.toString(gcrSector[sectorPos], 16) +
-            ")" + (char) currentByte + "  y=" + cpu.y +
+            ")" + (char) currentByte + "  y=" + cpu.getY() +
             " written: " + bytesWritten +
             " SectorPos: " + sectorPos + " " + cpu.cycles);
       }

@@ -16,6 +16,9 @@ import java.io.InputStream;
 import java.io.DataInputStream;
 import java.net.URL;
 import java.util.*;
+
+import com.dreamfabric.jac64.emu.cpu.CPU;
+
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;

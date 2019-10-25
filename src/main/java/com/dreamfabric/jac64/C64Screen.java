@@ -14,6 +14,8 @@ import java.awt.image.*;
 import java.applet.*;
 import javax.swing.JPanel;
 
+import com.dreamfabric.jac64.emu.cpu.CPU;
+
 /**
  * Implements the VIC chip + some other HW
  *
@@ -588,9 +590,9 @@ MouseMotionListener {
     case 0xd41A:
       return poty;
     case 0xdc00:
-      return keyboard.readDC00(cpu.lastReadOP);
+      return keyboard.readDC00(cpu.getLastReadOP());
     case 0xdc01:
-      return keyboard.readDC01(cpu.lastReadOP);
+      return keyboard.readDC01(cpu.getLastReadOP());
     case 0xdd00:
       //       System.out.print("Read dd00 IEC1: ");
       // Try the frodo way... again...
@@ -1023,13 +1025,13 @@ MouseMotionListener {
       if (lastCycle + 1 < cycles) {
         System.out.println("More than one cycle passed: " +
             (cycles - lastCycle) + " at " + cycles + " PC: "
-            + Integer.toHexString(cpu.pc));
+            + Integer.toHexString(cpu.getPc()));
       }
 
       if (lastCycle == cycles) {
         System.out.println("No diff since last update!!!: " +
             (cycles - lastCycle) + " at " + cycles + " PC: "
-            + Integer.toHexString(cpu.pc));
+            + Integer.toHexString(cpu.getPc()));
       }
       lastCycle = cycles;
     }
@@ -1099,7 +1101,7 @@ MouseMotionListener {
           lastIRQ = cpu.cycles;
           if (IRQDEBUG)
             monitor.info("Generating IRQ at " + vbeam + " req:" + raster
-                + " IRQs:" + cpu.interruptInExec
+                + " IRQs:" + cpu.getInterruptInExec()
                 + " flags: " + irqFlags + " delta: " +
                 (cpu.cycles - lastLine));
         }

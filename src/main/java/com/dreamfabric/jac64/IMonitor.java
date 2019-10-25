@@ -8,6 +8,8 @@
 
 package com.dreamfabric.jac64;
 
+import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
+
 /**
  * @author jblok
  */

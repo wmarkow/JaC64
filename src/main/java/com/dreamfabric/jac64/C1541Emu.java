@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 
 import java.net.URL;
 
+import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
+
 import java.io.DataInputStream;
 import java.io.InputStreamReader;
 

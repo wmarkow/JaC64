@@ -3,6 +3,8 @@ package com.dreamfabric.c64utils;
 import java.util.Hashtable;
 import java.util.Vector;
 import com.dreamfabric.jac64.*;
+import com.dreamfabric.jac64.emu.cpu.MOS6510Ops;
+
 import java.io.InputStream;
 
 /**

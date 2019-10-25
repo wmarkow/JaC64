@@ -8,6 +8,8 @@
  */
 package com.dreamfabric.jac64;
 
+import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 import com.dreamfabric.resid.ISIDDefs;
 import com.dreamfabric.resid.SID;
 import com.dreamfabric.resid.ISIDDefs.sampling_method;
@@ -58,7 +60,7 @@ public class RESIDChip extends ExtChip {
       }
       time = nextSample;
       if (!removeSample)
-        cpu.scheduler.addEvent(this);
+        cpu.getScheduler().addEvent(this);
     }
   };
 
@@ -77,7 +79,7 @@ public class RESIDChip extends ExtChip {
     clocksPerSampleRest -= clocksPerSample * 1000;
     System.out.println("ClocksPer Sample: " + clocksPerSample + "." + clocksPerSampleRest);
     sampleEvent.time = cpu.cycles + 5;
-    cpu.scheduler.addEvent(sampleEvent);
+    cpu.getScheduler().addEvent(sampleEvent);
   }
 
   public void clock(long cycles) { }
@@ -98,7 +100,7 @@ public class RESIDChip extends ExtChip {
   public void reset() {
     nextSample = cpu.cycles + 10;
     lastCycles = cpu.cycles;
-    cpu.scheduler.addEvent(sampleEvent, nextSample);
+    cpu.getScheduler().addEvent(sampleEvent, nextSample);
     sid.reset();
   }
 

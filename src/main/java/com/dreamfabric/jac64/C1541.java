@@ -3,6 +3,8 @@ package com.dreamfabric.jac64;
 import java.io.ByteArrayOutputStream;
 import java.util.Observable;
 
+import com.dreamfabric.jac64.emu.cpu.CPU;
+
 /**
  * class C1541 - simple SerialBus and C1541 emulation.
  * - will not support everything but the usual simplest

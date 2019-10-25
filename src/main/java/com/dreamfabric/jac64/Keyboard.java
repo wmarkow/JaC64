@@ -11,6 +11,8 @@
 
 package com.dreamfabric.jac64;
 import com.dreamfabric.c64utils.*;
+import com.dreamfabric.jac64.emu.cpu.CPU;
+
 import java.awt.event.*;
 import java.util.*;
 

@@ -7,6 +7,9 @@
  */
 package com.dreamfabric.c64utils;
 import com.dreamfabric.jac64.*;
+import com.dreamfabric.jac64.emu.cpu.M6510Ops;
+import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
+import com.dreamfabric.jac64.emu.cpu.MOS6510Ops;
 
 /**
  * @author jblok

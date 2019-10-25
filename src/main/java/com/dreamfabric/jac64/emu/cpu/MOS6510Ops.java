@@ -1,4 +1,7 @@
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.cpu;
+
+import com.dreamfabric.jac64.Hex;
+
 /**
  * Definitions for the  MOS6510Core
  *

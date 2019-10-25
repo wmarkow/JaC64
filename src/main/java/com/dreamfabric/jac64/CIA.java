@@ -7,6 +7,7 @@
  */
 package com.dreamfabric.jac64;
 
+import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 
 /**
  * CIA emulation for JaC64. 
@@ -108,7 +109,7 @@ public class CIA {
         // Since this should continue run, just reschedule...
 //        System.out.println("TOD ticked..." + (todhour>>4) + (todhour & 0xf) + ":" + 
 //              (todmin>>4) + (todmin&0xf) + ":" + (todsec>>4) + (todsec&0xf));
-        cpu.scheduler.addEvent(this);
+        cpu.getScheduler().addEvent(this);
       }
   };
   
@@ -124,7 +125,7 @@ public class CIA {
     timerB = new CIATimer("TimerB", 2, false, timerA);
     timerA.otherTimer = timerB;
     todEvent.time = cpu.cycles + 10000;
-    cpu.scheduler.addEvent(todEvent);
+    cpu.getScheduler().addEvent(todEvent);
   }
 
   public void reset() {
@@ -382,7 +383,7 @@ public class CIA {
         if (state != STOP) {
 //	    System.out.println(ciaID() + " Adding Timer update event at " + cycles +
 //			       " with time: " + nextUpdate + " state: " + state);
-          cpu.scheduler.addEvent(this, nextUpdate);
+          cpu.getScheduler().addEvent(this, nextUpdate);
         }
       }
     };
@@ -409,7 +410,7 @@ public class CIA {
       nextZero = 0;
       nextUpdate = 0;
       writeCR = -1;
-      cpu.scheduler.removeEvent(updateEvent);
+      cpu.getScheduler().removeEvent(updateEvent);
     }
 
     private int getTimer(long cycles) {
@@ -460,7 +461,7 @@ public class CIA {
       writeCR = data;
       if (nextUpdate > cycles + 1 || !updateEvent.scheduled) {
         nextUpdate = cycles + 1;
-        cpu.scheduler.addEvent(updateEvent, nextUpdate);
+        cpu.getScheduler().addEvent(updateEvent, nextUpdate);
       }
     }
 

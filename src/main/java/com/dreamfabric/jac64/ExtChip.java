@@ -10,6 +10,8 @@ package com.dreamfabric.jac64;
 
 import java.util.Hashtable;
 
+import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
+
 /**
  * ExtChip - used for implementing HW Chips connected to the
  * CPU.
@@ -123,7 +125,7 @@ public abstract class ExtChip {
     	boolean val = (irqFlags & irq) == 0;
     	irqFlags |= irq;
     	if (irqFlags != oldIrqFlags) {
-    		if (DEBUG_INTERRUPS && irqFlags != 0 && cpu.debug) {
+    		if (DEBUG_INTERRUPS && irqFlags != 0 && cpu.isDebug()) {
     			cpu.log("ExtChips: Setting IRQ! " + irq + " => " + irqFlags +  " at " + cpu.cycles);
     		}
     		cpu.setIRQLow(irqFlags != 0);
@@ -135,7 +137,7 @@ public abstract class ExtChip {
     public void clearIRQ(int irq) {
     	irqFlags &= ~irq;
     	if (irqFlags != oldIrqFlags) {
-    		if (DEBUG_INTERRUPS && oldIrqFlags != 0 && cpu.debug) {
+    		if (DEBUG_INTERRUPS && oldIrqFlags != 0 && cpu.isDebug()) {
     			System.out.println("Clearing IRQ! " + irq + " => " + irqFlags +  " at " + cpu.cycles);
     		}
     		cpu.setIRQLow(irqFlags != 0);
@@ -147,7 +149,7 @@ public abstract class ExtChip {
       boolean val = (nmiFlags & nmi) == 0;
       nmiFlags |= nmi;
       if (nmiFlags != oldNmiFlags) {
-        if (DEBUG_INTERRUPS && cpu.debug)
+        if (DEBUG_INTERRUPS && cpu.isDebug())
           System.out.println("Setting NMI! " + nmi + " => " + nmiFlags +  " at " + cpu.cycles);
         cpu.setNMILow(nmiFlags != 0);
         oldNmiFlags = nmiFlags;
@@ -159,7 +161,7 @@ public abstract class ExtChip {
     public void clearNMI(int nmi) {
       nmiFlags &= ~nmi;
       if (nmiFlags != oldNmiFlags) {
-        if (DEBUG_INTERRUPS && oldNmiFlags != 0 && cpu.debug) {
+        if (DEBUG_INTERRUPS && oldNmiFlags != 0 && cpu.isDebug()) {
           System.out.println("Clearing NMI! " + nmi + " => " + nmiFlags +  " at " + cpu.cycles);
         }
         cpu.setNMILow(nmiFlags != 0);

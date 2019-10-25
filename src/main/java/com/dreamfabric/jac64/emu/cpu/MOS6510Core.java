@@ -8,8 +8,13 @@
  *
  */
 
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.cpu;
 import java.io.*;
+
+import com.dreamfabric.jac64.EventQueue;
+import com.dreamfabric.jac64.ExtChip;
+import com.dreamfabric.jac64.IMonitor;
+import com.dreamfabric.jac64.PatchListener;
 
 /**
  * MOS6510Core "implements" the 6510 processor in java code.
@@ -24,7 +29,7 @@ import java.io.*;
  */
 public abstract class MOS6510Core extends MOS6510Ops {
   protected int memory[];
-    protected boolean debug = false;
+  protected boolean debug = false;
 
   public static final int NMI_DELAY = 2;
   public static final int IRQ_DELAY = 2;
@@ -53,7 +58,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
   // The processor flags
   boolean sign = false;
   boolean zero = false;
-  boolean overflow = false;
+  protected boolean overflow = false;
   boolean carry = false;
   boolean decimal = false;
   boolean brk = false;
@@ -70,7 +75,8 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
   protected EventQueue scheduler = new EventQueue();
 
-  private String[] debugInfo;
+
+private String[] debugInfo;
 
   public MOS6510Core(IMonitor m, String cb) {
     monitor = m;
@@ -126,13 +132,15 @@ public abstract class MOS6510Core extends MOS6510Ops {
   protected long start = System.currentTimeMillis();
   protected int pc;
   protected int interruptInExec = 0;
-  protected boolean disableInterupt = false;
+  
+
+protected boolean disableInterupt = false;
 
   // Used for actual address...
   protected int rindex = 0;
   protected int lastReadOP = 0;
 
-  public int getSP() {
+public int getSP() {
     return s;
   }
 
@@ -934,12 +942,36 @@ public abstract class MOS6510Core extends MOS6510Ops {
     }
   }
 
-  void log(String s) {
+  public void log(String s) {
     if (debug)
       monitor.info(getName() + " : " + s);
   }
 
   public boolean getIRQLow() {
 	  return IRQLow;
+  }
+  
+  public int getPc() {
+      return pc;
+  }
+  
+  public EventQueue getScheduler() {
+      return scheduler;
+  }
+  
+  public int getY() {
+      return y;
+  }
+  
+  public int getLastReadOP() {
+      return lastReadOP;
+  }
+  
+  public int getInterruptInExec() {
+      return interruptInExec;
+  }
+  
+  public boolean isDebug() {
+      return debug;
   }
 }

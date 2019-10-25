@@ -9,6 +9,9 @@
 
 package com.dreamfabric.jac64;
 
+import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
+
 /**
  * SIDChip - implements all neccessary control and set-up for the SID
  * chip emulation.
@@ -31,7 +34,7 @@ public class SIDChip extends ExtChip {
       if (time < cpu.cycles)
         time = cpu.cycles + 10;
       if (!killEvent) 
-        cpu.scheduler.addEvent(this);
+        cpu.getScheduler().addEvent(this);
     }
   };
   
@@ -41,11 +44,11 @@ public class SIDChip extends ExtChip {
       try {
         System.out.println("Creating SID configuration");
         sid = new SIDVoice6581[3];
-        sid[0] = new SIDVoice6581(cpu.memory, IO_OFFSET + 0xd400 );
+        sid[0] = new SIDVoice6581(cpu.getMemory(), IO_OFFSET + 0xd400 );
         sid[0].init();
-        sid[1] = new SIDVoice6581(cpu.memory, IO_OFFSET + 0xd400 + 7);
+        sid[1] = new SIDVoice6581(cpu.getMemory(), IO_OFFSET + 0xd400 + 7);
         sid[1].init();
-        sid[2] = new SIDVoice6581(cpu.memory, IO_OFFSET + 0xd400 + 14);
+        sid[2] = new SIDVoice6581(cpu.getMemory(), IO_OFFSET + 0xd400 + 14);
         sid[2].init();
         sid[0].next = sid[2];
         sid[1].next = sid[0];
@@ -53,7 +56,7 @@ public class SIDChip extends ExtChip {
         mixer = new SIDMixer(sid, null, driver);
         driver.setMasterVolume(100);
         sidEvent.time = cpu.cycles + 10;
-        cpu.scheduler.addEvent(sidEvent);
+        cpu.getScheduler().addEvent(sidEvent);
       } catch (Throwable e) {
         e.printStackTrace();
         sid = null;
