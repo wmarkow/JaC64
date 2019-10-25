@@ -1,4 +1,4 @@
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.vic;
 /**
  * Describe class VICConstants here.
  *
