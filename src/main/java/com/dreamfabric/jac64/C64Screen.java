@@ -21,6 +21,7 @@ import com.dreamfabric.jac64.emu.disk.C1541Chips;
 import com.dreamfabric.jac64.emu.keyboard.Keyboard;
 import com.dreamfabric.jac64.emu.sid.RESIDChip;
 import com.dreamfabric.jac64.emu.sid.SIDChip;
+import com.dreamfabric.jac64.emu.tfe.TFE_CS8900;
 
 /**
  * Implements the VIC chip + some other HW

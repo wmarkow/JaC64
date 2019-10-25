@@ -1,4 +1,4 @@
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.tfe;
 /**
  * Describe class TFE_CS8900 here.
  *
