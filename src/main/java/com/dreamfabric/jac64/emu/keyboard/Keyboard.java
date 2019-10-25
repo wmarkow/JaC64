@@ -9,8 +9,10 @@
  *
  */
 
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.keyboard;
 import com.dreamfabric.c64utils.*;
+import com.dreamfabric.jac64.C64Screen;
+import com.dreamfabric.jac64.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 
 import java.awt.event.*;
@@ -70,9 +72,11 @@ public class Keyboard {
 
 
   boolean extendedKeyboardEmulation = false;
-  boolean stickExits = false;
 
-  int joystick1 = 255;
+boolean stickExits = false;
+
+
+int joystick1 = 255;
   int bval = 255;
   boolean lastUp = false;
   boolean lastLeft = false;
@@ -547,12 +551,12 @@ public class Keyboard {
     }
   }
 
-  int readDC00(int pc) {
+  public int readDC00(int pc) {
     // 0xdc00 - why does this not work when it is "correctly" implemented?
     // DC00 a'la VICE which seems to work on StarPost!?
     int val = 0xff;
     int tmp = pc < 0x10000 ? joy1 : 0xff;
-    int mask = (cia.prb | ~(cia.ddrb)) & tmp;
+    int mask = (cia.getPrb() | ~(cia.getDdrb())) & tmp;
 
 
     for (int m = 0x1, i = 0; i < 8; m <<= 1, i++) {
@@ -562,21 +566,21 @@ public class Keyboard {
 
     tmp = pc < 0x10000 ? joy2 : 0xff;
 //    System.out.println("Read keyboard via dc00: => " + ((val & (cia.pra | ~(cia.ddra))) & tmp));
-    return (val & (cia.pra | ~(cia.ddra))) & tmp;
+    return (val & (cia.getPra() | ~(cia.getDdra()))) & tmp;
   }
 
-  void setButtonval(int bval) {
+  public void setButtonval(int bval) {
     this.bval = bval;
     updateJoystick();
   }
 
-  int readDC01(int pc) {
+  public int readDC01(int pc) {
     // A'la VICE!
     //    System.out.println("PC: " + Integer.toHexString(pc));
 
     int val = 0xff;
     int tmp = pc < 0x10000 ? (joy2 & bval) : 0xff;
-    int mask = (cia.pra | ~(cia.ddra)) & tmp;
+    int mask = (cia.getPra() | ~(cia.getDdra())) & tmp;
 
     for (int m = 0x1, i = 0; i < 8; m <<= 1, i++) {
       if ((mask & m) == 0)
@@ -585,7 +589,7 @@ public class Keyboard {
     tmp = pc < 0x10000 ? (joy1 & bval) : 0xff;
 //    System.out.println("Read keyboard via dc00: " + val + " => " + ((val & (cia.prb | ~(cia.ddrb))) & tmp));
 
-    return (val & (cia.prb | ~(cia.ddrb))) & tmp;
+    return (val & (cia.getPrb() | ~(cia.getDdrb()))) & tmp;
   }
   
   /* Updates $DC00/$DC01 based on recent joystick activity. */
@@ -617,5 +621,13 @@ public class Keyboard {
       keycol[i] = 255;
     }
 
+  }
+  
+  public void setStickExits(boolean stickExits) {
+      this.stickExits = stickExits;
+  }
+  
+  public void setExtendedKeyboardEmulation(boolean extendedKeyboardEmulation) {
+      this.extendedKeyboardEmulation = extendedKeyboardEmulation;
   }
 }

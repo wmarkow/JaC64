@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.disk.C1541Chips;
+import com.dreamfabric.jac64.emu.keyboard.Keyboard;
 import com.dreamfabric.jac64.emu.sid.RESIDChip;
 import com.dreamfabric.jac64.emu.sid.SIDChip;
 
@@ -413,8 +414,8 @@ MouseMotionListener {
   public void setKeyboardEmulation(boolean extended) {
     monitor.info("Keyboard extended: " + extended);
 
-    keyboard.stickExits = !extended;
-    keyboard.extendedKeyboardEmulation = extended;
+    keyboard.setStickExits(!extended);
+    keyboard.setExtendedKeyboardEmulation(extended);
   }
 
   public void init(CPU cpu) {
@@ -481,7 +482,7 @@ MouseMotionListener {
     }
   }
 
-  void restoreKey(boolean down) {
+  public void restoreKey(boolean down) {
     if (down) setNMI(KEYBOARD_NMI);
     else clearNMI(KEYBOARD_NMI);
   }

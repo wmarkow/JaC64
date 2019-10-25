@@ -44,7 +44,7 @@ public class CIA {
 
   int pra = 0;
   int prb = 0;
-  int ddra = 0;
+int ddra = 0;
   int ddrb = 0;
   int tod10sec = 0;
   int todsec = 0;
@@ -615,4 +615,21 @@ public class CIA {
       cr = writeCR & 0xef;
     }
   }
+  
+  public int getPra() {
+      return pra;
+  }
+
+  public int getPrb() {
+      return prb;
+  }
+
+  public int getDdra() {
+      return ddra;
+  }
+
+  public int getDdrb() {
+      return ddrb;
+  }
+
 }

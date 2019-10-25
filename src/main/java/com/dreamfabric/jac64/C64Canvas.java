@@ -16,6 +16,8 @@ import java.awt.event.FocusEvent;
 import java.awt.Font;
 import javax.swing.JPanel;
 
+import com.dreamfabric.jac64.emu.keyboard.Keyboard;
+
 /**
  * The actual AWT component that shows the C64 Screen.
  *
