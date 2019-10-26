@@ -8,19 +8,28 @@
  */
 package com.dreamfabric.jac64;
 
-
 public abstract class AudioDriver {
 
-  public abstract void init(int sampleRate, int bufferSize);
-  public abstract void write(byte[] buffer);
-  public abstract long getMicros();
-  public abstract boolean hasSound();
-  public abstract int available();
-  public abstract int getMasterVolume();
-  public abstract void setMasterVolume(int v);
-  public abstract void shutdown();
-  public abstract void setSoundOn(boolean on);
-  public abstract void setFullSpeed(boolean full);
-  public abstract boolean fullSpeed();
+    public abstract void init(int sampleRate, int bufferSize);
+
+    public abstract void write(byte[] buffer);
+
+    public abstract long getMicros();
+
+    public abstract boolean hasSound();
+
+    public abstract int available();
+
+    public abstract int getMasterVolume();
+
+    public abstract void setMasterVolume(int v);
+
+    public abstract void shutdown();
+
+    public abstract void setSoundOn(boolean on);
+
+    public abstract void setFullSpeed(boolean full);
+
+    public abstract boolean fullSpeed();
 
 }

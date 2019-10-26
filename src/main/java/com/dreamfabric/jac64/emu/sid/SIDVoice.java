@@ -18,8 +18,9 @@ package com.dreamfabric.jac64.emu.sid;
  */
 
 public class SIDVoice {
-  public int[] intBuffer;
-  public int[] generateSound(long cycles) {
-    return null;
-  };
+    public int[] intBuffer;
+
+    public int[] generateSound(long cycles) {
+        return null;
+    };
 }

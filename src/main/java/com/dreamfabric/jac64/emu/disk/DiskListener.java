@@ -1,4 +1,5 @@
 package com.dreamfabric.jac64.emu.disk;
+
 /**
  * Describe class DiskChangeListener here.
  *
@@ -10,7 +11,8 @@ package com.dreamfabric.jac64.emu.disk;
  */
 public interface DiskListener {
 
-  public void diskChanged();
-  public void atnChanged(boolean low);
+    public void diskChanged();
+
+    public void atnChanged(boolean low);
 
 }

@@ -30,18 +30,18 @@ package com.dreamfabric.resid;
  */
 public class PointPlotter {
 
-	protected int /* sound_sample */f[];
+    protected int /* sound_sample */ f[];
 
-	public PointPlotter(int /* sound_sample */arr[]) {
-		this.f = arr;
-	}
+    public PointPlotter(int /* sound_sample */ arr[]) {
+        this.f = arr;
+    }
 
-	void plot(double x, double y) {
-		// Clamp negative values to zero.
-		if (y < 0) {
-			y = 0;
-		}
+    void plot(double x, double y) {
+        // Clamp negative values to zero.
+        if (y < 0) {
+            y = 0;
+        }
 
-		f[(int) x] = (int /* sound_sample */) y;
-	}
+        f[(int) x] = (int /* sound_sample */) y;
+    }
 }

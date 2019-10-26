@@ -16,23 +16,22 @@ import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 
 public interface IMonitor {
 
-  public void init(MOS6510Core cpu);
+    public void init(MOS6510Core cpu);
 
-  public void setEnabled(boolean b);
+    public void setEnabled(boolean b);
 
-  public boolean isEnabled();//test for expensive operations
+    public boolean isEnabled();// test for expensive operations
 
-  public void info(Object o);
+    public void info(Object o);
 
-  public void warning(Object o);
+    public void warning(Object o);
 
-  public void error(Object o);
+    public void error(Object o);
 
-  public int getLevel();
+    public int getLevel();
 
-  public void setLevel(int level);
+    public void setLevel(int level);
 
-  public void disAssemble(int[] memory, int pc, int acc, int x, int y,
-			  byte status, int interruptInExec,
-			  int lastInterrupt);
+    public void disAssemble(int[] memory, int pc, int acc, int x, int y, byte status, int interruptInExec,
+            int lastInterrupt);
 }

@@ -1,4 +1,5 @@
 package com.dreamfabric.jac64;
+
 /**
  * Describe class Observable here.
  *
@@ -10,9 +11,9 @@ package com.dreamfabric.jac64;
  */
 public interface Observer {
 
-  /**
-   * Creates a new <code>Observable</code> instance.
-   *
-   */
-  public void update(Object src, Object data);
+    /**
+     * Creates a new <code>Observable</code> instance.
+     *
+     */
+    public void update(Object src, Object data);
 }

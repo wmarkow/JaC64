@@ -15,25 +15,26 @@ import java.net.URL;
 
 public class SELoader extends Loader {
 
-  String codebase = null;
+    String codebase = null;
 
-  public SELoader() {
-  }
-
-  public SELoader(String codebase) {
-    this.codebase = codebase;
-  }
-
-  public InputStream getResourceStream(String resource) {
-    try {
-      URL url = getClass().getResource(resource);
-      System.out.println("URL: " + url);
-      System.out.println("Read ROM " + resource);
-      if (url == null) url = new URL(codebase + resource);
-      return url.openConnection().getInputStream();
-    } catch (Exception e) {
-      e.printStackTrace();
+    public SELoader() {
     }
-    return null;
-  }
+
+    public SELoader(String codebase) {
+        this.codebase = codebase;
+    }
+
+    public InputStream getResourceStream(String resource) {
+        try {
+            URL url = getClass().getResource(resource);
+            System.out.println("URL: " + url);
+            System.out.println("Read ROM " + resource);
+            if (url == null)
+                url = new URL(codebase + resource);
+            return url.openConnection().getInputStream();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

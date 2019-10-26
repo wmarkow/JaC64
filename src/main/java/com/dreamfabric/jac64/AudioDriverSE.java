@@ -16,100 +16,98 @@ import javax.sound.sampled.SourceDataLine;
 
 public class AudioDriverSE extends AudioDriver {
 
-  private SourceDataLine dataLine;
-  private FloatControl volume;
-  private int vol = 0;
-  private boolean soundOn = true;
-  private boolean fullSpeed = false;
-  
-  public int available() {
-    if (dataLine == null)
-      return 0;
-    return dataLine.available();
-  }
+    private SourceDataLine dataLine;
+    private FloatControl volume;
+    private int vol = 0;
+    private boolean soundOn = true;
+    private boolean fullSpeed = false;
 
-  public int getMasterVolume() {
-    return vol;
-  }
-
-  public long getMicros() {
-    if (dataLine == null)
-      return 0;
-    return dataLine.getMicrosecondPosition();
-  }
-
-  public boolean hasSound() {
-    return dataLine != null;
-  }
-
-  public void init(int sampleRate, int bufferSize) {
-//  Allocate Audio resources
-    AudioFormat af = new AudioFormat(sampleRate, 16, 1, true, false);
-    DataLine.Info dli =
-      new DataLine.Info(SourceDataLine.class, af, bufferSize);
-    try {
-      dataLine = (SourceDataLine) AudioSystem.getLine(dli);
-      if (dataLine == null)
-        System.out.println("DataLine: not existing...");
-      else {
-        System.out.println("DataLine allocated: " + dataLine);
-        dataLine.open(dataLine.getFormat(), bufferSize);
-        volume = (FloatControl)
-        dataLine.getControl(FloatControl.Type.MASTER_GAIN);
-        setMasterVolume(100);
-
-        // Startup the dataline
-        dataLine.start();
-      }
-    } catch (Exception e) {
-      System.out.println("Problem while getting data line ");
-      e.printStackTrace();
-      dataLine = null;
-    }  
-  }
-  
-  public void setMasterVolume(int v) {
-    if (volume != null) {
-      volume.setValue(-10.0f + 0.1f * v);
+    public int available() {
+        if (dataLine == null)
+            return 0;
+        return dataLine.available();
     }
-    vol = v;
-  }
 
-  public void shutdown() {
-    dataLine.close();
-  }
+    public int getMasterVolume() {
+        return vol;
+    }
 
-  public void write(byte[] buffer) {
-    if (dataLine == null)
-      return;
-    int bsize = buffer.length;
-    if (!fullSpeed) {
-      while (dataLine.available() < bsize)
+    public long getMicros() {
+        if (dataLine == null)
+            return 0;
+        return dataLine.getMicrosecondPosition();
+    }
+
+    public boolean hasSound() {
+        return dataLine != null;
+    }
+
+    public void init(int sampleRate, int bufferSize) {
+        // Allocate Audio resources
+        AudioFormat af = new AudioFormat(sampleRate, 16, 1, true, false);
+        DataLine.Info dli = new DataLine.Info(SourceDataLine.class, af, bufferSize);
         try {
-          Thread.sleep(1);
+            dataLine = (SourceDataLine) AudioSystem.getLine(dli);
+            if (dataLine == null)
+                System.out.println("DataLine: not existing...");
+            else {
+                System.out.println("DataLine allocated: " + dataLine);
+                dataLine.open(dataLine.getFormat(), bufferSize);
+                volume = (FloatControl) dataLine.getControl(FloatControl.Type.MASTER_GAIN);
+                setMasterVolume(100);
+
+                // Startup the dataline
+                dataLine.start();
+            }
         } catch (Exception e) {
+            System.out.println("Problem while getting data line ");
+            e.printStackTrace();
+            dataLine = null;
         }
-    } else if (dataLine.available() < bsize) {
-      return;
     }
-    if (!soundOn) {
-      // Kill sound!!!
-      for (int i = 0; i < buffer.length; i++) {
-        buffer[i] = 0;
-      }
+
+    public void setMasterVolume(int v) {
+        if (volume != null) {
+            volume.setValue(-10.0f + 0.1f * v);
+        }
+        vol = v;
     }
-    dataLine.write(buffer, 0, bsize);
-  }
 
-  public void setSoundOn(boolean on) {
-    soundOn = on;
-  }
+    public void shutdown() {
+        dataLine.close();
+    }
 
-  public void setFullSpeed(boolean full) {
-    fullSpeed = full;
-  }
+    public void write(byte[] buffer) {
+        if (dataLine == null)
+            return;
+        int bsize = buffer.length;
+        if (!fullSpeed) {
+            while (dataLine.available() < bsize)
+                try {
+                    Thread.sleep(1);
+                } catch (Exception e) {
+                }
+        } else if (dataLine.available() < bsize) {
+            return;
+        }
+        if (!soundOn) {
+            // Kill sound!!!
+            for (int i = 0; i < buffer.length; i++) {
+                buffer[i] = 0;
+            }
+        }
+        dataLine.write(buffer, 0, bsize);
+    }
 
-  public boolean fullSpeed() {
-    return fullSpeed;
-  }
+    public void setSoundOn(boolean on) {
+        soundOn = on;
+    }
+
+    public void setFullSpeed(boolean full) {
+        fullSpeed = full;
+    }
+
+    public boolean fullSpeed() {
+        return fullSpeed;
+    }
 }

@@ -23,8 +23,8 @@
 package com.dreamfabric.resid;
 
 public class Potentiometer {
-	public int /* reg8 */readPOT() {
-		// NB! Not modeled.
-		return 0xff;
-	}
+    public int /* reg8 */ readPOT() {
+        // NB! Not modeled.
+        return 0xff;
+    }
 }

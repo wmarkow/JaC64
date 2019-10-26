@@ -21,52 +21,52 @@ import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
  */
 
 public class DefaultIMon implements IMonitor {
-  int level = 0;
-  String prefix = "";
+    int level = 0;
+    String prefix = "";
 
- // -------------------------------------------------------------------
-  // Imonitor - ignore for now...
-  // -------------------------------------------------------------------
-  public void init(MOS6510Core cpu) {
-  }
-
-  public void setEnabled(boolean b) {
-  }
-
-  public boolean isEnabled() {
-    return false;
-  }
-
-  public void info(Object o) {
-    output((String) o);
-  }
-
-  public void setLevel(int level) {
-    this.level = level;
-  }
-
-  public int getLevel() {
-    return level;
-  }
-
-  public void warning(Object o) {
-    output((String) o);
-  }
-
-  public void error(Object o) {
-    output((String) o);
-  }
-
-  private void output(String s) {
-    if (prefix != null) {
-      if (s.startsWith(prefix)) {
-	System.out.println(s);
-      }
-    } else {
-      System.out.println(s);
+    // -------------------------------------------------------------------
+    // Imonitor - ignore for now...
+    // -------------------------------------------------------------------
+    public void init(MOS6510Core cpu) {
     }
-  }
 
-  public void disAssemble(int[] memory, int pc, int acc, int x, int y,
-			  byte status, int interruptInExec, int lastI) {}
+    public void setEnabled(boolean b) {
+    }
+
+    public boolean isEnabled() {
+        return false;
+    }
+
+    public void info(Object o) {
+        output((String) o);
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void warning(Object o) {
+        output((String) o);
+    }
+
+    public void error(Object o) {
+        output((String) o);
+    }
+
+    private void output(String s) {
+        if (prefix != null) {
+            if (s.startsWith(prefix)) {
+                System.out.println(s);
+            }
+        } else {
+            System.out.println(s);
+        }
+    }
+
+    public void disAssemble(int[] memory, int pc, int acc, int x, int y, byte status, int interruptInExec, int lastI) {
+    }
 }

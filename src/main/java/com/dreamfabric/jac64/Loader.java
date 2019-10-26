@@ -13,20 +13,20 @@ import java.io.InputStream;
  */
 public abstract class Loader {
 
-  public abstract InputStream getResourceStream(String rs);
+    public abstract InputStream getResourceStream(String rs);
 
-  public String getResourceString(String rs) {
-    InputStream inStr = getResourceStream(rs);
-    int c;
-    StringBuffer sb = new StringBuffer();
-    try {
-      while ((c = inStr.read()) != -1) {
-	sb.append((char) c);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
+    public String getResourceString(String rs) {
+        InputStream inStr = getResourceStream(rs);
+        int c;
+        StringBuffer sb = new StringBuffer();
+        try {
+            while ((c = inStr.read()) != -1) {
+                sb.append((char) c);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
     }
-    return sb.toString();
-  }
 
 }

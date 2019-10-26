@@ -8,7 +8,6 @@
 
 package com.dreamfabric.jac64;
 
-
 public interface PatchListener {
     public boolean readFile(String name, int addr);
 }
