@@ -20,6 +20,7 @@ import com.dreamfabric.jac64.Loader;
 import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.disk.C1541Emu;
+import com.dreamfabric.jac64.emu.pla.PLA;
 
 /**
  * CPU "implements" the C64s 6510 processor in java code. reimplemented from old
@@ -64,6 +65,8 @@ public class CPU extends MOS6510Core {
 
     private int cheatMon[];
     private AutoStore[] autoStore;
+
+    private PLA pla = new PLA();
 
     public CPU(IMonitor m, String cb, Loader loader) {
         super(m, cb);
@@ -151,6 +154,11 @@ public class CPU extends MOS6510Core {
                 romFlag = 0xe000;
             else
                 romFlag = 0x10000; // No Rom at all (Basic / Kernal)
+        }
+
+        if (adr == 0x01) {
+            // setting CHAREN, HIRAM and LORAM of PLA
+            pla.setCharenHiramLoren(data);
         }
 
         adr &= 0xffff;
