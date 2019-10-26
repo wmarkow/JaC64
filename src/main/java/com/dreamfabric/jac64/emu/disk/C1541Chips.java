@@ -1,8 +1,8 @@
 package com.dreamfabric.jac64.emu.disk;
 
 import com.dreamfabric.jac64.C64Reader;
-import com.dreamfabric.jac64.C64Screen;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
+import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 /**
  * Describe class C1541Chips here.

@@ -11,9 +11,9 @@
 
 package com.dreamfabric.jac64.emu.keyboard;
 import com.dreamfabric.c64utils.*;
-import com.dreamfabric.jac64.C64Screen;
 import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 import java.awt.event.*;
 import java.util.*;

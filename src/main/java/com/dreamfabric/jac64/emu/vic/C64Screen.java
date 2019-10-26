@@ -6,7 +6,7 @@
  * ---------------------------------------------------
  */
 
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.vic;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -14,6 +14,11 @@ import java.awt.image.*;
 import java.applet.*;
 import javax.swing.JPanel;
 
+import com.dreamfabric.jac64.AudioDriver;
+import com.dreamfabric.jac64.AudioDriverSE;
+import com.dreamfabric.jac64.C64Canvas;
+import com.dreamfabric.jac64.IMonitor;
+import com.dreamfabric.jac64.Observer;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
@@ -22,7 +27,6 @@ import com.dreamfabric.jac64.emu.keyboard.Keyboard;
 import com.dreamfabric.jac64.emu.sid.RESIDChip;
 import com.dreamfabric.jac64.emu.sid.SIDChip;
 import com.dreamfabric.jac64.emu.tfe.TFE_CS8900;
-import com.dreamfabric.jac64.emu.vic.VICConstants;
 
 /**
  * Implements the VIC chip + some other HW

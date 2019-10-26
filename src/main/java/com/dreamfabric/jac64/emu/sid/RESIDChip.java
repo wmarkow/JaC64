@@ -9,11 +9,11 @@
 package com.dreamfabric.jac64.emu.sid;
 
 import com.dreamfabric.jac64.AudioDriver;
-import com.dreamfabric.jac64.C64Screen;
 import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
+import com.dreamfabric.jac64.emu.vic.C64Screen;
 import com.dreamfabric.resid.ISIDDefs;
 import com.dreamfabric.resid.SID;
 import com.dreamfabric.resid.ISIDDefs.sampling_method;
