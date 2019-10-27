@@ -18,9 +18,12 @@ import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Loader;
 import com.dreamfabric.jac64.PatchListener;
+import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.TimeEvent;
+import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.disk.C1541Emu;
 import com.dreamfabric.jac64.emu.pla.PLA;
+import com.dreamfabric.jac64.emu.sid.SID;
 
 /**
  * CPU "implements" the C64s 6510 processor in java code. reimplemented from old
@@ -66,7 +69,8 @@ public class CPU extends MOS6510Core {
     private int cheatMon[];
     private AutoStore[] autoStore;
 
-    private PLA pla = new PLA();
+    private PLA pla = C64Emulation.getPla();
+    private AddressableBus addressableBus = C64Emulation.getAddressableBus();
 
     public CPU(IMonitor m, String cb, Loader loader) {
         super(m, cb);
@@ -114,6 +118,14 @@ public class CPU extends MOS6510Core {
             schedule(cycles);
         }
 
+        // START: a new way of reading data from SID.
+        Byte result = addressableBus.read(adr);
+        if (result != null) {
+            rindex = adr;
+            return (int) result;
+        }
+        // END: a new way of reading data from SID.
+
         if ((romFlag & adr) == romFlag) {
             return memory[rindex = adr | 0x10000];
         } else if ((adr & 0xf000) == 0xd000) {
@@ -156,10 +168,18 @@ public class CPU extends MOS6510Core {
                 romFlag = 0x10000; // No Rom at all (Basic / Kernal)
         }
 
+        // START: a new way of writing data.
         if (adr == 0x01) {
             // setting CHAREN, HIRAM and LORAM of PLA
-            pla.setCharenHiramLoren(data);
+            pla.setCharenHiramLoram(data);
         }
+        addressableBus.write(adr, (byte) data);
+        // if(addressableBus.write(adr, (byte) data))
+        // {
+        // windex = adr;
+        // return;
+        // }
+        // END: a new way of writing data.
 
         adr &= 0xffff;
         if (ioON && ((adr & 0xf000) == 0xd000)) {
