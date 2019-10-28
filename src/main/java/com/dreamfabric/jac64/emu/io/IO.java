@@ -1,16 +1,16 @@
 package com.dreamfabric.jac64.emu.io;
 
 import com.dreamfabric.jac64.emu.bus.AbstractAddressable;
-import com.dreamfabric.jac64.emu.sid.SID;
+import com.dreamfabric.jac64.emu.sid.SIDIf;
 
 public class IO extends AbstractAddressable {
 
     private final static int START_ADDRESS = 0xD000;
     private final static int END_ADDRESS = 0xDFFF;
 
-    private SID sid;
+    private SIDIf sid;
 
-    public void setSid(SID sid) {
+    public void setSid(SIDIf sid) {
         this.sid = sid;
     }
 

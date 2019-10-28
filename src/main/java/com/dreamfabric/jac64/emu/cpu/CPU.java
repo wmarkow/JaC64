@@ -23,7 +23,8 @@ import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.disk.C1541Emu;
 import com.dreamfabric.jac64.emu.pla.PLA;
-import com.dreamfabric.jac64.emu.sid.SID;
+import com.dreamfabric.jac64.emu.sid.RESID;
+import com.dreamfabric.jac64.emu.sid.VoidSID;
 
 /**
  * CPU "implements" the C64s 6510 processor in java code. reimplemented from old
@@ -81,6 +82,10 @@ public class CPU extends MOS6510Core {
             c1541 = new C1541Emu(d, cb);
             // d.init(c1541);
             // d.setEnabled(true);
+        }
+
+        if (C64Emulation.getSid() instanceof RESID) {
+            ((RESID) C64Emulation.getSid()).setCpu(this);
         }
     }
 
@@ -173,12 +178,11 @@ public class CPU extends MOS6510Core {
             // setting CHAREN, HIRAM and LORAM of PLA
             pla.setCharenHiramLoram(data);
         }
-        addressableBus.write(adr, (byte) data);
-        // if(addressableBus.write(adr, (byte) data))
-        // {
-        // windex = adr;
-        // return;
-        // }
+        // addressableBus.write(adr, (byte) data);
+        if (addressableBus.write(adr, (byte) data)) {
+            windex = adr;
+            return;
+        }
         // END: a new way of writing data.
 
         adr &= 0xffff;
