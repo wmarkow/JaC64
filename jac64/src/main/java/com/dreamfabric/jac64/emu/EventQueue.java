@@ -80,6 +80,10 @@ public class EventQueue {
     }
 
     public TimeEvent popFirst() {
+        if (first == null) {
+            return null;
+        }
+
         TimeEvent tmp = first;
         if (tmp != null) {
             first = tmp.nextEvent;

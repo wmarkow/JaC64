@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import com.dreamfabric.jac64.C64Canvas;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Observer;
+import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
@@ -32,8 +33,10 @@ import com.dreamfabric.jac64.emu.disk.C1541Chips;
 import com.dreamfabric.jac64.emu.keyboard.Keyboard;
 import com.dreamfabric.jac64.emu.sid.AudioDriver;
 import com.dreamfabric.jac64.emu.sid.AudioDriverSE;
+import com.dreamfabric.jac64.emu.sid.RESID;
 import com.dreamfabric.jac64.emu.sid.RESIDChip;
 import com.dreamfabric.jac64.emu.sid.SIDChip;
+import com.dreamfabric.jac64.emu.sid.SIDIf;
 import com.dreamfabric.jac64.emu.tfe.TFE_CS8900;
 
 /**
@@ -116,8 +119,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     private int[] memory;
 
     private Keyboard keyboard;
-
-    ExtChip sidChip;
 
     CIA cia[];
     // C1541 c1541;
@@ -311,20 +312,26 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         switch (sid) {
         case RESID_6581:
         case RESID_8580:
-            if (!(sidChip instanceof RESIDChip)) {
-                if (sidChip != null)
-                    sidChip.stop();
-                sidChip = new RESIDChip(cpu, audioDriver);
+            if (getSid() instanceof RESID) {
+                ((RESID) getSid()).setChipVersion(sid);
+            } else {
+                getSid().stop();
+                RESID newSid = new RESID();
+                newSid.setChipVersion(sid);
+                newSid.start();
+
+                setSid(newSid);
             }
-            ((RESIDChip) sidChip).setChipVersion(sid);
+
             break;
         case JACSID:
-            if (!(sidChip instanceof SIDChip)) {
-                if (sidChip != null)
-                    sidChip.stop();
-                sidChip = new SIDChip(cpu, audioDriver);
-            }
-            break;
+            // not managed in a new way yet
+            // if (!(sidChip instanceof SIDChip)) {
+            // if (sidChip != null)
+            // sidChip.stop();
+            // sidChip = new SIDChip(cpu, audioDriver);
+            // }
+            // break;
         }
     }
 
@@ -587,9 +594,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         case 0xd02d:
         case 0xd02e:
             return sprites[address - 0xd027].col | 0xf0;
-        case 0xd41b:
-        case 0xd41c:
-            return sidChip.performRead(IO_OFFSET + address, cycles);
         case 0xd419:
             return potx;
         case 0xd41A:
@@ -606,9 +610,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
             val &= 0xff;
             return val;
         default:
-            if (pos == 0x4) {
-                return sidChip.performRead(address + IO_OFFSET, cycles);
-            } else if (pos == 0xd) {
+            if (pos == 0xd) {
                 return cia[1].performRead(address + IO_OFFSET, cycles);
             } else if (pos == 0xc) {
                 return cia[0].performRead(address + IO_OFFSET, cycles);
@@ -911,9 +913,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
             break;
 
         default:
-            if (pos == 0x4) {
-                sidChip.performWrite(address + IO_OFFSET, data, cycles);
-            } else if (pos == 0xd) {
+            if (pos == 0xd) {
                 cia[1].performWrite(address + IO_OFFSET, data, cycles);
             } else if (pos == 0xc) {
                 cia[0].performWrite(address + IO_OFFSET, data, cycles);
@@ -1704,14 +1704,14 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     public void stop() {
         motorSound(false);
-        sidChip.stop();
+        // sidChip.stop();
         audioDriver.shutdown();
     }
 
     public void reset() {
         // Clear a lot of stuff...???
         initUpdate();
-        sidChip.reset();
+        getSid().reset();
         lastLine = cpu.cycles;
         nextIOUpdate = cpu.cycles + 47;
 
@@ -1999,5 +1999,13 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     public int getIecLines() {
         return iecLines;
+    }
+
+    private SIDIf getSid() {
+        return C64Emulation.getSid();
+    }
+
+    private void setSid(SIDIf sid) {
+        C64Emulation.setSid(sid);
     }
 }
