@@ -109,7 +109,7 @@ public class RESID extends VoidSID {
             writeSamples();
         }
 
-         nextExecInNanos = nanos + nanosPerSample;
+         nextExecInNanos = nanos + (long)(nanosPerSample * 0.95);
     }
 
     private void writeSamples() {
