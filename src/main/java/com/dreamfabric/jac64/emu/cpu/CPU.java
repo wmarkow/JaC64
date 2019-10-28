@@ -83,10 +83,6 @@ public class CPU extends MOS6510Core {
             // d.init(c1541);
             // d.setEnabled(true);
         }
-
-        if (C64Emulation.getSid() instanceof RESID) {
-            ((RESID) C64Emulation.getSid()).setCpu(this);
-        }
     }
 
     public C1541Emu getDrive() {

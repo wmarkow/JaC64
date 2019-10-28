@@ -2,7 +2,6 @@ package com.dreamfabric.jac64.emu.sid;
 
 import com.dreamfabric.jac64.AudioDriver;
 import com.dreamfabric.jac64.AudioDriverSE;
-import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 import com.dreamfabric.resid.ISIDDefs;
 import com.dreamfabric.resid.ISIDDefs.sampling_method;
@@ -20,15 +19,11 @@ public class RESID extends VoidSID {
     int CPUFrq = 985248;
     int clocksPerSample = CPUFrq / SAMPLE_RATE;
     int clocksPerSampleRest = 0;
-    long nextSample = 0;
-    long lastCycles = 0;
     private int pos = 0;
     private AudioDriver audioDriver;
 
     private Thread thread;
-    private Long nextExecInNanos = null;
-
-    private CPU cpu = null;
+    private long nextExecInNanos = 0;
 
     public RESID() {
         audioDriver = new AudioDriverSE();
@@ -36,9 +31,6 @@ public class RESID extends VoidSID {
         audioDriver.setSoundOn(true);
 
         sid = new SID();
-
-        lastCycles = 0;
-        nextSample = 0;
 
         sid.set_sampling_parameters(CPUFrq, sampling_method.SAMPLE_FAST, SAMPLE_RATE, -1, 0.97);
 
@@ -51,25 +43,13 @@ public class RESID extends VoidSID {
             @Override
             public void run() {
                 while (true) {
-                    if (nextExecInNanos == null) {
-                        continue;
-                    }
-
                     long nanos = System.nanoTime();
                     if (nanos >= nextExecInNanos) {
-                        nextExecInNanos = null;
                         executeForNanos(nanos);
                     }
                 }
             }
         });
-    }
-
-    public void setCpu(CPU cpu) {
-        this.cpu = cpu;
-        lastCycles = cpu.cycles;
-        nextSample = cpu.cycles;
-        nextExecInNanos = System.nanoTime();
 
         thread.start();
     }
@@ -101,8 +81,6 @@ public class RESID extends VoidSID {
     }
 
     public void reset() {
-        nextSample = cpu.cycles + 10;
-        lastCycles = cpu.cycles;
         sid.reset();
     }
 
@@ -111,10 +89,11 @@ public class RESID extends VoidSID {
     }
 
     public void setChipVersion(int version) {
-        if (version == C64Screen.RESID_6581)
+        if (version == C64Screen.RESID_6581) {
             sid.set_chip_model(ISIDDefs.chip_model.MOS6581);
-        else
+        } else {
             sid.set_chip_model(ISIDDefs.chip_model.MOS8580);
+        }
     }
 
     private void executeForNanos(long curNanos) {
