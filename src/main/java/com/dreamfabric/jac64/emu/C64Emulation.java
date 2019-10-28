@@ -13,7 +13,7 @@ public class C64Emulation {
 
     private static PLA pla = new PLA();
     private static IO io = new IO();
-    // private static SIDIf sid = new VoidSID();
+//     private static SIDIf sid = new VoidSID();
     private static SIDIf sid = new RESID();
 
     static {

@@ -1,9 +1,9 @@
 package com.dreamfabric.jac64.emu.io;
 
-import com.dreamfabric.jac64.emu.bus.AbstractAddressable;
+import com.dreamfabric.jac64.emu.bus.AddressableVoid;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
 
-public class IO extends AbstractAddressable {
+public class IO extends AddressableVoid {
 
     private final static int START_ADDRESS = 0xD000;
     private final static int END_ADDRESS = 0xDFFF;
@@ -50,10 +50,5 @@ public class IO extends AbstractAddressable {
     @Override
     public int getEndAddress() {
         return END_ADDRESS;
-    }
-
-    @Override
-    protected void initMemory() {
-        // do nothing here
     }
 }

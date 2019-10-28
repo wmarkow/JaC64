@@ -2,12 +2,22 @@ package com.dreamfabric.jac64.emu.sid;
 
 import com.dreamfabric.jac64.AudioDriver;
 import com.dreamfabric.jac64.AudioDriverSE;
+import com.dreamfabric.jac64.emu.bus.AddressableChip;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 import com.dreamfabric.resid.ISIDDefs;
 import com.dreamfabric.resid.ISIDDefs.sampling_method;
 import com.dreamfabric.resid.SID;
 
-public class RESID extends VoidSID {
+/***
+ * Implementation of {@link SIDIf} which uses reSID algorithm to emulate SID
+ * chip.
+ * 
+ * @see {@link com.dreamfabric.resid.*}
+ * 
+ * @author Witold Markowski
+ *
+ */
+public class RESID extends AddressableChip implements SIDIf {
 
     static final int SAMPLE_RATE = 44000;
     static final int DL_BUFFER_SIZE = 44000;
@@ -33,8 +43,8 @@ public class RESID extends VoidSID {
         sid = new SID();
 
         sid.set_sampling_parameters(CPUFrq, sampling_method.SAMPLE_FAST, SAMPLE_RATE, -1, 0.97);
-
         setChipVersion(C64Screen.RESID_6581);
+        
         thread = new Thread(new Runnable() {
 
             @Override
@@ -109,7 +119,7 @@ public class RESID extends VoidSID {
             writeSamples();
         }
 
-         nextExecInNanos = nanos + (long)(nanosPerSample * 0.95);
+        nextExecInNanos = nanos + (long) (nanosPerSample * 0.95);
     }
 
     private void writeSamples() {
