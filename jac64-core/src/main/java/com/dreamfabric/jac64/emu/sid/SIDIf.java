@@ -1,8 +1,9 @@
 package com.dreamfabric.jac64.emu.sid;
 
+import com.dreamfabric.jac64.emu.SimulableIf;
 import com.dreamfabric.jac64.emu.bus.AddressableIf;
 
-public interface SIDIf extends AddressableIf {
+public interface SIDIf extends AddressableIf, SimulableIf {
 
     public final static int START_ADDRESS = 0xD400;
     public final static int END_ADDRESS = 0xD41F;

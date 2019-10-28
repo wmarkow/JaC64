@@ -276,6 +276,9 @@ public class CPU extends MOS6510Core {
         reset();
         running = true;
         setPC(address);
+        
+        C64Emulation.getSid().start();
+        
         loop();
     }
 
@@ -316,6 +319,7 @@ public class CPU extends MOS6510Core {
     // Takes the thread and loops!!!
     public void start() {
         run(0xfce2); // Power UP reset routine!
+        
         if (pause) {
             while (pause) {
                 System.out.println("Entering pause mode...");
@@ -347,12 +351,14 @@ public class CPU extends MOS6510Core {
         // stop completely
         running = false;
         pause = false;
+        C64Emulation.getSid().stop();
         notify();
     }
 
     public void reset() {
         writeByte(1, 0x7);
         super.reset();
+        C64Emulation.getSid().reset();
 
         if (EMULATE_1541) {
             c1541.reset();

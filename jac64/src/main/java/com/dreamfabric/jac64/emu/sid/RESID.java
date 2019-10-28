@@ -1,6 +1,7 @@
 package com.dreamfabric.jac64.emu.sid;
 
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
+import com.dreamfabric.jac64.emu.sid.SIDIf;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 import com.dreamfabric.resid.ISIDDefs;
 import com.dreamfabric.resid.ISIDDefs.sampling_method;
@@ -23,15 +24,15 @@ public class RESID extends AddressableChip implements SIDIf {
     int BUFFER_SIZE = 256;
     byte[] buffer = new byte[BUFFER_SIZE * 2];
 
-    SID sid;
-    int CPUFrq = 985248;
-    int clocksPerSample = CPUFrq / SAMPLE_RATE;
+    private SID sid;
+    private int CPUFrq = 985248;
+    private int clocksPerSample = CPUFrq / SAMPLE_RATE;
     private long nanosPerSample = (long) (1e9 / SAMPLE_RATE);
     private int pos = 0;
+    private long nextExecInNanos = 0;
     private AudioDriver audioDriver;
 
-    private Thread thread;
-    private long nextExecInNanos = 0;
+    private RESIDThread thread;
 
     public RESID() {
         audioDriver = new AudioDriverSE();
@@ -43,17 +44,6 @@ public class RESID extends AddressableChip implements SIDIf {
         sid.set_sampling_parameters(CPUFrq, sampling_method.SAMPLE_FAST, SAMPLE_RATE, -1, 0.97);
         setChipVersion(C64Screen.RESID_6581);
 
-        thread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                while (true) {
-                    execute();
-                }
-            }
-        });
-
-        thread.start();
     }
 
     public void clock(long cycles) {
@@ -82,12 +72,24 @@ public class RESID extends AddressableChip implements SIDIf {
         return null;
     }
 
-    public void reset() {
-        sid.reset();
+    @Override
+    public void start() {
+        if (thread != null && thread.isAlive()) {
+            return;
+        }
+
+        thread = new RESIDThread();
+        thread.start();
     }
 
+    @Override
     public void stop() {
-        // Called from any thread!
+        thread.forceStop();
+    }
+
+    @Override
+    public void reset() {
+        sid.reset();
     }
 
     public void setChipVersion(int version) {
@@ -123,5 +125,31 @@ public class RESID extends AddressableChip implements SIDIf {
     private void writeSamples() {
         audioDriver.write(buffer);
         pos = 0;
+    }
+
+    private class RESIDThread extends Thread {
+
+        private boolean running = false;
+
+        public RESIDThread() {
+            super("reSID Thread");
+        }
+
+        @Override
+        public void run() {
+            while (running) {
+                execute();
+            }
+        }
+
+        @Override
+        public synchronized void start() {
+            running = true;
+            super.start();
+        }
+
+        public synchronized void forceStop() {
+            running = false;
+        }
     }
 }
