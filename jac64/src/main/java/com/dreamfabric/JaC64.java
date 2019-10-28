@@ -45,7 +45,6 @@ import com.dreamfabric.jac64.C64Reader;
 import com.dreamfabric.jac64.DirEntry;
 import com.dreamfabric.jac64.SELoader;
 import com.dreamfabric.jac64.emu.cpu.CPU;
-import com.dreamfabric.jac64.emu.sid.SIDMixer;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 public class JaC64 implements ActionListener, KeyEventDispatcher {
@@ -69,8 +68,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     private JDialog loadFile;
     private DirEntry[] dirEntries;
 
-    private static final String[] SID_TYPES = new String[] { "SID: resid MOS 6581", "SID: resid MOS 8580",
-            "SID: JaC64 Original" };
+    private static final String[] SID_TYPES = new String[] { "SID: resid MOS 6581", "SID: resid MOS 8580" };
 
     private static final String[] JOYSTICK = new String[] { "Joystick in port 1", "Joystick in port 2" };
 
@@ -101,7 +99,6 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     };
 
     public JaC64() {
-        SIDMixer.DL_BUFFER_SIZE = 16384;
         Debugger monitor = new Debugger();
 
         cpu = new CPU(monitor, "", new SELoader());
@@ -254,8 +251,6 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
             scr.setSID(C64Screen.RESID_6581);
         } else if (cmd.equals(SID_TYPES[1])) {
             scr.setSID(C64Screen.RESID_8580);
-        } else if (cmd.equals(SID_TYPES[2])) {
-            scr.setSID(C64Screen.JACSID);
         } else if (cmd.equals(JOYSTICK[0])) {
             scr.setStick(true);
         } else if (cmd.equals(JOYSTICK[1])) {

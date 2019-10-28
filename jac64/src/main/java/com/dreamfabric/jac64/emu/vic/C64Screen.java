@@ -56,7 +56,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     public static final int RESID_6581 = 1;
     public static final int RESID_8580 = 2;
-    public static final int JACSID = 3;
 
     public static final boolean IRQDEBUG = false;
     public static final boolean SPRITEDEBUG = false;
@@ -320,16 +319,9 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
                 setSid(newSid);
             }
-
             break;
-        case JACSID:
-            // not managed in a new way yet
-            // if (!(sidChip instanceof SIDChip)) {
-            // if (sidChip != null)
-            // sidChip.stop();
-            // sidChip = new SIDChip(cpu, audioDriver);
-            // }
-            // break;
+        default:
+            break;
         }
     }
 
