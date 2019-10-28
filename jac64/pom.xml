@@ -18,5 +18,11 @@
 			<artifactId>jac64-resid</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.github.catseye</groupId>
+			<artifactId>jac64-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>

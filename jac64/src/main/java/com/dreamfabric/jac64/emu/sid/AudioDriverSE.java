@@ -6,7 +6,7 @@
  * http://www.dreamfabric.com/c64
  * ---------------------------------------------------
  */
-package com.dreamfabric.jac64;
+package com.dreamfabric.jac64.emu.sid;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;

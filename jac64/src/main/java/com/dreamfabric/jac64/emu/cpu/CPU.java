@@ -23,8 +23,6 @@ import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.disk.C1541Emu;
 import com.dreamfabric.jac64.emu.pla.PLA;
-import com.dreamfabric.jac64.emu.sid.RESID;
-import com.dreamfabric.jac64.emu.sid.VoidSID;
 
 /**
  * CPU "implements" the C64s 6510 processor in java code. reimplemented from old

@@ -9,7 +9,6 @@
 
 package com.dreamfabric.jac64.emu.sid;
 
-import com.dreamfabric.jac64.AudioDriver;
 import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cpu.CPU;

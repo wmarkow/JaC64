@@ -1,7 +1,5 @@
 package com.dreamfabric.jac64.emu.sid;
 
-import com.dreamfabric.jac64.AudioDriver;
-import com.dreamfabric.jac64.AudioDriverSE;
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 import com.dreamfabric.resid.ISIDDefs;
@@ -44,7 +42,7 @@ public class RESID extends AddressableChip implements SIDIf {
 
         sid.set_sampling_parameters(CPUFrq, sampling_method.SAMPLE_FAST, SAMPLE_RATE, -1, 0.97);
         setChipVersion(C64Screen.RESID_6581);
-        
+
         thread = new Thread(new Runnable() {
 
             @Override
