@@ -3,10 +3,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.catseye</groupId>
-	<artifactId>jac64</artifactId>
+	<artifactId>jac64-parent</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>jac64</name>
+	<name>jac64-parent</name>
+	<packaging>pom</packaging>
 
+	<modules>
+        <module>jac64</module>
+        <module>jac64-resid</module>
+    </modules>
+	
 	<build>
 		<plugins>
 			<plugin>

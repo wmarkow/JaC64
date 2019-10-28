@@ -1,8 +1,2 @@
-*.class
-*.jar
-roms/*
-sounds/*
-.classpath
 .project
 .settings/
-target/
