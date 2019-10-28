@@ -34,8 +34,6 @@ import com.dreamfabric.jac64.emu.keyboard.Keyboard;
 import com.dreamfabric.jac64.emu.sid.AudioDriver;
 import com.dreamfabric.jac64.emu.sid.AudioDriverSE;
 import com.dreamfabric.jac64.emu.sid.RESID;
-import com.dreamfabric.jac64.emu.sid.RESIDChip;
-import com.dreamfabric.jac64.emu.sid.SIDChip;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
 import com.dreamfabric.jac64.emu.tfe.TFE_CS8900;
 
