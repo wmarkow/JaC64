@@ -19,6 +19,7 @@ import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Loader;
 import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.emu.C64Emulation;
+import com.dreamfabric.jac64.emu.SlowDownCalculator;
 import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.disk.C1541Emu;
@@ -276,9 +277,9 @@ public class CPU extends MOS6510Core {
         reset();
         running = true;
         setPC(address);
-        
+
         C64Emulation.getSid().start();
-        
+
         loop();
     }
 
@@ -319,7 +320,7 @@ public class CPU extends MOS6510Core {
     // Takes the thread and loops!!!
     public void start() {
         run(0xfce2); // Power UP reset routine!
-        
+
         if (pause) {
             while (pause) {
                 System.out.println("Entering pause mode...");
@@ -390,8 +391,11 @@ public class CPU extends MOS6510Core {
         // How much should this be???
         monitor.info("Starting CPU at: " + Integer.toHexString(pc));
         try {
+            SlowDownCalculator slowDownCalculator = new SlowDownCalculator(C64Emulation.CPUFrq);
+            
             while (running) {
-
+                slowDownCalculator.markLoopStart(System.nanoTime(), cycles);
+                
                 // Debugging?
                 if (monitor.isEnabled()) { // || interruptInExec > 0) {
                     if (baLowUntil <= cycles) {
@@ -428,6 +432,18 @@ public class CPU extends MOS6510Core {
                     nr_ins = 0;
                     lastMillis = System.currentTimeMillis();
                     next_print = cycles + CYCLES_PER_DEBUG;
+                }
+                
+                long delay = slowDownCalculator.calculateWaitInNanos(System.nanoTime(), cycles);
+                if(delay == 0)
+                {
+                    continue;
+                }
+                
+                long sleepUntilNanos = System.nanoTime() + delay;
+                while(System.nanoTime() <= sleepUntilNanos)
+                {
+                    // just empty loop to slow down the simulation
                 }
             }
         } catch (Exception e) {

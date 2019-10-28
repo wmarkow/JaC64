@@ -8,6 +8,7 @@ import com.dreamfabric.jac64.emu.sid.SIDIf;
 
 public class C64Emulation {
 
+    public final static int CPUFrq = 985248;
     private static AddressableBus addressableBus = new AddressableBus();
 
     private static PLA pla = new PLA();
