@@ -18,7 +18,7 @@ public class RESID extends VoidSID {
     SID sid;
     int CPUFrq = 985248;
     int clocksPerSample = CPUFrq / SAMPLE_RATE;
-    int clocksPerSampleRest = 0;
+    private long nanosPerSample = (long) (1e9 / SAMPLE_RATE);
     private int pos = 0;
     private AudioDriver audioDriver;
 
@@ -34,19 +34,13 @@ public class RESID extends VoidSID {
 
         sid.set_sampling_parameters(CPUFrq, sampling_method.SAMPLE_FAST, SAMPLE_RATE, -1, 0.97);
 
-        clocksPerSampleRest = (int) ((CPUFrq * 1000L) / SAMPLE_RATE);
-        clocksPerSampleRest -= clocksPerSample * 1000;
-
         setChipVersion(C64Screen.RESID_6581);
         thread = new Thread(new Runnable() {
 
             @Override
             public void run() {
                 while (true) {
-                    long nanos = System.nanoTime();
-                    if (nanos >= nextExecInNanos) {
-                        executeForNanos(nanos);
-                    }
+                    execute();
                 }
             }
         });
@@ -96,7 +90,12 @@ public class RESID extends VoidSID {
         }
     }
 
-    private void executeForNanos(long curNanos) {
+    private void execute() {
+        long nanos = System.nanoTime();
+        if (nanos < nextExecInNanos) {
+            return;
+        }
+
         // Clock resid!
         for (int q = 0; q < clocksPerSample; q++) {
             sid.clock();
@@ -110,7 +109,7 @@ public class RESID extends VoidSID {
             writeSamples();
         }
 
-        nextExecInNanos = curNanos + clocksPerSample * 1000;
+         nextExecInNanos = nanos + nanosPerSample;
     }
 
     private void writeSamples() {
