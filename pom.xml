@@ -11,6 +11,7 @@
 	<modules>
         <module>jac64</module>
         <module>jac64-resid</module>
+        <module>jac64-core</module>
     </modules>
 	
 	<build>
