@@ -50,7 +50,7 @@ public class RESID extends AddressableChip implements SIDIf {
     }
 
     @Override
-    public boolean write(int address, byte data) {
+    public boolean write(int address, int data) {
         if (super.write(address, data)) {
             sid.write(address - getStartAddress(), data);
 
@@ -61,12 +61,11 @@ public class RESID extends AddressableChip implements SIDIf {
     }
 
     @Override
-    public Byte read(int address) {
-        Byte result = super.read(address);
+    public Integer read(int address) {
+        Integer result = super.read(address);
 
         if (result != null) {
-            Integer integer = sid.read(address - getStartAddress());
-            return integer.byteValue();
+            return sid.read(address - getStartAddress());
         }
 
         return null;

@@ -15,7 +15,7 @@ public class IO extends AddressableVoid {
     }
 
     @Override
-    public boolean write(int address, byte data) {
+    public boolean write(int address, int data) {
         if (sid.write(address, data)) {
             return true;
         }
@@ -24,8 +24,8 @@ public class IO extends AddressableVoid {
     }
 
     @Override
-    public Byte read(int address) {
-        Byte result = null;
+    public Integer read(int address) {
+        Integer result = null;
 
         result = sid.read(address);
         if (result != null) {

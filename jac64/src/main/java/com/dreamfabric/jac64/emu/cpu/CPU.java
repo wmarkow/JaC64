@@ -119,7 +119,7 @@ public class CPU extends MOS6510Core {
         }
 
         // START: a new way of reading data from SID.
-        Byte result = addressableBus.read(adr);
+        Integer result = addressableBus.read(adr);
         if (result != null) {
             rindex = adr;
             return (int) result;

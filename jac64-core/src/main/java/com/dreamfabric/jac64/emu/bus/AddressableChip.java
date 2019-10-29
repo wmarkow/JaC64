@@ -10,7 +10,7 @@ package com.dreamfabric.jac64.emu.bus;
  */
 public abstract class AddressableChip extends AddressableVoid {
 
-    private byte memory[];
+    private int memory[];
 
     public AddressableChip() {
         super();
@@ -25,7 +25,7 @@ public abstract class AddressableChip extends AddressableVoid {
      *         operation was not possible (device disabled or address mismatch).
      */
     @Override
-    public boolean write(int address, byte data) {
+    public boolean write(int address, int data) {
         if (!canWriteOrRead(address)) {
             return false;
         }
@@ -42,7 +42,7 @@ public abstract class AddressableChip extends AddressableVoid {
      *         operation was not possible (device disabled or address mismatch).
      */
     @Override
-    public Byte read(int address) {
+    public Integer read(int address) {
         if (!canWriteOrRead(address)) {
             return null;
         }
@@ -52,7 +52,7 @@ public abstract class AddressableChip extends AddressableVoid {
 
     protected void initMemory() {
         int length = getEndAddress() - getStartAddress();
-        memory = new byte[length];
+        memory = new int[length];
     }
 
 }

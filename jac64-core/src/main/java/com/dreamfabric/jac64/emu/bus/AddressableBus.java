@@ -15,7 +15,7 @@ public class AddressableBus implements AddressableIf {
     }
 
     @Override
-    public boolean write(int address, byte data) {
+    public boolean write(int address, int data) {
         boolean result = false;
 
         for (AddressableIf addressable : addressables) {
@@ -28,9 +28,9 @@ public class AddressableBus implements AddressableIf {
     }
 
     @Override
-    public Byte read(int address) {
+    public Integer read(int address) {
         for (AddressableIf addressable : addressables) {
-            Byte result = addressable.read(address);
+            Integer result = addressable.read(address);
             if (result != null) {
                 return result;
             }
