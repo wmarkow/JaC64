@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
 
-public class CIA1 extends AddressableChip implements KeyListener {
+public class CIA1 extends AddressableChip implements KeyListener, Joy1KeyListener, Joy2KeyListener {
     private static Logger LOGGER = LoggerFactory.getLogger(CIA1.class);
 
     public final static int START_ADDRESS = 0xDC00;
@@ -33,9 +33,26 @@ public class CIA1 extends AddressableChip implements KeyListener {
     private static final int CRB = 0x0f + START_ADDRESS;
 
     private Set<Key> pressedKeys = new HashSet<Key>();
+    private Set<Joy1Key> pressedJoy1Keys = new HashSet<Joy1Key>();
+    private Set<Joy2Key> pressedJoy2Keys = new HashSet<Joy2Key>();
+
+    /***
+     * Hold the value of the current PortA and PortB pin read. The pin read should
+     * not be stored in the PRA and PRB registers.
+     */
+    private int praPinRead;
+    private int prbPinRead;
 
     public CIA1() {
         super();
+
+        write0(CIA1.DDRA, 0x00); // input
+        write0(CIA1.PRA, 0xFF); // HIGH
+        write0(CIA1.DDRB, 0x00); // input
+        write0(CIA1.PRB, 0xFF); // HIGH
+
+        praPinRead = 255;
+        prbPinRead = 255;
     }
 
     @Override
@@ -52,8 +69,9 @@ public class CIA1 extends AddressableChip implements KeyListener {
     public boolean write(int address, int data) {
         boolean result = super.write(address, data);
 
-        if (result) {
+        if (result && address >= 0xdc00 && address <= 0xdc03) {
             // LOGGER.info(String.format("CIA1 write %s = %s", address, data));
+            return true;
         }
 
         // just for sniffing return false
@@ -69,9 +87,19 @@ public class CIA1 extends AddressableChip implements KeyListener {
 
         if (address >= 0xdc00 && address <= 0xdc03) {
             updateKeyboardState();
+            int portB = calculatePortBValeForJoy1();
+            int portA = calculatePortAValueForJoy2();
 
-            // read it again as the value could change
-            result = read0(address);
+            praPinRead &= portA;
+            prbPinRead &= portB;
+
+            if (address == CIA1.PRA) {
+                return praPinRead;
+            }
+
+            if (address == CIA1.PRB) {
+                return prbPinRead;
+            }
         }
 
         if (result != null) {
@@ -92,6 +120,14 @@ public class CIA1 extends AddressableChip implements KeyListener {
         return this;
     }
 
+    public Joy1KeyListener getJoy1KeyListener() {
+        return this;
+    }
+
+    public Joy2KeyListener getJoy2KeyListener() {
+        return this;
+    }
+
     @Override
     public void keyPressed(Key key) {
         LOGGER.info(String.format("CIA1 key pressed %s", key));
@@ -104,6 +140,34 @@ public class CIA1 extends AddressableChip implements KeyListener {
         LOGGER.info(String.format("CIA1 key released %s", key));
 
         pressedKeys.remove(key);
+    }
+
+    @Override
+    public void joy1KeyPressed(Joy1Key key) {
+        LOGGER.info(String.format("CIA1 Joy1 key pressed %s", key));
+
+        pressedJoy1Keys.add(key);
+    }
+
+    @Override
+    public void joy1KeyReleased(Joy1Key key) {
+        LOGGER.info(String.format("CIA1 Joy1 key released %s", key));
+
+        pressedJoy1Keys.remove(key);
+    }
+
+    @Override
+    public void joy2KeyPressed(Joy2Key key) {
+        LOGGER.info(String.format("CIA1 Joy2 key pressed %s", key));
+
+        pressedJoy2Keys.add(key);
+    }
+
+    @Override
+    public void joy2KeyReleased(Joy2Key key) {
+        LOGGER.info(String.format("CIA1 Joy2 key released %s", key));
+
+        pressedJoy2Keys.remove(key);
     }
 
     private void updateKeyboardState() {
@@ -121,8 +185,8 @@ public class CIA1 extends AddressableChip implements KeyListener {
             portA = transferFromPortBtoPortA(key, portA);
         }
 
-        write0(PRB, portB);
-        write0(PRA, portA);
+        praPinRead = portA;
+        prbPinRead = portB;
     }
 
     private int transferFromPortAtoPortB(Key key, int currentPortB) {
@@ -165,6 +229,38 @@ public class CIA1 extends AddressableChip implements KeyListener {
         }
 
         return currentPortA;
+    }
+
+    private int calculatePortBValeForJoy1() {
+        Iterator<Joy1Key> iterator = pressedJoy1Keys.iterator();
+
+        // joy1 is connected to Port B
+        int portB = getPRB();
+
+        while (iterator.hasNext()) {
+            Joy1Key key = iterator.next();
+
+            // clear the bit because joy key is pressed
+            portB = (portB & (~key.getPortBValue() & 0xFF));
+        }
+
+        return portB;
+    }
+
+    private int calculatePortAValueForJoy2() {
+        Iterator<Joy2Key> iterator = pressedJoy2Keys.iterator();
+
+        // joy2 is connected to Port A
+        int portA = getPRA();
+
+        while (iterator.hasNext()) {
+            Joy2Key key = iterator.next();
+
+            // clear the bit because joy key is pressed
+            portA = (portA & (~key.getPortAValue() & 0xFF));
+        }
+
+        return portA;
     }
 
     private int getDDRA() {
