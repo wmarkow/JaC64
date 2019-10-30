@@ -70,7 +70,7 @@ public class CIA1 extends AddressableChip implements KeyListener {
             updateKeyboardState();
         }
 
-        Integer result = memory[address - getStartAddress()];
+        Integer result = read0(address);
 
         if (result != null) {
             // LOGGER.info(String.format("CIA1 read %s = %s", address, result));
@@ -119,8 +119,8 @@ public class CIA1 extends AddressableChip implements KeyListener {
             portA = transferFromPortBtoPortA(key, portA);
         }
 
-        memory[PRB - START_ADDRESS] = portB;
-        memory[PRA - START_ADDRESS] = portA;
+        write0(PRB, portB);
+        write0(PRA, portA);
     }
 
     private int transferFromPortAtoPortB(Key key, int currentPortB) {
@@ -166,18 +166,18 @@ public class CIA1 extends AddressableChip implements KeyListener {
     }
 
     private int getDDRA() {
-        return memory[DDRA - START_ADDRESS];
+        return read0(DDRA);
     }
 
     private int getDDRB() {
-        return memory[DDRB - START_ADDRESS];
+        return read0(DDRB);
     }
 
     private int getPRA() {
-        return memory[PRA - START_ADDRESS];
+        return read0(PRA);
     }
 
     private int getPRB() {
-        return memory[PRB - START_ADDRESS];
+        return read0(PRB);
     }
 }

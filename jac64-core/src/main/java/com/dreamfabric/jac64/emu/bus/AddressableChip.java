@@ -10,7 +10,7 @@ package com.dreamfabric.jac64.emu.bus;
  */
 public abstract class AddressableChip extends AddressableVoid {
 
-    protected int memory[];
+    private int memory[];
 
     public AddressableChip() {
         super();
@@ -30,7 +30,7 @@ public abstract class AddressableChip extends AddressableVoid {
             return false;
         }
 
-        memory[address - getStartAddress()] = data;
+        write0(address, data);
 
         return true;
     }
@@ -55,4 +55,38 @@ public abstract class AddressableChip extends AddressableVoid {
         memory = new int[length];
     }
 
+    protected void write0(int address, int data) {
+        if (data < 0) {
+            throw new IllegalArgumentException(String.format("Can't write: negative value %s", data));
+        }
+
+        if (data > 255) {
+            throw new IllegalArgumentException(String.format("Can't write: value bigger than 255 %s", data));
+        }
+
+        if (address < getStartAddress()) {
+            throw new IllegalArgumentException(
+                    String.format("Can't write: address to small %s < %s", address, getStartAddress()));
+        }
+
+        if (address > getEndAddress()) {
+            throw new IllegalArgumentException(
+                    String.format("Can't write: address to big %s > %s", address, getEndAddress()));
+        }
+        memory[address - getStartAddress()] = data;
+    }
+
+    protected Integer read0(int address) {
+        if (address < getStartAddress()) {
+            throw new IllegalArgumentException(
+                    String.format("Can't write: address to small %s < %s", address, getStartAddress()));
+        }
+
+        if (address > getEndAddress()) {
+            throw new IllegalArgumentException(
+                    String.format("Can't write: address to big %s > %s", address, getEndAddress()));
+        }
+
+        return memory[address - getStartAddress()];
+    }
 }

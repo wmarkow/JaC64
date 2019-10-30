@@ -174,7 +174,7 @@ public class CPU extends MOS6510Core {
             pla.setCharenHiramLoram(data);
         }
         // addressableBus.write(adr, (byte) data);
-        if (addressableBus.write(adr, (byte) data)) {
+        if (addressableBus.write(adr, data)) {
             windex = adr;
             return;
         }
