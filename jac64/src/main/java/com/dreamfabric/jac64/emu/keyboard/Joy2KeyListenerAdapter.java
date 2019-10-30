@@ -63,14 +63,19 @@ public class Joy2KeyListenerAdapter implements java.awt.event.KeyListener {
     }
 
     private Joy2Key map(KeyEvent event) {
+        if (KeyEvent.VK_CONTROL == event.getKeyCode() && KeyEvent.KEY_LOCATION_LEFT == event.getKeyLocation()) {
+            // left control pressed but we want right one
+            return null;
+        }
+
         return keyMap.get(event.getKeyCode());
     }
 
     private void prepareMap() {
-        keyMap.put(KeyEvent.VK_NUMPAD5, Joy2Key.VK_DOWN);
-        keyMap.put(KeyEvent.VK_NUMPAD0, Joy2Key.VK_FIRE);
-        keyMap.put(KeyEvent.VK_NUMPAD4, Joy2Key.VK_LEFT);
-        keyMap.put(KeyEvent.VK_NUMPAD6, Joy2Key.VK_RIGHT);
-        keyMap.put(KeyEvent.VK_NUMPAD8, Joy2Key.VK_UP);
+        keyMap.put(KeyEvent.VK_DOWN, Joy2Key.VK_DOWN);
+        keyMap.put(KeyEvent.VK_CONTROL, Joy2Key.VK_FIRE);
+        keyMap.put(KeyEvent.VK_LEFT, Joy2Key.VK_LEFT);
+        keyMap.put(KeyEvent.VK_RIGHT, Joy2Key.VK_RIGHT);
+        keyMap.put(KeyEvent.VK_UP, Joy2Key.VK_UP);
     }
 }
