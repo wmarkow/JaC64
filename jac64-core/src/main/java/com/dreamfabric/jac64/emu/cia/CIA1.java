@@ -62,21 +62,23 @@ public class CIA1 extends AddressableChip implements KeyListener {
 
     @Override
     public Integer read(int address) {
-        if (!canWriteOrRead(address)) {
+        Integer result = super.read(address);
+        if (result == null) {
             return null;
         }
 
-        if (address == PRA || address == PRB) {
+        if (address >= 0xdc00 && address <= 0xdc03) {
             updateKeyboardState();
-        }
 
-        Integer result = read0(address);
+            // read it again as the value could change
+            result = read0(address);
+        }
 
         if (result != null) {
             // LOGGER.info(String.format("CIA1 read %s = %s", address, result));
         }
 
-        if (address >= 0xdc00 && address <= 0xdc03) {
+        if (result != null && address >= 0xdc00 && address <= 0xdc03) {
             // for now return the correct result only for those registers: keypad and
             // joysticks
             return result;
