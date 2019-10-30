@@ -10,7 +10,7 @@ package com.dreamfabric.jac64.emu.bus;
  */
 public abstract class AddressableChip extends AddressableVoid {
 
-    private int memory[];
+    protected int memory[];
 
     public AddressableChip() {
         super();

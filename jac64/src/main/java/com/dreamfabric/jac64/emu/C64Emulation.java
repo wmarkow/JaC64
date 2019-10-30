@@ -1,6 +1,7 @@
 package com.dreamfabric.jac64.emu;
 
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
+import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.sid.RESID;
@@ -14,10 +15,12 @@ public class C64Emulation {
     private static PLA pla = new PLA();
     private static IO io = new IO();
     private static SIDIf sid = new RESID();
+    private static CIA1 cia1 = new CIA1();
 
     static {
         // prepare IO
         io.setSid(sid);
+        io.setCia1(cia1);
 
         // prepare PLA
         pla.setIO(io);
@@ -40,5 +43,9 @@ public class C64Emulation {
 
     public static void setSid(SIDIf sid) {
         C64Emulation.sid = sid;
+    }
+
+    public static CIA1 getCia1() {
+        return cia1;
     }
 }

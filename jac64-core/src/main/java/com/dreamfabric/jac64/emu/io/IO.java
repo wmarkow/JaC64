@@ -1,6 +1,7 @@
 package com.dreamfabric.jac64.emu.io;
 
 import com.dreamfabric.jac64.emu.bus.AddressableVoid;
+import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
 
 public class IO extends AddressableVoid {
@@ -9,14 +10,23 @@ public class IO extends AddressableVoid {
     private final static int END_ADDRESS = 0xDFFF;
 
     private SIDIf sid;
+    private CIA1 cia1;
 
     public void setSid(SIDIf sid) {
         this.sid = sid;
     }
 
+    public void setCia1(CIA1 cia1) {
+        this.cia1 = cia1;
+    }
+
     @Override
     public boolean write(int address, int data) {
         if (sid.write(address, data)) {
+            return true;
+        }
+
+        if (cia1.write(address, data)) {
             return true;
         }
 
@@ -32,6 +42,11 @@ public class IO extends AddressableVoid {
             return result;
         }
 
+        result = cia1.read(address);
+        if (result != null) {
+            return result;
+        }
+
         return null;
     }
 
@@ -40,6 +55,7 @@ public class IO extends AddressableVoid {
         super.setEnabled(enabled);
 
         sid.setEnabled(enabled);
+        cia1.setEnabled(enabled);
     }
 
     @Override

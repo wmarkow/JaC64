@@ -17,7 +17,9 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JPanel;
 
+import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.keyboard.Keyboard;
+import com.dreamfabric.jac64.emu.keyboard.KeyListenerAdapter;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 /**
@@ -34,6 +36,7 @@ public class C64Canvas extends JPanel implements KeyListener, FocusListener {
     boolean integerScale = true;
     C64Screen scr;
     Keyboard keyboard;
+    KeyListenerAdapter keyboardAdapter = new KeyListenerAdapter(C64Emulation.getCia1().getKeyListener());
     boolean autoScale;
     int w;
     int h;
@@ -84,10 +87,12 @@ public class C64Canvas extends JPanel implements KeyListener, FocusListener {
 
     public void keyPressed(KeyEvent event) {
         keyboard.keyPressed(event);
+        keyboardAdapter.keyPressed(event);
     }
 
     public void keyReleased(KeyEvent event) {
         keyboard.keyReleased(event);
+        keyboardAdapter.keyReleased(event);
     }
 
     public void keyTyped(KeyEvent event) {
