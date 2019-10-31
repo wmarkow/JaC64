@@ -37,7 +37,6 @@ public class CPU extends MOS6510Core {
     public static final boolean DEBUG_EVENT = false;
     // The IO RAM memory at 0x10000 (just since there is RAM there...)
     public static final int IO_OFFSET = 0x10000 - 0xd000;
-    public static final int BASIC_ROM2 = 0x1a000;
     public static final int KERNAL_ROM2 = 0x1e000;
     public static final int CHAR_ROM2 = 0x1d000;
 
@@ -50,7 +49,6 @@ public class CPU extends MOS6510Core {
     private int romFlag = 0xa000;
 
     // Defaults for the ROMs
-    public boolean basicROM = true;
     public boolean kernalROM = true;
     public boolean charROM = false;
     public boolean ioON = true;
@@ -154,15 +152,12 @@ public class CPU extends MOS6510Core {
             int p = (memory[0] ^ 0xff) | memory[1];
 
             kernalROM = ((p & 2) == 2); // Kernal on
-            basicROM = ((p & 3) == 3); // Basic on
 
             charROM = ((p & 3) != 0) && ((p & 4) == 0);
             // ioON is probably not correct!!! Check against table...
             ioON = ((p & 3) != 0) && ((p & 4) != 0);
 
-            if (basicROM)
-                romFlag = 0xa000;
-            else if (kernalROM)
+            if (kernalROM)
                 romFlag = 0xe000;
             else
                 romFlag = 0x10000; // No Rom at all (Basic / Kernal)
@@ -191,8 +186,7 @@ public class CPU extends MOS6510Core {
 
     private void fixRindex(int adr) {
         // ROM/RAM address fix
-        if ((basicROM && ((adr & 0xe000) == 0xa000)) || (kernalROM && ((adr & 0xe000) == 0xe000))
-                || (charROM && ((adr & 0xf000) == 0xd000))) {
+        if ((kernalROM && ((adr & 0xe000) == 0xe000)) || (charROM && ((adr & 0xf000) == 0xd000))) {
             // Add ROM address for the read!
             adr |= 0x10000;
         }
@@ -269,8 +263,9 @@ public class CPU extends MOS6510Core {
 
     protected void installROMS() {
         loadROM(loader.getResourceStream("/roms/kernal.c64"), KERNAL_ROM2, 0x2000);
-        loadROM(loader.getResourceStream("/roms/basic.c64"), BASIC_ROM2, 0x2000);
         loadROM(loader.getResourceStream("/roms/chargen.c64"), CHAR_ROM2, 0x1000);
+
+        C64Emulation.installROMs();
     }
 
     public void run(int address) {
@@ -285,35 +280,35 @@ public class CPU extends MOS6510Core {
 
     public void unknownInstruction(int pc, int op) {
         switch (op) {
-        case SLEEP:
-            cycles += 100;
-            break;
-        case LOAD_FILE:
-            if (acc == 0)
-                monitor.info("**** LOAD FILE! ***** PC = " + Integer.toString(pc, 16) + " => "
-                        + Integer.toString(rindex, 16));
-            else
-                monitor.info("**** VERIFY!    ***** PC = " + pc + " => " + rindex);
-            int len;
-            int mptr = memory[0xbb] + (memory[0xbc] << 8);
-            monitor.info("Filename len:" + (len = memory[0xb7]));
-            String name = "";
-            for (int i = 0; i < len; i++)
-                name += (char) memory[mptr++];
-            name += '\n';
-            int sec = memory[0xb9];
-            monitor.info("name = " + name);
-            monitor.info("Sec Address: " + sec);
-            int loadAdr = -1;
-            if (sec == 0)
-                loadAdr = memory[0x2b] + (memory[0x2c] << 8);
-            if (list != null) {
-                if (list.readFile(name, loadAdr)) {
-                    acc = 0;
+            case SLEEP:
+                cycles += 100;
+                break;
+            case LOAD_FILE:
+                if (acc == 0)
+                    monitor.info("**** LOAD FILE! ***** PC = " + Integer.toString(pc, 16) + " => "
+                            + Integer.toString(rindex, 16));
+                else
+                    monitor.info("**** VERIFY!    ***** PC = " + pc + " => " + rindex);
+                int len;
+                int mptr = memory[0xbb] + (memory[0xbc] << 8);
+                monitor.info("Filename len:" + (len = memory[0xb7]));
+                String name = "";
+                for (int i = 0; i < len; i++)
+                    name += (char) memory[mptr++];
+                name += '\n';
+                int sec = memory[0xb9];
+                monitor.info("name = " + name);
+                monitor.info("Sec Address: " + sec);
+                int loadAdr = -1;
+                if (sec == 0)
+                    loadAdr = memory[0x2b] + (memory[0x2c] << 8);
+                if (list != null) {
+                    if (list.readFile(name, loadAdr)) {
+                        acc = 0;
+                    }
                 }
-            }
-            pc--;
-            break;
+                pc--;
+                break;
         }
     }
 
@@ -392,10 +387,10 @@ public class CPU extends MOS6510Core {
         monitor.info("Starting CPU at: " + Integer.toHexString(pc));
         try {
             SlowDownCalculator slowDownCalculator = new SlowDownCalculator(C64Emulation.CPUFrq);
-            
+
             while (running) {
                 slowDownCalculator.markLoopStart(System.nanoTime(), cycles);
-                
+
                 // Debugging?
                 if (monitor.isEnabled()) { // || interruptInExec > 0) {
                     if (baLowUntil <= cycles) {
@@ -433,16 +428,14 @@ public class CPU extends MOS6510Core {
                     lastMillis = System.currentTimeMillis();
                     next_print = cycles + CYCLES_PER_DEBUG;
                 }
-                
+
                 long delay = slowDownCalculator.calculateWaitInNanos(System.nanoTime(), cycles);
-                if(delay == 0)
-                {
+                if (delay == 0) {
                     continue;
                 }
-                
+
                 long sleepUntilNanos = System.nanoTime() + delay;
-                while(System.nanoTime() <= sleepUntilNanos)
-                {
+                while (System.nanoTime() <= sleepUntilNanos) {
                     // just empty loop to slow down the simulation
                 }
             }
