@@ -67,11 +67,11 @@ public class C64Emulation {
     }
 
     private static void loadROM(String resource, AddressableChip addressableChip, int len) {
-         addressableChip.setEnabled(true);
+        addressableChip.setEnabled(true);
 
         try {
             SELoader loader = new SELoader();
-            InputStream ins = loader.getResourceStream("/roms/basic.c64");
+            InputStream ins = loader.getResourceStream(resource);
 
             BufferedInputStream stream = new BufferedInputStream(ins);
             if (stream != null) {
