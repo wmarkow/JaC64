@@ -51,7 +51,7 @@ public abstract class AddressableChip extends AddressableVoid {
     }
 
     protected void initMemory() {
-        int length = getEndAddress() - getStartAddress();
+        int length = getEndAddress() - getStartAddress() + 1;
         memory = new int[length];
     }
 
