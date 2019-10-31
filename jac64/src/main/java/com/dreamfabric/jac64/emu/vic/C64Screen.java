@@ -19,9 +19,12 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 
+import com.dreamfabric.c64utils.C64Script;
 import com.dreamfabric.jac64.C64Canvas;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Observer;
@@ -30,7 +33,6 @@ import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.disk.C1541Chips;
-import com.dreamfabric.jac64.emu.keyboard.Keyboard;
 import com.dreamfabric.jac64.emu.sid.AudioDriver;
 import com.dreamfabric.jac64.emu.sid.AudioDriverSE;
 import com.dreamfabric.jac64.emu.sid.RESID;
@@ -114,8 +116,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     private C64Canvas canvas;
 
     private int[] memory;
-
-    private Keyboard keyboard;
 
     CIA cia[];
     // C1541 c1541;
@@ -256,7 +256,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     // This variable changes when Kernal has installed
     // a working ISR that is reading the keyboard
     private boolean isrRunning = false;
-    private int ciaWrites = 0;
 
     public C64Screen(IMonitor m, boolean dob) {
         monitor = m;
@@ -307,21 +306,21 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     public void setSID(int sid) {
         switch (sid) {
-        case RESID_6581:
-        case RESID_8580:
-            if (getSid() instanceof RESID) {
-                ((RESID) getSid()).setChipVersion(sid);
-            } else {
-                getSid().stop();
-                RESID newSid = new RESID();
-                newSid.setChipVersion(sid);
-                newSid.start();
+            case RESID_6581:
+            case RESID_8580:
+                if (getSid() instanceof RESID) {
+                    ((RESID) getSid()).setChipVersion(sid);
+                } else {
+                    getSid().stop();
+                    RESID newSid = new RESID();
+                    newSid.setChipVersion(sid);
+                    newSid.start();
 
-                setSid(newSid);
-            }
-            break;
-        default:
-            break;
+                    setSid(newSid);
+                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -402,21 +401,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         audioDriver.setSoundOn(on);
     }
 
-    public void setStick(boolean one) {
-        keyboard.setStick(one);
-    }
-
-    public void registerHotKey(int key, int mod, String script, Object o) {
-        keyboard.registerHotKey(key, mod, script, o);
-    }
-
-    public void setKeyboardEmulation(boolean extended) {
-        monitor.info("Keyboard extended: " + extended);
-
-        keyboard.setStickExits(!extended);
-        keyboard.setExtendedKeyboardEmulation(extended);
-    }
-
     public void init(CPU cpu) {
         super.init(cpu);
 
@@ -441,8 +425,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         // c1541 = new C1541(memory);
         // c1541.addObserver(this);
 
-        keyboard = new Keyboard(this, cia[0], memory);
-        canvas = new C64Canvas(this, DOUBLE, keyboard);
+        canvas = new C64Canvas(this, DOUBLE);
         canvas.addMouseMotionListener(this);
         canvas.addMouseListener(this);
 
@@ -502,114 +485,110 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         address = address & IO_ADDRAND[pos];
         int val = 0;
         switch (address) {
-        case 0xd000:
-        case 0xd002:
-        case 0xd004:
-        case 0xd006:
-        case 0xd008:
-        case 0xd00a:
-        case 0xd00c:
-        case 0xd00e:
-            return sprites[(address - 0xd000) >> 1].x & 0xff;
-        case 0xd001:
-        case 0xd003:
-        case 0xd005:
-        case 0xd007:
-        case 0xd009:
-        case 0xd00b:
-        case 0xd00d:
-        case 0xd00f:
-            return sprites[(address - 0xd000) >> 1].y;
-        case 0xd010:
-            return sprXMSB;
-        case 0xd011:
-            return control1 & 0x7f | ((vbeam & 0x100) >> 1);
-        case 0xd012:
-            return vbeam & 0xff;
-        // Sprite collission registers - zeroed after read!
-        case 0xd013:
-        case 0xd014:
-            // Lightpen x/y
-            return 0;
-        case 0xd015:
-            return sprEN;
-        case 0xd016:
-            return control2;
-        case 0xd017:
-            return sprYEX;
-        case 0xd018:
-            return vicMem;
-        case 0xd019:
-            if (SPRITEDEBUG)
-                monitor.info("Reading d019: " + memory[address + IO_OFFSET]);
-            return irqFlags;
-        case 0xd01a:
-            return irqMask;
-        case 0xd01b:
-            return sprPri;
-        case 0xd01c:
-            return sprMul;
-        case 0xd01d:
-            return sprXEX;
-        case 0xd01e:
-            val = sprCol;
-            if (SPRITEDEBUG)
-                monitor.info("Reading sprite collission: " + Integer.toString(address, 16) + " => " + val);
-            sprCol = 0;
-            return val;
-        case 0xd01f:
-            val = sprBgCol;
-            if (SPRITEDEBUG)
-                monitor.info("Reading sprite collission: " + Integer.toString(address, 16) + " => " + val);
+            case 0xd000:
+            case 0xd002:
+            case 0xd004:
+            case 0xd006:
+            case 0xd008:
+            case 0xd00a:
+            case 0xd00c:
+            case 0xd00e:
+                return sprites[(address - 0xd000) >> 1].x & 0xff;
+            case 0xd001:
+            case 0xd003:
+            case 0xd005:
+            case 0xd007:
+            case 0xd009:
+            case 0xd00b:
+            case 0xd00d:
+            case 0xd00f:
+                return sprites[(address - 0xd000) >> 1].y;
+            case 0xd010:
+                return sprXMSB;
+            case 0xd011:
+                return control1 & 0x7f | ((vbeam & 0x100) >> 1);
+            case 0xd012:
+                return vbeam & 0xff;
+            // Sprite collission registers - zeroed after read!
+            case 0xd013:
+            case 0xd014:
+                // Lightpen x/y
+                return 0;
+            case 0xd015:
+                return sprEN;
+            case 0xd016:
+                return control2;
+            case 0xd017:
+                return sprYEX;
+            case 0xd018:
+                return vicMem;
+            case 0xd019:
+                if (SPRITEDEBUG)
+                    monitor.info("Reading d019: " + memory[address + IO_OFFSET]);
+                return irqFlags;
+            case 0xd01a:
+                return irqMask;
+            case 0xd01b:
+                return sprPri;
+            case 0xd01c:
+                return sprMul;
+            case 0xd01d:
+                return sprXEX;
+            case 0xd01e:
+                val = sprCol;
+                if (SPRITEDEBUG)
+                    monitor.info("Reading sprite collission: " + Integer.toString(address, 16) + " => " + val);
+                sprCol = 0;
+                return val;
+            case 0xd01f:
+                val = sprBgCol;
+                if (SPRITEDEBUG)
+                    monitor.info("Reading sprite collission: " + Integer.toString(address, 16) + " => " + val);
 
-            sprBgCol = 0;
-            return val;
-        case 0xd020:
-            return bCol | 0xf0;
-        case 0xd021:
-        case 0xd022:
-        case 0xd023:
-        case 0xd024:
-            return bgCol[address - 0xd021] | 0xf0;
-        case 0xd025:
-            return sprMC0 | 0xf0;
-        case 0xd026:
-            return sprMC1 | 0xf0;
-        case 0xd027:
-        case 0xd028:
-        case 0xd029:
-        case 0xd02a:
-        case 0xd02b:
-        case 0xd02c:
-        case 0xd02d:
-        case 0xd02e:
-            return sprites[address - 0xd027].col | 0xf0;
-        case 0xd419:
-            return potx;
-        case 0xd41A:
-            return poty;
-        case 0xdc00:
-            return keyboard.readDC00(cpu.getLastReadOP());
-        case 0xdc01:
-            return keyboard.readDC01(cpu.getLastReadOP());
-        case 0xdd00:
-            // System.out.print("Read dd00 IEC1: ");
-            // Try the frodo way... again...
-            val = (cia2PRA | ~cia2DDRA) & 0x3f | iecLines & c1541Chips.getIecLines();
+                sprBgCol = 0;
+                return val;
+            case 0xd020:
+                return bCol | 0xf0;
+            case 0xd021:
+            case 0xd022:
+            case 0xd023:
+            case 0xd024:
+                return bgCol[address - 0xd021] | 0xf0;
+            case 0xd025:
+                return sprMC0 | 0xf0;
+            case 0xd026:
+                return sprMC1 | 0xf0;
+            case 0xd027:
+            case 0xd028:
+            case 0xd029:
+            case 0xd02a:
+            case 0xd02b:
+            case 0xd02c:
+            case 0xd02d:
+            case 0xd02e:
+                return sprites[address - 0xd027].col | 0xf0;
+            case 0xd419:
+                return potx;
+            case 0xd41A:
+                return poty;
+            case 0xdd00:
+                // System.out.print("Read dd00 IEC1: ");
+                // Try the frodo way... again...
+                val = (cia2PRA | ~cia2DDRA) & 0x3f | iecLines & c1541Chips.getIecLines();
 
-            val &= 0xff;
-            return val;
-        default:
-            if (pos == 0xd) {
-                return cia[1].performRead(address + IO_OFFSET, cycles);
-            } else if (pos == 0xc) {
-                return cia[0].performRead(address + IO_OFFSET, cycles);
-            } else if (pos == 0xe) {
-                return tfe.performRead(address + IO_OFFSET, cycles);
-            } else if (pos >= 0x8) {
-                return memory[IO_OFFSET + address] | 0xf0;
-            }
-            return 0xff;
+                val &= 0xff;
+                return val;
+            default:
+                if (pos == 0xd) {
+                    return cia[1].performRead(address + IO_OFFSET, cycles);
+                } else if (pos == 0xc) {
+                    return cia[0].performRead(address + IO_OFFSET, cycles);
+                } else if (pos == 0xe) {
+                    return tfe.performRead(address + IO_OFFSET, cycles);
+                } else if (pos >= 0x8) {
+                    return memory[IO_OFFSET + address] | 0xf0;
+                }
+                return 0xff;
         }
     }
 
@@ -630,287 +609,270 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         // }
 
         switch (address) {
-        // -------------------------------------------------------------------
-        // VIC related
-        // -------------------------------------------------------------------
-        case 0xd000:
-        case 0xd002:
-        case 0xd004:
-        case 0xd006:
-        case 0xd008:
-        case 0xd00a:
-        case 0xd00c:
-        case 0xd00e:
-            int sprite = (address - 0xd000) >> 1;
-            sprites[sprite].x &= 0x100;
-            sprites[sprite].x += data;
-            break;
-        case 0xd001:
-        case 0xd003:
-        case 0xd005:
-        case 0xd007:
-        case 0xd009:
-        case 0xd00b:
-        case 0xd00d:
-        case 0xd00f:
-            sprites[(address - 0xd000) >> 1].y = data;
-            // System.out.println("Setting sprite " + (address - 0xd000)/2 + " to " + data);
-            break;
-        case 0xd010:
-            sprXMSB = data;
-            for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
-                sprites[i].x &= 0xff;
-                sprites[i].x |= (data & m) != 0 ? 0x100 : 0;
-            }
-            break;
-        // d011 -> high address of raster pos
-        case 0xd011:
-            raster = (raster & 0xff) | ((data << 1) & 0x100);
-            control1 = data;
-            // monitor.info("Setting blank: " +
-            // ((memory[ + 0xd011] & 0x08) == 0) +
-            // " at " + vbeam);
+            // -------------------------------------------------------------------
+            // VIC related
+            // -------------------------------------------------------------------
+            case 0xd000:
+            case 0xd002:
+            case 0xd004:
+            case 0xd006:
+            case 0xd008:
+            case 0xd00a:
+            case 0xd00c:
+            case 0xd00e:
+                int sprite = (address - 0xd000) >> 1;
+                sprites[sprite].x &= 0x100;
+                sprites[sprite].x += data;
+                break;
+            case 0xd001:
+            case 0xd003:
+            case 0xd005:
+            case 0xd007:
+            case 0xd009:
+            case 0xd00b:
+            case 0xd00d:
+            case 0xd00f:
+                sprites[(address - 0xd000) >> 1].y = data;
+                // System.out.println("Setting sprite " + (address - 0xd000)/2 + " to " + data);
+                break;
+            case 0xd010:
+                sprXMSB = data;
+                for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
+                    sprites[i].x &= 0xff;
+                    sprites[i].x |= (data & m) != 0 ? 0x100 : 0;
+                }
+                break;
+            // d011 -> high address of raster pos
+            case 0xd011:
+                raster = (raster & 0xff) | ((data << 1) & 0x100);
+                control1 = data;
+                // monitor.info("Setting blank: " +
+                // ((memory[ + 0xd011] & 0x08) == 0) +
+                // " at " + vbeam);
 
-            if (vScroll != (data & 7)) {
-                // update vScroll and badLine!
-                vScroll = data & 0x7;
-                boolean oldBadLine = badLine;
-                badLine = (displayEnabled && vbeam >= 0x30 && vbeam <= 0xf7) && (vbeam & 0x7) == vScroll;
-                if (BAD_LINE_DEBUG && oldBadLine != badLine) {
-                    monitor.info("#### BadLC diff@" + vbeam + " => " + badLine + " vScroll: " + vScroll + " vmli: "
-                            + vmli + " vc: " + vc + " rc: " + rc + " cyc line: " + (cpu.cycles - lastLine)
-                            + " cyc IRQ: " + (cpu.cycles - lastIRQ));
+                if (vScroll != (data & 7)) {
+                    // update vScroll and badLine!
+                    vScroll = data & 0x7;
+                    boolean oldBadLine = badLine;
+                    badLine = (displayEnabled && vbeam >= 0x30 && vbeam <= 0xf7) && (vbeam & 0x7) == vScroll;
+                    if (BAD_LINE_DEBUG && oldBadLine != badLine) {
+                        monitor.info("#### BadLC diff@" + vbeam + " => " + badLine + " vScroll: " + vScroll + " vmli: "
+                                + vmli + " vc: " + vc + " rc: " + rc + " cyc line: " + (cpu.cycles - lastLine)
+                                + " cyc IRQ: " + (cpu.cycles - lastIRQ));
+                    }
+                }
+
+                extended = (data & 0x40) != 0;
+                blankRow = (data & 0x08) == 0;
+
+                // 000 => normal text, 001 => multicolor text
+                // 010 => extended text, 011 => illegal mode...
+                // 100 => hires gfx, 101 => multi hires
+                // 110, 111 => ?
+                videoMode = (extended ? 0x02 : 0) | (multiCol ? 0x01 : 0) | (((data & 0x20) != 0) ? 0x04 : 0x00);
+
+                // System.out.println("Extended set to: " + extended + " at " +
+                // vbeam + " d011: " + Hex.hex2(data));
+
+                if (VIC_MEM_DEBUG || BAD_LINE_DEBUG) {
+                    monitor.info(
+                            "d011 = " + data + " at " + vbeam + " => YScroll = " + (data & 0x7) + " cyc since line: "
+                                    + (cpu.cycles - lastLine) + " cyc since IRQ: " + (cpu.cycles - lastIRQ));
+                }
+                if (IRQDEBUG)
+                    monitor.info("Setting raster position (hi) to: " + (data & 0x80));
+
+                break;
+
+            // d012 -> raster position
+            case 0xd012:
+                raster = (raster & 0x100) | data;
+                if (IRQDEBUG)
+                    monitor.info("Setting Raster Position (low) to " + data);
+                break;
+            case 0xd013:
+            case 0xd014:
+                // Write to lightpen...
+                break;
+            case 0xd015:
+                sprEN = data;
+                for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
+                    sprites[i].enabled = (data & m) != 0;
+                }
+                // System.out.println("Setting sprite enable to " + data);
+
+                break;
+            case 0xd016:
+                control2 = data;
+                horizScroll = data & 0x7;
+                multiCol = (data & 0x10) != 0;
+
+                // if (hideColumn != ((data & 0x08) == 0)) {
+                // System.out.println("38 chars on: " + hideColumn + " at " + vbeam + " cycle: "
+                // +
+                // (cycles - lastLine) + " borderstate:" + borderState);
+                // }
+
+                hideColumn = (data & 0x08) == 0;
+
+                // Set videmode...
+                videoMode = (extended ? 0x02 : 0) | (multiCol ? 0x01 : 0) | (((control1 & 0x20) != 0) ? 0x04 : 0x00);
+
+                // System.out.println("HorizScroll set to: " + horizScroll + " at "
+                // + vbeam);
+
+                // System.out.println("MultiColor set to: " + multiCol + " at " + vbeam);
+                break;
+
+            case 0xd017:
+                sprYEX = data;
+                for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
+                    sprites[i].expandY = (data & m) != 0;
+                }
+                break;
+
+            case 0xd018:
+                vicMem = data;
+                setVideoMem();
+                break;
+
+            case 0xd019: {
+                if ((data & 0x80) != 0)
+                    data = 0xff;
+                int latchval = 0xff ^ data;
+                if (IRQDEBUG)
+                    monitor.info("Latching VIC-II: " + Integer.toString(data, 16) + " on "
+                            + Integer.toString(irqFlags, 16) + " latch: " + Integer.toString(latchval, 16));
+
+                irqFlags &= latchval;
+
+                // Is this "flagged" off?
+                if ((irqMask & 0x0f & irqFlags) == 0) {
+                    clearIRQ(VIC_IRQ);
                 }
             }
+                break;
+            case 0xd01a:
+                irqMask = data;
 
-            extended = (data & 0x40) != 0;
-            blankRow = (data & 0x08) == 0;
-
-            // 000 => normal text, 001 => multicolor text
-            // 010 => extended text, 011 => illegal mode...
-            // 100 => hires gfx, 101 => multi hires
-            // 110, 111 => ?
-            videoMode = (extended ? 0x02 : 0) | (multiCol ? 0x01 : 0) | (((data & 0x20) != 0) ? 0x04 : 0x00);
-
-            // System.out.println("Extended set to: " + extended + " at " +
-            // vbeam + " d011: " + Hex.hex2(data));
-
-            if (VIC_MEM_DEBUG || BAD_LINE_DEBUG) {
-                monitor.info("d011 = " + data + " at " + vbeam + " => YScroll = " + (data & 0x7) + " cyc since line: "
-                        + (cpu.cycles - lastLine) + " cyc since IRQ: " + (cpu.cycles - lastIRQ));
-            }
-            if (IRQDEBUG)
-                monitor.info("Setting raster position (hi) to: " + (data & 0x80));
-
-            break;
-
-        // d012 -> raster position
-        case 0xd012:
-            raster = (raster & 0x100) | data;
-            if (IRQDEBUG)
-                monitor.info("Setting Raster Position (low) to " + data);
-            break;
-        case 0xd013:
-        case 0xd014:
-            // Write to lightpen...
-            break;
-        case 0xd015:
-            sprEN = data;
-            for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
-                sprites[i].enabled = (data & m) != 0;
-            }
-            // System.out.println("Setting sprite enable to " + data);
-
-            break;
-        case 0xd016:
-            control2 = data;
-            horizScroll = data & 0x7;
-            multiCol = (data & 0x10) != 0;
-
-            // if (hideColumn != ((data & 0x08) == 0)) {
-            // System.out.println("38 chars on: " + hideColumn + " at " + vbeam + " cycle: "
-            // +
-            // (cycles - lastLine) + " borderstate:" + borderState);
-            // }
-
-            hideColumn = (data & 0x08) == 0;
-
-            // Set videmode...
-            videoMode = (extended ? 0x02 : 0) | (multiCol ? 0x01 : 0) | (((control1 & 0x20) != 0) ? 0x04 : 0x00);
-
-            // System.out.println("HorizScroll set to: " + horizScroll + " at "
-            // + vbeam);
-
-            // System.out.println("MultiColor set to: " + multiCol + " at " + vbeam);
-            break;
-
-        case 0xd017:
-            sprYEX = data;
-            for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
-                sprites[i].expandY = (data & m) != 0;
-            }
-            break;
-
-        case 0xd018:
-            vicMem = data;
-            setVideoMem();
-            break;
-
-        case 0xd019: {
-            if ((data & 0x80) != 0)
-                data = 0xff;
-            int latchval = 0xff ^ data;
-            if (IRQDEBUG)
-                monitor.info("Latching VIC-II: " + Integer.toString(data, 16) + " on " + Integer.toString(irqFlags, 16)
-                        + " latch: " + Integer.toString(latchval, 16));
-
-            irqFlags &= latchval;
-
-            // Is this "flagged" off?
-            if ((irqMask & 0x0f & irqFlags) == 0) {
-                clearIRQ(VIC_IRQ);
-            }
-        }
-            break;
-        case 0xd01a:
-            irqMask = data;
-
-            // Check if IRQ should trigger or clear!
-            if ((irqMask & 0x0f & irqFlags) != 0) {
-                irqFlags |= 0x80;
-                setIRQ(VIC_IRQ);
-            } else {
-                clearIRQ(VIC_IRQ);
-            }
-
-            if (IRQDEBUG) {
-                monitor.info("Changing IRQ mask to: " + Integer.toString(irqMask, 16) + " vbeam: " + vbeam);
-            }
-            break;
-
-        case 0xd01b:
-            sprPri = data;
-            for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
-                sprites[i].priority = (data & m) != 0;
-            }
-            break;
-        case 0xd01c:
-            sprMul = data;
-            for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
-                sprites[i].multicolor = (data & m) != 0;
-            }
-            break;
-        case 0xd01d:
-            sprXEX = data;
-            for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
-                sprites[i].expandX = (data & m) != 0;
-            }
-            break;
-
-        case 0xd020:
-            borderColor = cbmcolor[bCol = data & 15];
-            break;
-        case 0xd021:
-            bgColor = cbmcolor[bgCol[0] = data & 15];
-            for (int i = 0, n = 8; i < n; i++) {
-                sprites[i].color[0] = bgColor;
-            }
-            break;
-        case 0xd022:
-        case 0xd023:
-        case 0xd024:
-            bgCol[address - 0xd021] = data & 15;
-            break;
-        case 0xd025:
-            sprMC0 = data & 15;
-            for (int i = 0, n = 8; i < n; i++) {
-                sprites[i].color[1] = cbmcolor[sprMC0];
-            }
-            break;
-        case 0xd026:
-            sprMC1 = data & 15;
-            for (int i = 0, n = 8; i < n; i++) {
-                sprites[i].color[3] = cbmcolor[sprMC1];
-            }
-            break;
-        case 0xd027:
-        case 0xd028:
-        case 0xd029:
-        case 0xd02a:
-        case 0xd02b:
-        case 0xd02c:
-        case 0xd02d:
-        case 0xd02e:
-            sprites[address - 0xd027].color[2] = cbmcolor[data & 15];
-            sprites[address - 0xd027].col = data & 15;
-            // System.out.println("Sprite " + (address - 0xd027) + " color set to: " + (data
-            // & 15));
-            break;
-        // CIA 1 & 2 - 'special' addresses
-        case 0xdc00:
-        case 0xdc01:
-        case 0xdc02:
-        case 0xdc03:
-            // monitor.println("////////////==> Set Keyboard:" +
-            // Integer.toString(address - ,16) + " = " + data +
-            // " => ~" + ((~data) & 0xff));
-            cia[0].performWrite(address + IO_OFFSET, data, cpu.cycles);
-            if (!isrRunning) {
-                if (ciaWrites++ > 20) {
-                    isrRunning = true;
-                    ciaWrites = 0;
+                // Check if IRQ should trigger or clear!
+                if ((irqMask & 0x0f & irqFlags) != 0) {
+                    irqFlags |= 0x80;
+                    setIRQ(VIC_IRQ);
                 } else {
-                    System.out.println("startup CIA write# " + ciaWrites + ": set " + address + " to " + data);
+                    clearIRQ(VIC_IRQ);
                 }
-            }
-            break;
-        case 0xdd00:
-            if (DEBUG_IEC)
-                monitor.info("C64: IEC Write: " + Integer.toHexString(data));
 
-            // if (emulateDisk) {
-            // c1541.handleDisk(data, cpu.cycles);
-            // }
+                if (IRQDEBUG) {
+                    monitor.info("Changing IRQ mask to: " + Integer.toString(irqMask, 16) + " vbeam: " + vbeam);
+                }
+                break;
 
-            if (VIC_MEM_DEBUG)
-                System.out.println("Set dd00 to " + Integer.toHexString(data));
+            case 0xd01b:
+                sprPri = data;
+                for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
+                    sprites[i].priority = (data & m) != 0;
+                }
+                break;
+            case 0xd01c:
+                sprMul = data;
+                for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
+                    sprites[i].multicolor = (data & m) != 0;
+                }
+                break;
+            case 0xd01d:
+                sprXEX = data;
+                for (int i = 0, m = 1, n = 8; i < n; i++, m = m << 1) {
+                    sprites[i].expandX = (data & m) != 0;
+                }
+                break;
 
-            cia[1].performWrite(address + IO_OFFSET, data, cpu.cycles);
-            cia2PRA = data;
+            case 0xd020:
+                borderColor = cbmcolor[bCol = data & 15];
+                break;
+            case 0xd021:
+                bgColor = cbmcolor[bgCol[0] = data & 15];
+                for (int i = 0, n = 8; i < n; i++) {
+                    sprites[i].color[0] = bgColor;
+                }
+                break;
+            case 0xd022:
+            case 0xd023:
+            case 0xd024:
+                bgCol[address - 0xd021] = data & 15;
+                break;
+            case 0xd025:
+                sprMC0 = data & 15;
+                for (int i = 0, n = 8; i < n; i++) {
+                    sprites[i].color[1] = cbmcolor[sprMC0];
+                }
+                break;
+            case 0xd026:
+                sprMC1 = data & 15;
+                for (int i = 0, n = 8; i < n; i++) {
+                    sprites[i].color[3] = cbmcolor[sprMC1];
+                }
+                break;
+            case 0xd027:
+            case 0xd028:
+            case 0xd029:
+            case 0xd02a:
+            case 0xd02b:
+            case 0xd02c:
+            case 0xd02d:
+            case 0xd02e:
+                sprites[address - 0xd027].color[2] = cbmcolor[data & 15];
+                sprites[address - 0xd027].col = data & 15;
+                // System.out.println("Sprite " + (address - 0xd027) + " color set to: " + (data
+                // & 15));
+                break;
+            case 0xdd00:
+                if (DEBUG_IEC)
+                    monitor.info("C64: IEC Write: " + Integer.toHexString(data));
 
-            data = ~cia2PRA & cia2DDRA;
-            int oldLines = iecLines;
-            iecLines = (data << 2) & 0x80 // DATA
-                    | (data << 2) & 0x40 // CLK
-                    | (data << 1) & 0x10; // ATN
+                // if (emulateDisk) {
+                // c1541.handleDisk(data, cpu.cycles);
+                // }
 
-            if (((oldLines ^ iecLines) & 0x10) != 0) {
-                c1541Chips.atnChanged((iecLines & 0x10) == 0);
-            }
-            c1541Chips.updateIECLines();
+                if (VIC_MEM_DEBUG)
+                    System.out.println("Set dd00 to " + Integer.toHexString(data));
 
-            if (DEBUG_IEC)
-                printIECLines();
-            setVideoMem();
-            break;
+                cia[1].performWrite(address + IO_OFFSET, data, cpu.cycles);
+                cia2PRA = data;
 
-        case 0xdd02:
-            cia2DDRA = data;
-            // System.out.println("C64: Wrote to DDRA (IEC): " +
-            // Integer.toHexString(data));
-            cia[1].performWrite(address + IO_OFFSET, data, cpu.cycles);
-            setVideoMem();
-            break;
+                data = ~cia2PRA & cia2DDRA;
+                int oldLines = iecLines;
+                iecLines = (data << 2) & 0x80 // DATA
+                        | (data << 2) & 0x40 // CLK
+                        | (data << 1) & 0x10; // ATN
 
-        default:
-            if (pos == 0xd) {
-                cia[1].performWrite(address + IO_OFFSET, data, cycles);
-            } else if (pos == 0xc) {
-                cia[0].performWrite(address + IO_OFFSET, data, cycles);
-            } else if (pos == 0xe) {
-                tfe.performWrite(address + IO_OFFSET, data, cycles);
-            }
-            // handle color ram!
+                if (((oldLines ^ iecLines) & 0x10) != 0) {
+                    c1541Chips.atnChanged((iecLines & 0x10) == 0);
+                }
+                c1541Chips.updateIECLines();
+
+                if (DEBUG_IEC)
+                    printIECLines();
+                setVideoMem();
+                break;
+
+            case 0xdd02:
+                cia2DDRA = data;
+                // System.out.println("C64: Wrote to DDRA (IEC): " +
+                // Integer.toHexString(data));
+                cia[1].performWrite(address + IO_OFFSET, data, cpu.cycles);
+                setVideoMem();
+                break;
+
+            default:
+                if (pos == 0xd) {
+                    cia[1].performWrite(address + IO_OFFSET, data, cycles);
+                } else if (pos == 0xc) {
+                    cia[0].performWrite(address + IO_OFFSET, data, cycles);
+                } else if (pos == 0xe) {
+                    tfe.performWrite(address + IO_OFFSET, data, cycles);
+                }
+                // handle color ram!
         }
     }
 
@@ -1032,434 +994,434 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         }
 
         switch (vicCycle) {
-        case 0:
-            // Increase the vbeam - rendering is started
-            vbeam = (vbeam + 1) % 312;
-            if (vbeam == 0)
-                frame++;
-            vPos = vbeam - (FIRST_VISIBLE_VBEAM + 1);
+            case 0:
+                // Increase the vbeam - rendering is started
+                vbeam = (vbeam + 1) % 312;
+                if (vbeam == 0)
+                    frame++;
+                vPos = vbeam - (FIRST_VISIBLE_VBEAM + 1);
 
-            if (vbeam == FIRST_VISIBLE_VBEAM) {
-                colIndex++;
-                if (colIndex >= LABEL_COUNT)
-                    colIndex = 0;
-                // Display enabled?
-                initUpdate();
-            }
+                if (vbeam == FIRST_VISIBLE_VBEAM) {
+                    colIndex++;
+                    if (colIndex >= LABEL_COUNT)
+                        colIndex = 0;
+                    // Display enabled?
+                    initUpdate();
+                }
 
-            // Check for interrupts, etc...
-            // Sprite collission interrupts - why only once a line?
-            if (((irqMask & 2) != 0) && (sprBgCol != 0) && (irqFlags & 2) == 0) {
-                if (SPRITEDEBUG)
-                    monitor.info("*** Sprite collission IRQ (d01f): " + sprBgCol + " at " + vbeam);
-                irqFlags |= 82;
-                setIRQ(VIC_IRQ);
-            }
-            if (((irqMask & 4) != 0) && (sprCol != 0) && (irqFlags & 4) == 0) {
-                if (SPRITEDEBUG)
-                    monitor.info("*** Sprite collission IRQ (d01e): " + sprCol + " at " + vbeam);
-                irqFlags |= 84;
-                setIRQ(VIC_IRQ);
-            }
-
-            int irqComp = raster;
-            // Not nice... FIX THIS!!!
-            if (irqComp > 312)
-                irqComp &= 0xff;
-
-            if ((irqFlags & 1) == 0 && (irqComp == vbeam)) {
-                irqFlags |= 0x1;
-
-                if ((irqMask & 1) != 0) {
-                    irqFlags |= 0x80;
-                    irqTriggered = true;
+                // Check for interrupts, etc...
+                // Sprite collission interrupts - why only once a line?
+                if (((irqMask & 2) != 0) && (sprBgCol != 0) && (irqFlags & 2) == 0) {
+                    if (SPRITEDEBUG)
+                        monitor.info("*** Sprite collission IRQ (d01f): " + sprBgCol + " at " + vbeam);
+                    irqFlags |= 82;
                     setIRQ(VIC_IRQ);
-                    lastIRQ = cpu.cycles;
-                    if (IRQDEBUG)
-                        monitor.info(
-                                "Generating IRQ at " + vbeam + " req:" + raster + " IRQs:" + cpu.getInterruptInExec()
-                                        + " flags: " + irqFlags + " delta: " + (cpu.cycles - lastLine));
                 }
-            } else {
-                irqTriggered = false;
-            }
-            notVisible = false;
-            if (vPos < 0 || vPos >= 284) {
-                cpu.baLowUntil = 0;
-                notVisible = true;
-                if (STATE_DEBUG)
-                    monitor.info("FINISH next at " + vbeam);
-                // Jump directly to VS_FINISH and wait for end of line...
-                break;
-            }
+                if (((irqMask & 4) != 0) && (sprCol != 0) && (irqFlags & 4) == 0) {
+                    if (SPRITEDEBUG)
+                        monitor.info("*** Sprite collission IRQ (d01e): " + sprCol + " at " + vbeam);
+                    irqFlags |= 84;
+                    setIRQ(VIC_IRQ);
+                }
 
-            // Check if display should be enabled...
-            if (vbeam == 0x30) {
-                displayEnabled = (control1 & 0x10) != 0;
-                if (displayEnabled) {
-                    borderState &= ~0x04;
+                int irqComp = raster;
+                // Not nice... FIX THIS!!!
+                if (irqComp > 312)
+                    irqComp &= 0xff;
+
+                if ((irqFlags & 1) == 0 && (irqComp == vbeam)) {
+                    irqFlags |= 0x1;
+
+                    if ((irqMask & 1) != 0) {
+                        irqFlags |= 0x80;
+                        irqTriggered = true;
+                        setIRQ(VIC_IRQ);
+                        lastIRQ = cpu.cycles;
+                        if (IRQDEBUG)
+                            monitor.info("Generating IRQ at " + vbeam + " req:" + raster + " IRQs:"
+                                    + cpu.getInterruptInExec() + " flags: " + irqFlags + " delta: "
+                                    + (cpu.cycles - lastLine));
+                    }
                 } else {
-                    borderState |= 0x04;
+                    irqTriggered = false;
                 }
-            }
-
-            badLine = (displayEnabled && vbeam >= 0x30 && vbeam <= 0xf7) && (vbeam & 0x7) == vScroll;
-
-            // Clear the collission masks each line... - not needed???
-            for (int i = 0, n = SC_WIDTH; i < n; i++) {
-                collissionMask[i] = 0;
-            }
-            break;
-        case 1: // Sprite data - sprite 3
-            if (sprites[3].dma) {
-                sprites[3].readSpriteData(); // reads all 3 bytes here (one should be prev).
-            }
-            if (sprites[5].dma) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_SP5;
-            }
-            break;
-        case 2:
-            // here some of the bytes for sprite 4 should be read...
-            break;
-        case 3:
-            if (sprites[4].dma) {
-                sprites[4].readSpriteData();
-            }
-            if (sprites[6].dma) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_SP6;
-            }
-            break;
-        case 4:
-            // here some of the bytes for sprite 5 should be read...
-            break;
-        case 5:
-            if (sprites[5].dma) {
-                sprites[5].readSpriteData();
-            }
-            if (sprites[7].dma) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_SP7;
-            }
-            break;
-        case 6:
-            // here some of the bytes for sprite 6 should be read..
-            break;
-        case 7:
-            if (sprites[6].dma) {
-                sprites[6].readSpriteData();
-            }
-            break;
-        case 8:
-            // here some of the bytes for sprite 7 should be read...
-            break;
-        case 9:
-            if (sprites[7].dma) {
-                sprites[7].readSpriteData();
-            }
-
-            // Border management! (at another cycle maybe?)
-            if (blankRow) {
-                if (vbeam == 247) {
-                    borderState |= 1;
+                notVisible = false;
+                if (vPos < 0 || vPos >= 284) {
+                    cpu.baLowUntil = 0;
+                    notVisible = true;
+                    if (STATE_DEBUG)
+                        monitor.info("FINISH next at " + vbeam);
+                    // Jump directly to VS_FINISH and wait for end of line...
+                    break;
                 }
-            } else {
-                if (vbeam == 251) {
-                    borderState |= 1;
+
+                // Check if display should be enabled...
+                if (vbeam == 0x30) {
+                    displayEnabled = (control1 & 0x10) != 0;
+                    if (displayEnabled) {
+                        borderState &= ~0x04;
+                    } else {
+                        borderState |= 0x04;
+                    }
                 }
-                if (vbeam == 51) {
+
+                badLine = (displayEnabled && vbeam >= 0x30 && vbeam <= 0xf7) && (vbeam & 0x7) == vScroll;
+
+                // Clear the collission masks each line... - not needed???
+                for (int i = 0, n = SC_WIDTH; i < n; i++) {
+                    collissionMask[i] = 0;
+                }
+                break;
+            case 1: // Sprite data - sprite 3
+                if (sprites[3].dma) {
+                    sprites[3].readSpriteData(); // reads all 3 bytes here (one should be prev).
+                }
+                if (sprites[5].dma) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_SP5;
+                }
+                break;
+            case 2:
+                // here some of the bytes for sprite 4 should be read...
+                break;
+            case 3:
+                if (sprites[4].dma) {
+                    sprites[4].readSpriteData();
+                }
+                if (sprites[6].dma) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_SP6;
+                }
+                break;
+            case 4:
+                // here some of the bytes for sprite 5 should be read...
+                break;
+            case 5:
+                if (sprites[5].dma) {
+                    sprites[5].readSpriteData();
+                }
+                if (sprites[7].dma) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_SP7;
+                }
+                break;
+            case 6:
+                // here some of the bytes for sprite 6 should be read..
+                break;
+            case 7:
+                if (sprites[6].dma) {
+                    sprites[6].readSpriteData();
+                }
+                break;
+            case 8:
+                // here some of the bytes for sprite 7 should be read...
+                break;
+            case 9:
+                if (sprites[7].dma) {
+                    sprites[7].readSpriteData();
+                }
+
+                // Border management! (at another cycle maybe?)
+                if (blankRow) {
+                    if (vbeam == 247) {
+                        borderState |= 1;
+                    }
+                } else {
+                    if (vbeam == 251) {
+                        borderState |= 1;
+                    }
+                    if (vbeam == 51) {
+                        borderState &= 0xfe;
+
+                        // Reset sprite data to avoid garbage since they are not painted...
+                        for (int i = 0, n = 7; i < n; i++) {
+                            if (!sprites[i].painting) {
+                                sprites[i].lineFinished = true;
+                            }
+                        }
+                    }
+                }
+                // No border after vbeam 55 (ever?)
+                if (vbeam == 55) {
                     borderState &= 0xfe;
 
                     // Reset sprite data to avoid garbage since they are not painted...
                     for (int i = 0, n = 7; i < n; i++) {
-                        if (!sprites[i].painting) {
+                        if (!sprites[i].painting)
                             sprites[i].lineFinished = true;
+                    }
+                }
+                break;
+            case 10:
+                break;
+            case 11: // Set badline fetching...
+                if (badLine) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                }
+                break;
+            case 12: // First visible cycle (on screen)
+                // calculate mpos before starting the rendering!
+                mpos = vPos * SC_WIDTH;
+                drawBackground();
+
+                xPos = 16;
+                mpos += 8;
+
+                break;
+            case 13:
+                drawBackground();
+                drawSprites();
+                mpos += 8;
+
+                // Set vc, reset vmli...
+                vc = vcBase;
+                vmli = 0;
+                if (badLine) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    if (BAD_LINE_DEBUG)
+                        System.out.println("#### RC = 0 (" + rc + ") at " + vbeam + " vc: " + vc);
+                    rc = 0;
+                }
+                break;
+            case 14:
+                drawBackground();
+                drawSprites();
+                mpos += 8;
+                if (badLine) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                }
+                break;
+            case 15:
+
+                drawBackground();
+                drawSprites();
+                mpos += 8;
+
+                if (badLine) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                }
+
+                // Turn off sprite DMA if finished reading!
+                for (int i = 0, n = 8; i < n; i++) {
+                    if (sprites[i].nextByte == 63)
+                        sprites[i].dma = false;
+                }
+
+                break;
+            case 16:
+                if (!hideColumn) {
+                    borderState &= 0xfd;
+                }
+                if (badLine) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    // Fetch first char into cache! (for the below draw...)
+                    vicCharCache[vmli] = memory[videoMatrix + (vcBase & 0x3ff)];
+                    vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + (vcBase & 0x3ff)];
+                }
+
+                // Draw one character here!
+                drawGraphics(mpos + horizScroll);
+                drawSprites();
+                if (borderState != 0)
+                    drawBackground();
+                mpos += 8;
+
+                // System.out.println("Cycle: " + vicCycle + " VMLI: " + vmli + " => " + mpos);
+                break;
+            case 17:
+                if (hideColumn) {
+                    borderState &= 0xfd;
+                }
+
+                if (badLine) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    // Fetch a some chars into cache! (for the below draw...)
+                    vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
+                    vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
+                }
+                // draw the graphics. (should probably handle sprites also??)
+                drawGraphics(mpos + horizScroll);
+                drawSprites();
+                mpos += 8;
+                break;
+            // Cycle 18 - 53
+            default:
+                if (badLine) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    // Fetch a some chars into cache! (for the below draw...)
+                    vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
+                    vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
+                }
+                // draw the graphics. (should probably handle sprites also??)
+                drawGraphics(mpos + horizScroll);
+                drawSprites();
+
+                mpos += 8;
+                // System.out.println("Cycle: " + vicCycle + " VMLI: " + vmli + " => " + mpos);
+                break;
+            case 54:
+                // Then Check if it is time to start up the sprites!
+                // Does not matter in which order this is done ?=
+                if (badLine) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    // Fetch a some chars into cache! (for the below draw...)
+                    vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
+                    vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
+                }
+                int mult = 1;
+                int ypos = vPos + SC_SPYOFFS;
+
+                for (int i = 0, n = 8; i < n; i++) {
+                    Sprite sprite = sprites[i];
+                    if (sprite.enabled) {
+                        // If it is time to start drawing this sprite!
+                        if (sprite.y == (ypos & 0xff) && (ypos < 270)) {
+                            sprite.nextByte = 0;
+                            sprite.dma = true;
+                            sprite.expFlipFlop = true;
+                            if (SPRITEDEBUG)
+                                System.out.println("Starting painting sprite " + i + " on " + vbeam
+                                        + " first visible at " + (ypos + 1));
+                        }
+                    }
+                    mult = mult << 1;
+                }
+                if (sprites[0].dma) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_SP0;
+                }
+
+                drawGraphics(mpos + horizScroll);
+                drawSprites();
+
+                mpos += 8;
+                // System.out.println("Cycle: " + vicCycle + " VMLI: " + vmli + " => " + mpos);
+
+                break;
+            case 55:
+                if (hideColumn) {
+                    borderState |= 2;
+                }
+                if (badLine) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    // Fetch a some chars into cache! (for the below draw...)
+                    vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
+                    vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
+                }
+                drawGraphics(mpos + horizScroll);
+                drawSprites();
+                if (borderState != 0)
+                    drawBackground();
+                mpos += 8;
+                // System.out.println("Cycle: " + vicCycle + " VMLI: " + vmli + " => " + mpos);
+
+                break;
+            case 56:
+                if (!hideColumn) {
+                    borderState |= 2;
+                }
+
+                drawBackground();
+                drawSprites();
+                mpos += 8;
+
+                // If time to turn of sprite display...
+                for (int i = 0, n = 8; i < n; i++) {
+                    Sprite sprite = sprites[i];
+                    if (!sprite.dma) {
+                        sprite.painting = false;
+                        if (SPRITEDEBUG)
+                            System.out.println("Stopped painting sprite " + i + " at (after): " + vbeam);
+                    }
+                }
+
+                // Here we should check if sprite dma should start...
+                // - probably need to add a dma variable to sprites, and not
+                // only use the painting variable for better emulation
+                // Bus not available if sp0 or sp1 is painting
+                if (sprites[1].dma) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_SP1;
+                }
+                break;
+            case 57:
+                // Paint border, check sprite for display and read sprite 0 data.
+                for (int i = 0, n = 8; i < n; i++) {
+                    Sprite sprite = sprites[i];
+                    if (sprite.dma)
+                        sprite.painting = true;
+                }
+
+                drawBackground();
+                drawSprites();
+                mpos += 8;
+
+                if (rc == 7) {
+                    vcBase = vc;
+                    gfxVisible = false;
+                    if (BAD_LINE_DEBUG) {
+                        monitor.info("#### RC7 ==> vc = " + vc + " at " + vbeam + " vicCycle = " + vicCycle);
+                        if (vc == 1000) {
+                            monitor.info("--------------- last line ----------------");
                         }
                     }
                 }
-            }
-            // No border after vbeam 55 (ever?)
-            if (vbeam == 55) {
-                borderState &= 0xfe;
 
-                // Reset sprite data to avoid garbage since they are not painted...
-                for (int i = 0, n = 7; i < n; i++) {
-                    if (!sprites[i].painting)
-                        sprites[i].lineFinished = true;
+                if (badLine || gfxVisible) {
+                    rc = (rc + 1) & 7;
+                    gfxVisible = true;
                 }
-            }
-            break;
-        case 10:
-            break;
-        case 11: // Set badline fetching...
-            if (badLine) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
-            }
-            break;
-        case 12: // First visible cycle (on screen)
-            // calculate mpos before starting the rendering!
-            mpos = vPos * SC_WIDTH;
-            drawBackground();
 
-            xPos = 16;
-            mpos += 8;
+                if (sprites[0].painting) {
+                    sprites[0].readSpriteData();
+                }
 
-            break;
-        case 13:
-            drawBackground();
-            drawSprites();
-            mpos += 8;
+                if (sprites[2].dma) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_SP2;
+                }
 
-            // Set vc, reset vmli...
-            vc = vcBase;
-            vmli = 0;
-            if (badLine) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
-                if (BAD_LINE_DEBUG)
-                    System.out.println("#### RC = 0 (" + rc + ") at " + vbeam + " vc: " + vc);
-                rc = 0;
-            }
-            break;
-        case 14:
-            drawBackground();
-            drawSprites();
-            mpos += 8;
-            if (badLine) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
-            }
-            break;
-        case 15:
-
-            drawBackground();
-            drawSprites();
-            mpos += 8;
-
-            if (badLine) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
-            }
-
-            // Turn off sprite DMA if finished reading!
-            for (int i = 0, n = 8; i < n; i++) {
-                if (sprites[i].nextByte == 63)
-                    sprites[i].dma = false;
-            }
-
-            break;
-        case 16:
-            if (!hideColumn) {
-                borderState &= 0xfd;
-            }
-            if (badLine) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
-                // Fetch first char into cache! (for the below draw...)
-                vicCharCache[vmli] = memory[videoMatrix + (vcBase & 0x3ff)];
-                vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + (vcBase & 0x3ff)];
-            }
-
-            // Draw one character here!
-            drawGraphics(mpos + horizScroll);
-            drawSprites();
-            if (borderState != 0)
+                break;
+            case 58:
                 drawBackground();
-            mpos += 8;
+                drawSprites();
+                mpos += 8;
 
-            // System.out.println("Cycle: " + vicCycle + " VMLI: " + vmli + " => " + mpos);
-            break;
-        case 17:
-            if (hideColumn) {
-                borderState &= 0xfd;
-            }
+                break;
+            case 59:
+                drawBackground();
+                drawSprites();
+                mpos += 8;
 
-            if (badLine) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
-                // Fetch a some chars into cache! (for the below draw...)
-                vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
-                vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
-            }
-            // draw the graphics. (should probably handle sprites also??)
-            drawGraphics(mpos + horizScroll);
-            drawSprites();
-            mpos += 8;
-            break;
-        // Cycle 18 - 53
-        default:
-            if (badLine) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
-                // Fetch a some chars into cache! (for the below draw...)
-                vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
-                vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
-            }
-            // draw the graphics. (should probably handle sprites also??)
-            drawGraphics(mpos + horizScroll);
-            drawSprites();
-
-            mpos += 8;
-            // System.out.println("Cycle: " + vicCycle + " VMLI: " + vmli + " => " + mpos);
-            break;
-        case 54:
-            // Then Check if it is time to start up the sprites!
-            // Does not matter in which order this is done ?=
-            if (badLine) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
-                // Fetch a some chars into cache! (for the below draw...)
-                vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
-                vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
-            }
-            int mult = 1;
-            int ypos = vPos + SC_SPYOFFS;
-
-            for (int i = 0, n = 8; i < n; i++) {
-                Sprite sprite = sprites[i];
-                if (sprite.enabled) {
-                    // If it is time to start drawing this sprite!
-                    if (sprite.y == (ypos & 0xff) && (ypos < 270)) {
-                        sprite.nextByte = 0;
-                        sprite.dma = true;
-                        sprite.expFlipFlop = true;
-                        if (SPRITEDEBUG)
-                            System.out.println("Starting painting sprite " + i + " on " + vbeam + " first visible at "
-                                    + (ypos + 1));
+                if (sprites[1].painting) {
+                    sprites[1].readSpriteData();
+                }
+                break;
+            case 60:
+                drawSprites();
+                break;
+            case 61:
+                if (sprites[2].painting) {
+                    sprites[2].readSpriteData();
+                }
+                if (sprites[3].dma) {
+                    cpu.baLowUntil = lastLine + VICConstants.BA_SP3;
+                }
+                break;
+            case 62:
+                // Should this be made??? or should sprite 0 be repaintable
+                // same line?
+                // Reset sprites so that they can be repainted again...
+                for (int i = 0; i < sprites.length; i++) {
+                    sprites[i].reset();
+                }
+                lastLine += VICConstants.SCAN_RATE;
+                // Update screen
+                if (updating) {
+                    if (vPos == 285) {
+                        mis.newPixels();
+                        canvas.repaint();
+                        actualScanTime = (actualScanTime * 9 + (int) ((audioDriver.getMicros() - lastScan))) / 10;
+                        lastScan = audioDriver.getMicros();
+                        updating = false;
                     }
                 }
-                mult = mult << 1;
-            }
-            if (sprites[0].dma) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_SP0;
-            }
-
-            drawGraphics(mpos + horizScroll);
-            drawSprites();
-
-            mpos += 8;
-            // System.out.println("Cycle: " + vicCycle + " VMLI: " + vmli + " => " + mpos);
-
-            break;
-        case 55:
-            if (hideColumn) {
-                borderState |= 2;
-            }
-            if (badLine) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
-                // Fetch a some chars into cache! (for the below draw...)
-                vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
-                vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
-            }
-            drawGraphics(mpos + horizScroll);
-            drawSprites();
-            if (borderState != 0)
-                drawBackground();
-            mpos += 8;
-            // System.out.println("Cycle: " + vicCycle + " VMLI: " + vmli + " => " + mpos);
-
-            break;
-        case 56:
-            if (!hideColumn) {
-                borderState |= 2;
-            }
-
-            drawBackground();
-            drawSprites();
-            mpos += 8;
-
-            // If time to turn of sprite display...
-            for (int i = 0, n = 8; i < n; i++) {
-                Sprite sprite = sprites[i];
-                if (!sprite.dma) {
-                    sprite.painting = false;
-                    if (SPRITEDEBUG)
-                        System.out.println("Stopped painting sprite " + i + " at (after): " + vbeam);
-                }
-            }
-
-            // Here we should check if sprite dma should start...
-            // - probably need to add a dma variable to sprites, and not
-            // only use the painting variable for better emulation
-            // Bus not available if sp0 or sp1 is painting
-            if (sprites[1].dma) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_SP1;
-            }
-            break;
-        case 57:
-            // Paint border, check sprite for display and read sprite 0 data.
-            for (int i = 0, n = 8; i < n; i++) {
-                Sprite sprite = sprites[i];
-                if (sprite.dma)
-                    sprite.painting = true;
-            }
-
-            drawBackground();
-            drawSprites();
-            mpos += 8;
-
-            if (rc == 7) {
-                vcBase = vc;
-                gfxVisible = false;
-                if (BAD_LINE_DEBUG) {
-                    monitor.info("#### RC7 ==> vc = " + vc + " at " + vbeam + " vicCycle = " + vicCycle);
-                    if (vc == 1000) {
-                        monitor.info("--------------- last line ----------------");
-                    }
-                }
-            }
-
-            if (badLine || gfxVisible) {
-                rc = (rc + 1) & 7;
-                gfxVisible = true;
-            }
-
-            if (sprites[0].painting) {
-                sprites[0].readSpriteData();
-            }
-
-            if (sprites[2].dma) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_SP2;
-            }
-
-            break;
-        case 58:
-            drawBackground();
-            drawSprites();
-            mpos += 8;
-
-            break;
-        case 59:
-            drawBackground();
-            drawSprites();
-            mpos += 8;
-
-            if (sprites[1].painting) {
-                sprites[1].readSpriteData();
-            }
-            break;
-        case 60:
-            drawSprites();
-            break;
-        case 61:
-            if (sprites[2].painting) {
-                sprites[2].readSpriteData();
-            }
-            if (sprites[3].dma) {
-                cpu.baLowUntil = lastLine + VICConstants.BA_SP3;
-            }
-            break;
-        case 62:
-            // Should this be made??? or should sprite 0 be repaintable
-            // same line?
-            // Reset sprites so that they can be repainted again...
-            for (int i = 0; i < sprites.length; i++) {
-                sprites[i].reset();
-            }
-            lastLine += VICConstants.SCAN_RATE;
-            // Update screen
-            if (updating) {
-                if (vPos == 285) {
-                    mis.newPixels();
-                    canvas.repaint();
-                    actualScanTime = (actualScanTime * 9 + (int) ((audioDriver.getMicros() - lastScan))) / 10;
-                    lastScan = audioDriver.getMicros();
-                    updating = false;
-                }
-            }
-            notVisible = false;
-            break;
+                notVisible = false;
+                break;
         }
     }
 
@@ -1715,8 +1677,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         cia[0].reset();
         cia[1].reset();
         // c1541.reset();
-        keyboard.reset();
-        ciaWrites = 0;
         isrRunning = false;
 
         motorSound(false);
@@ -1972,7 +1932,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
             button2 = true;
         }
         // Emulate stick button
-        keyboard.setButtonval(0xff - (button1 | button2 ? 0x10 : 0));
         // keyboard.setButtonval(0xff - (button1 ? 0x4 : 0) - (button2 ? 0x8 : 0));
     }
 
@@ -1983,7 +1942,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
             button2 = false;
         }
         // Emulate stick button
-        keyboard.setButtonval(0xff - (button1 | button2 ? 0x10 : 0));
         // keyboard.setButtonval(0xff - (button1 ? 0x4 : 0) - (button2 ? 0x8 : 0));
     }
 

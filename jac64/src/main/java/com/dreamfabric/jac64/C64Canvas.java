@@ -18,7 +18,6 @@ import java.awt.event.KeyListener;
 import javax.swing.JPanel;
 
 import com.dreamfabric.jac64.emu.C64Emulation;
-import com.dreamfabric.jac64.emu.keyboard.Keyboard;
 import com.dreamfabric.jac64.emu.keyboard.Joy1KeyListenerAdapter;
 import com.dreamfabric.jac64.emu.keyboard.Joy2KeyListenerAdapter;
 import com.dreamfabric.jac64.emu.keyboard.KeyListenerAdapter;
@@ -37,7 +36,6 @@ public class C64Canvas extends JPanel implements KeyListener, FocusListener {
 
     boolean integerScale = true;
     C64Screen scr;
-    Keyboard keyboard;
     private KeyListenerAdapter keyboardAdapter = new KeyListenerAdapter(C64Emulation.getCia1().getKeyListener());
     private Joy1KeyListenerAdapter joy1KeyListenerAdapter = new Joy1KeyListenerAdapter(
             C64Emulation.getCia1().getJoy1KeyListener());
@@ -47,11 +45,10 @@ public class C64Canvas extends JPanel implements KeyListener, FocusListener {
     int w;
     int h;
 
-    public C64Canvas(C64Screen screen, boolean dob, Keyboard keyboard) {
+    public C64Canvas(C64Screen screen, boolean dob) {
         super();
         autoScale = dob;
         scr = screen;
-        this.keyboard = keyboard;
         setFont(new Font("Monospaced", Font.PLAIN, 11));
         setFocusTraversalKeysEnabled(false);
         addFocusListener(this);
@@ -92,14 +89,12 @@ public class C64Canvas extends JPanel implements KeyListener, FocusListener {
     }
 
     public void keyPressed(KeyEvent event) {
-        keyboard.keyPressed(event);
         keyboardAdapter.keyPressed(event);
         joy1KeyListenerAdapter.keyPressed(event);
         joy2KeyListenerAdapter.keyPressed(event);
     }
 
     public void keyReleased(KeyEvent event) {
-        keyboard.keyReleased(event);
         keyboardAdapter.keyReleased(event);
         joy1KeyListenerAdapter.keyReleased(event);
         joy2KeyListenerAdapter.keyReleased(event);
@@ -119,11 +114,9 @@ public class C64Canvas extends JPanel implements KeyListener, FocusListener {
     // -------------------------------------------------------------------
 
     public void focusGained(FocusEvent evt) {
-        keyboard.reset();
     }
 
     public void focusLost(FocusEvent evt) {
-        keyboard.reset();
     }
 
     public boolean isFocusable() {

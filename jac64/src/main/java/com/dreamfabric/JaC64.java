@@ -22,6 +22,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -40,6 +42,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
+import com.dreamfabric.c64utils.C64Script;
 import com.dreamfabric.c64utils.Debugger;
 import com.dreamfabric.jac64.C64Reader;
 import com.dreamfabric.jac64.DirEntry;
@@ -71,6 +74,8 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     private static final String[] SID_TYPES = new String[] { "SID: resid MOS 6581", "SID: resid MOS 8580" };
 
     private static final String[] JOYSTICK = new String[] { "Joystick in port 1", "Joystick in port 2" };
+
+    private List<Object[]> hotkeyScripts = new ArrayList<>();
 
     private TableModel dataModel = new AbstractTableModel() {
         public final String[] NAMES = new String[] { "File name", "Size", "Type" };
@@ -108,9 +113,8 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
         // Reader available after init!
         scr.init(cpu);
 
-        scr.registerHotKey(KeyEvent.VK_BACK_SPACE, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK, "reset()", cpu);
-
-        scr.registerHotKey(KeyEvent.VK_F12, KeyEvent.CTRL_DOWN_MASK, "toggleFullScreen()", this);
+        registerHotKey(KeyEvent.VK_BACK_SPACE, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK, "reset()", cpu);
+        registerHotKey(KeyEvent.VK_F12, KeyEvent.CTRL_DOWN_MASK, "toggleFullScreen()", this);
 
         reader = new C64Reader(); // scr.getDiskDrive().getReader();
         reader.setCPU(cpu);
@@ -187,6 +191,10 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     public boolean dispatchKeyEvent(KeyEvent e) {
         if (C64Win.isFocused()) {
             if (e.getID() == KeyEvent.KEY_PRESSED) {
+                keyPressed(e);
+                if (e.isConsumed()) {
+                    return true;
+                }
                 c64Canvas.keyPressed(e);
             } else if (e.getID() == KeyEvent.KEY_RELEASED) {
                 c64Canvas.keyReleased(e);
@@ -251,10 +259,6 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
             scr.setSID(C64Screen.RESID_6581);
         } else if (cmd.equals(SID_TYPES[1])) {
             scr.setSID(C64Screen.RESID_8580);
-        } else if (cmd.equals(JOYSTICK[0])) {
-            scr.setStick(true);
-        } else if (cmd.equals(JOYSTICK[1])) {
-            scr.setStick(false);
         }
     }
 
@@ -373,6 +377,26 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
             }
         });
         t.start();
+    }
+
+    private void registerHotKey(int key, int modflag, String script, Object o) {
+        hotkeyScripts.add(new Object[] { script, o, new int[] { key, modflag } });
+    }
+
+    public void keyPressed(KeyEvent event) {
+        int key = event.getKeyCode();
+        int mod = event.getModifiersEx();
+
+        for (Object[] hotkeyScript : hotkeyScripts) {
+            int[] keys = (int[]) hotkeyScript[2];
+            if (keys[0] == key && ((mod & keys[1]) == keys[1])) {
+
+                C64Script c64script = new C64Script();
+                c64script.interpretCall((String) hotkeyScript[0], hotkeyScript[1]);
+
+                event.consume();
+            }
+        }
     }
 
     public static void main(String[] args) {
