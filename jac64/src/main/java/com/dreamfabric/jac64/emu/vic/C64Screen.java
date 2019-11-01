@@ -24,6 +24,9 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dreamfabric.c64utils.C64Script;
 import com.dreamfabric.jac64.C64Canvas;
 import com.dreamfabric.jac64.IMonitor;
@@ -33,6 +36,7 @@ import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.disk.C1541Chips;
+import com.dreamfabric.jac64.emu.memory.BasicROMIf;
 import com.dreamfabric.jac64.emu.sid.AudioDriver;
 import com.dreamfabric.jac64.emu.sid.AudioDriverSE;
 import com.dreamfabric.jac64.emu.sid.RESID;
@@ -48,6 +52,8 @@ import com.dreamfabric.jac64.emu.tfe.TFE_CS8900;
  */
 
 public class C64Screen extends ExtChip implements Observer, MouseListener, MouseMotionListener {
+    private static Logger LOGGER = LoggerFactory.getLogger(C64Screen.class);
+
     public static final String version = "1.11";
 
     public static final int SERIAL_ATN = (1 << 3);
@@ -478,6 +484,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     };
 
     public int performRead(int address, long cycles) {
+        validateAddress(address);
+
         // dX00 => and address
         // d000 - d3ff => &d063
         int pos = (address >> 8) & 0xf;
@@ -593,8 +601,12 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     }
 
     public void performWrite(int address, int data, long cycles) {
+        validateAddress(address);
+
         int pos = (address >> 8) & 0xf;
         address = address & IO_ADDRAND[pos];
+
+        validateAddress(address);
 
         // monitor.info("Wrote to Chips at " + Integer.toString(address, 16)
         // + " = " + Integer.toString(data, 16));
@@ -1958,10 +1970,22 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     }
 
     protected int getMemory(int address) {
+        validateAddress(address);
+
         return memory[address];
     };
 
     protected void setMemory(int address, int data) {
+        validateAddress(address);
+
         memory[address] = data;
+    }
+
+    private void validateAddress(int address) {
+        if (address >= CPU.BASIC_ROM2 && address < CPU.BASIC_ROM2 + 0x2000) {
+            LOGGER.warn(String.format("Invalid address 0x%05X", address));
+
+            return;
+        }
     }
 }

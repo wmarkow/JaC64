@@ -13,10 +13,15 @@ package com.dreamfabric.jac64.emu.cpu;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.emu.EventQueue;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
+import com.dreamfabric.jac64.emu.memory.BasicROMIf;
+import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 /**
  * MOS6510Core "implements" the 6510 processor in java code. Other classes are
@@ -28,6 +33,8 @@ import com.dreamfabric.jac64.emu.chip.ExtChip;
  * @version $Revision: $ $Date: $
  */
 public abstract class MOS6510Core extends MOS6510Ops {
+    private static Logger LOGGER = LoggerFactory.getLogger(MOS6510Core.class);
+
     private int memory[];
     protected boolean debug = false;
 
@@ -972,12 +979,24 @@ public abstract class MOS6510Core extends MOS6510Ops {
     }
 
     protected int getMemory(int address) {
+        validateAddress(address);
+
         return memory[address];
     }
 
     protected void setMemory(int address, int data) {
+        validateAddress(address);
+
         memory[address] = data;
     }
 
     abstract protected int getMemorySize();
+
+    private void validateAddress(int address) {
+        if (address >= CPU.BASIC_ROM2 && address < CPU.BASIC_ROM2 + 0x2000) {
+            LOGGER.warn(String.format("Invalid address 0x%05X", address));
+
+            return;
+        }
+    }
 }
