@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.emu.io.IO;
+import com.dreamfabric.jac64.emu.memory.BasicROMIf;
 
 public class PLA {
 
@@ -16,6 +17,7 @@ public class PLA {
     private boolean loram = true;
 
     private IO io = null;
+    private BasicROMIf basicRom = null;
 
     public PLA() {
         LOGGER.info("Test");
@@ -26,8 +28,7 @@ public class PLA {
         hiram = (byteValue & 0b010) == 0b010 ? true : false;
         loram = (byteValue & 0b001) == 0b001 ? true : false;
 
-        // LOGGER.info(String.format("Setting CHAREN = %s, HIRAM = %s, LORAM = %s",
-        // charen, hiram, loram));
+//        LOGGER.info(String.format("Setting CHAREN = %s, HIRAM = %s, LORAM = %s", charen, hiram, loram));
 
         enableChips();
     }
@@ -36,29 +37,35 @@ public class PLA {
         this.io = io;
     }
 
+    public void setBasicROM(BasicROMIf basicRom) {
+        this.basicRom = basicRom;
+    }
+
     private void enableChips() {
         io.setEnabled(false);
+        basicRom.setEnabled(false);
 
         switch (getMode()) {
-        case 0:
-            break;
-        case 1:
-            break;
-        case 2:
-            break;
-        case 3:
-            break;
-        case 4:
-            break;
-        case 5:
-            io.setEnabled(true);
-            break;
-        case 6:
-            io.setEnabled(true);
-            break;
-        case 7:
-            io.setEnabled(true);
-            break;
+            case 0:
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                basicRom.setEnabled(true);
+                break;
+            case 4:
+                break;
+            case 5:
+                io.setEnabled(true);
+                break;
+            case 6:
+                io.setEnabled(true);
+                break;
+            case 7:
+                io.setEnabled(true);
+                break;
         }
     }
 

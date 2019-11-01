@@ -6,12 +6,17 @@ import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dreamfabric.jac64.Hex;
+import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.SELoader;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
 import com.dreamfabric.jac64.emu.cia.CIA1;
+import com.dreamfabric.jac64.emu.cpu.M6510Ops;
+import com.dreamfabric.jac64.emu.cpu.MOS6510Ops;
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
+import com.dreamfabric.jac64.emu.memory.KernalROM;
 import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.sid.RESID;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
@@ -26,6 +31,7 @@ public class C64Emulation {
     private static IO io = new IO();
     private static SIDIf sid = new RESID();
     private static CIA1 cia1 = new CIA1();
+    // private static KernalROM kernalROM = new KernalROM();
     private static BasicROM basicROM = new BasicROM();
 
     static {
@@ -35,9 +41,11 @@ public class C64Emulation {
 
         // prepare PLA
         pla.setIO(io);
+        pla.setBasicROM(basicROM);
 
         // prepare AddressableBus
         addressableBus.addAddressable(io);
+        // addressableBus.addAddressable(kernalROM);
         addressableBus.addAddressable(basicROM);
     }
 
@@ -62,7 +70,8 @@ public class C64Emulation {
     }
 
     public static void installROMs() {
-
+        // loadROM("/roms/kernal.c64", kernalROM, 0x2000);
+        // patchKernalROM();
         loadROM("/roms/basic.c64", basicROM, 0x2000);
     }
 
@@ -106,4 +115,15 @@ public class C64Emulation {
             LOGGER.error("Error loading resource" + e);
         }
     }
+
+    // private static void patchKernalROM() {
+    // int address = 0xf49e;
+    // kernalROM.write(address++, M6510Ops.JSR);
+    // kernalROM.write(address++, 0xd2);
+    // kernalROM.write(address++, 0xf5);
+    //
+    // LOGGER.info("Patched LOAD at: " + Hex.hex2(address));
+    // kernalROM.write(address++, MOS6510Ops.LOAD_FILE);
+    // kernalROM.write(address++, M6510Ops.RTS);
+    // }
 }
