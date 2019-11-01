@@ -51,8 +51,6 @@ public class CPU extends MOS6510Core {
     public static final int CH_MONITOR_WRITE = 2;
     public static final int CH_MONITOR_READ = 4;
 
-    private int romFlag = 0xa000;
-
     // Defaults for the ROMs
     public boolean basicROM = true;
     public boolean kernalROM = true;
@@ -128,19 +126,33 @@ public class CPU extends MOS6510Core {
         }
         // END: a new way of reading data from SID.
 
-        if ((romFlag & adr) == romFlag) {
+        if (basicROM && adr >= 0xA000 && adr <= 0xBFFF) {
+            // should never happen because Basic ROM is handled by addressable bus
             return getMemory(adr | 0x10000);
-        } else if ((adr & 0xf000) == 0xd000) {
-            if (ioON) {
-                return chips.performRead(adr, cycles);
-            } else if (charROM) {
-                return getMemory(adr | 0x10000);
-            } else {
-                return getMemory(adr);
-            }
-        } else {
-            return getMemory(adr);
         }
+        if (kernalROM && adr >= 0xE000 && adr <= 0xFFFF) {
+            return getMemory(adr | 0x10000);
+        }
+        if (charROM && adr >= 0xD000 && adr <= 0xDFFF) {
+            return getMemory(adr | 0x10000);
+        }
+        if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
+            return chips.performRead(adr, cycles);
+        }
+        return getMemory(adr);
+        // if ((romFlag & adr) == romFlag) {
+        // return getMemory(adr | 0x10000);
+        // } else if ((adr & 0xf000) == 0xd000) {
+        // if (ioON) {
+        // return chips.performRead(adr, cycles);
+        // } else if (charROM) {
+        // return getMemory(adr | 0x10000);
+        // } else {
+        // return getMemory(adr);
+        // }
+        // } else {
+        // return getMemory(adr);
+        // }
     }
 
     // A byte is written directly to memory or to ioChips
@@ -161,13 +173,6 @@ public class CPU extends MOS6510Core {
             charROM = ((p & 3) != 0) && ((p & 4) == 0);
             // ioON is probably not correct!!! Check against table...
             ioON = ((p & 3) != 0) && ((p & 4) != 0);
-
-            if (basicROM)
-                romFlag = 0xa000;
-            else if (kernalROM)
-                romFlag = 0xe000;
-            else
-                romFlag = 0x10000; // No Rom at all (Basic / Kernal)
 
             // LOGGER.info(String.format("Setting basicROM = %s, kernalROM = %s, charROM =
             // %s, ioON = %s", basicROM,
@@ -198,6 +203,23 @@ public class CPU extends MOS6510Core {
         } else {
             setMemory(windex = adr, data);
         }
+        // if (basicROM && adr >= 0xA000 && adr <= 0xBFFF) {
+        // // should never happen because Basic ROM is not writable
+        // throw new RuntimeException();
+        // }
+        // if (kernalROM && adr >= 0xE000 && adr <= 0xFFFF) {
+        // // should never happen because Basic ROM is not writable
+        // throw new RuntimeException();
+        // }
+        // if (charROM && adr >= 0xD000 && adr <= 0xDFFF) {
+        // // should never happen because Basic ROM is not writable
+        // throw new RuntimeException();
+        // }
+        // if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
+        // chips.performWrite(adr, data, cycles);
+        // return;
+        // }
+        // setMemory(windex = adr, data);
     }
 
     public void poke(int address, int data) {
