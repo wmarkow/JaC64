@@ -30,8 +30,7 @@ public class C1541Emu extends MOS6510Core {
 
     public C1541Emu(IMonitor m, String cb) {
         super(m, cb);
-        // Only single area of RAM
-        memory = new int[0x10000];
+
         chips = new C1541Chips(this);
         init(chips);
         loadDebug("c1541dbg.txt");
@@ -51,7 +50,7 @@ public class C1541Emu extends MOS6510Core {
     protected final int fetchByte(int adr) {
         cycles++;
         if (adr < 0x800 || adr >= 0xc000)
-            return memory[adr];
+            return getMemory(adr);
         int c = adr & 0xff00;
         if (c == 0x1800 || c == 0x1c00) {
             int data = chips.performRead(adr, cycles);
@@ -70,7 +69,7 @@ public class C1541Emu extends MOS6510Core {
     protected final void writeByte(int adr, int data) {
         cycles++;
         if (adr < 0x800) {
-            memory[adr] = data;
+            setMemory(adr, data);
         }
         int c = adr & 0xff00;
         if (c == 0x1800 || c == 0x1c00)
@@ -79,7 +78,7 @@ public class C1541Emu extends MOS6510Core {
 
     public void reset() {
         super.reset();
-        pc = memory[RESET_VECTOR] | (memory[RESET_VECTOR + 1] << 8);
+        pc = getMemory(RESET_VECTOR) | (getMemory(RESET_VECTOR + 1) << 8);
         System.out.println("C1541: Reset to " + Integer.toHexString(pc));
     }
 
@@ -106,11 +105,11 @@ public class C1541Emu extends MOS6510Core {
                 String msg;
                 if ((msg = getDebug(pc)) != null) {
                     System.out.println("C1541: " + Integer.toHexString(pc) + "****** " + msg + " Data: "
-                            + Integer.toHexString(memory[0x85]) + " => '" + (char) memory[0x85] + '\'');
+                            + Integer.toHexString(getMemory(0x85)) + " => '" + (char) getMemory(0x85) + '\'');
                 }
             }
             if (DEBUG && (monitor.isEnabled() || interruptInExec > 0)) {
-                monitor.disAssemble(memory, pc, acc, x, y, (byte) getStatusByte(), interruptInExec, lastInterrupt);
+                monitor.disAssemble(getMemory(), pc, acc, x, y, (byte) getStatusByte(), interruptInExec, lastInterrupt);
             }
             emulateOp();
 
@@ -167,6 +166,12 @@ public class C1541Emu extends MOS6510Core {
 
     protected void installROMS() {
         readROM("/roms/c1541.rom", C1541ROM, 0x4000);
+    }
+
+    @Override
+    protected int getMemorySize() {
+        // Only single area of RAM
+        return 0x10000;
     }
 
 }

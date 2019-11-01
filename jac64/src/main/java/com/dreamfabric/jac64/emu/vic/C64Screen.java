@@ -524,7 +524,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 return vicMem;
             case 0xd019:
                 if (SPRITEDEBUG)
-                    monitor.info("Reading d019: " + memory[address + IO_OFFSET]);
+                    monitor.info("Reading d019: " + getMemory(address + IO_OFFSET));
                 return irqFlags;
             case 0xd01a:
                 return irqMask;
@@ -586,7 +586,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 } else if (pos == 0xe) {
                     return tfe.performRead(address + IO_OFFSET, cycles);
                 } else if (pos >= 0x8) {
-                    return memory[IO_OFFSET + address] | 0xf0;
+                    return getMemory(IO_OFFSET + address) | 0xf0;
                 }
                 return 0xff;
         }
@@ -600,7 +600,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         // + " = " + Integer.toString(data, 16));
 
         // Store in the memory given by "CPU"
-        memory[address + IO_OFFSET] = data;
+        setMemory(address + IO_OFFSET, data);
 
         // if (address >= 0xd800 && address < 0xdc00) {
         // int p = address - 0xd800;
@@ -950,7 +950,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 colors[i] = new Color(cbmcolor[i]);
             }
         }
-        canvas.setBackground(colors[memory[IO_OFFSET + 0xd020] & 15]);
+        canvas.setBackground(colors[getMemory(IO_OFFSET + 0xd020) & 15]);
     }
 
     // -------------------------------------------------------------------
@@ -1212,8 +1212,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 if (badLine) {
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch first char into cache! (for the below draw...)
-                    vicCharCache[vmli] = memory[videoMatrix + (vcBase & 0x3ff)];
-                    vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + (vcBase & 0x3ff)];
+                    vicCharCache[vmli] = getMemory(videoMatrix + (vcBase & 0x3ff));
+                    vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + (vcBase & 0x3ff));
                 }
 
                 // Draw one character here!
@@ -1233,8 +1233,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 if (badLine) {
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
-                    vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
-                    vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
+                    vicCharCache[vmli] = getMemory(videoMatrix + ((vcBase + vmli) & 0x3ff));
+                    vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
                 }
                 // draw the graphics. (should probably handle sprites also??)
                 drawGraphics(mpos + horizScroll);
@@ -1246,8 +1246,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 if (badLine) {
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
-                    vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
-                    vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
+                    vicCharCache[vmli] = getMemory(videoMatrix + ((vcBase + vmli) & 0x3ff));
+                    vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
                 }
                 // draw the graphics. (should probably handle sprites also??)
                 drawGraphics(mpos + horizScroll);
@@ -1262,8 +1262,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 if (badLine) {
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
-                    vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
-                    vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
+                    vicCharCache[vmli] = getMemory(videoMatrix + ((vcBase + vmli) & 0x3ff));
+                    vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
                 }
                 int mult = 1;
                 int ypos = vPos + SC_SPYOFFS;
@@ -1301,8 +1301,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 if (badLine) {
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
-                    vicCharCache[vmli] = memory[videoMatrix + ((vcBase + vmli) & 0x3ff)];
-                    vicColCache[vmli] = memory[IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff)];
+                    vicCharCache[vmli] = getMemory(videoMatrix + ((vcBase + vmli) & 0x3ff));
+                    vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
                 }
                 drawGraphics(mpos + horizScroll);
                 drawSprites();
@@ -1488,7 +1488,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 position = charMemoryIndex + (vicCharCache[vmli] << 3);
             }
 
-            data = memory[position + rc];
+            data = getMemory(position + rc);
 
             if (multiCol && pcol > 7) {
                 multiColor[3] = cbmcolor[pcol & 7];
@@ -1540,7 +1540,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
             penColor = cbmcolor[(vmliData & 0xf0) >> 4];
             bgcol = cbmcolor[vmliData & 0x0f];
 
-            data = memory[position];
+            data = getMemory(position);
 
             if (multiCol) {
                 multiColor[1] = cbmcolor[(vmliData >> 4) & 0x0f];
@@ -1834,9 +1834,9 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
         void readSpriteData() {
             // Read pointer + the three sprite data pointers...
-            pointer = vicBank + memory[spr0BlockSel + spriteNo] * 0x40;
-            spriteReg = ((memory[pointer + nextByte++] & 0xff) << 16) | ((memory[pointer + nextByte++] & 0xff) << 8)
-                    | memory[pointer + nextByte++];
+            pointer = vicBank + getMemory(spr0BlockSel + spriteNo) * 0x40;
+            spriteReg = ((getMemory(pointer + nextByte++) & 0xff) << 16)
+                    | ((getMemory(pointer + nextByte++) & 0xff) << 8) | getMemory(pointer + nextByte++);
 
             // For debugging... seems to be err on other place than the
             // Memoryfetch - since this is also looking very odd...???
@@ -1955,5 +1955,13 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     private void setSid(SIDIf sid) {
         C64Emulation.setSid(sid);
+    }
+
+    protected int getMemory(int address) {
+        return memory[address];
+    };
+
+    protected void setMemory(int address, int data) {
+        memory[address] = data;
     }
 }

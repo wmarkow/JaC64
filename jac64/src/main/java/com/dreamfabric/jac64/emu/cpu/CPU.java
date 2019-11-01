@@ -12,6 +12,9 @@
  */
 package com.dreamfabric.jac64.emu.cpu;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dreamfabric.c64utils.AutoStore;
 import com.dreamfabric.jac64.DefaultIMon;
 import com.dreamfabric.jac64.Hex;
@@ -33,10 +36,12 @@ import com.dreamfabric.jac64.emu.pla.PLA;
  * @version $Revision:$, $Date:$
  */
 public class CPU extends MOS6510Core {
+    private static Logger LOGGER = LoggerFactory.getLogger(CPU.class);
 
     public static final boolean DEBUG_EVENT = false;
     // The IO RAM memory at 0x10000 (just since there is RAM there...)
     public static final int IO_OFFSET = 0x10000 - 0xd000;
+    public static final int BASIC_ROM2 = 0x1a000;
     public static final int KERNAL_ROM2 = 0x1e000;
     public static final int CHAR_ROM2 = 0x1d000;
 
@@ -49,6 +54,7 @@ public class CPU extends MOS6510Core {
     private int romFlag = 0xa000;
 
     // Defaults for the ROMs
+    public boolean basicROM = true;
     public boolean kernalROM = true;
     public boolean charROM = false;
     public boolean ioON = true;
@@ -72,7 +78,6 @@ public class CPU extends MOS6510Core {
 
     public CPU(IMonitor m, String cb, Loader loader) {
         super(m, cb);
-        memory = new int[0x20000];
         this.loader = loader;
         if (EMULATE_1541) {
             IMonitor d = new DefaultIMon(); // new Debugger();
@@ -119,23 +124,27 @@ public class CPU extends MOS6510Core {
         // START: a new way of reading data from SID.
         Integer result = addressableBus.read(adr);
         if (result != null) {
-            rindex = adr;
+            if ((romFlag & adr) == romFlag) {
+                rindex = adr | 0x10000;
+            } else {
+                rindex = adr;
+            }
             return (int) result;
         }
         // END: a new way of reading data from SID.
 
         if ((romFlag & adr) == romFlag) {
-            return memory[rindex = adr | 0x10000];
+            return getMemory(rindex = adr | 0x10000);
         } else if ((adr & 0xf000) == 0xd000) {
             if (ioON) {
                 return chips.performRead(rindex = adr, cycles);
             } else if (charROM) {
-                return memory[rindex = adr | 0x10000];
+                return getMemory(rindex = adr | 0x10000);
             } else {
-                return memory[rindex = adr];
+                return getMemory(rindex = adr);
             }
         } else {
-            return memory[rindex = adr];
+            return getMemory(rindex = adr);
         }
     }
 
@@ -148,19 +157,25 @@ public class CPU extends MOS6510Core {
         // System.out.println("Writing byte at: " + Integer.toString(adr, 16)
         // + " = " + data);
         if (adr <= 1) {
-            memory[adr] = data;
-            int p = (memory[0] ^ 0xff) | memory[1];
+            setMemory(adr, data);
+            int p = (getMemory(0) ^ 0xff) | getMemory(1);
 
             kernalROM = ((p & 2) == 2); // Kernal on
+            basicROM = ((p & 3) == 3); // Basic on
 
             charROM = ((p & 3) != 0) && ((p & 4) == 0);
             // ioON is probably not correct!!! Check against table...
             ioON = ((p & 3) != 0) && ((p & 4) != 0);
 
-            if (kernalROM)
+            if (basicROM)
+                romFlag = 0xa000;
+            else if (kernalROM)
                 romFlag = 0xe000;
             else
                 romFlag = 0x10000; // No Rom at all (Basic / Kernal)
+
+//            LOGGER.info(String.format("Setting basicROM = %s, kernalROM = %s, charROM = %s, ioON = %s", basicROM,
+//                    kernalROM, charROM, ioON));
         }
 
         // START: a new way of writing data.
@@ -168,9 +183,14 @@ public class CPU extends MOS6510Core {
             // setting CHAREN, HIRAM and LORAM of PLA
             pla.setCharenHiramLoram(data);
         }
-        // addressableBus.write(adr, (byte) data);
+
         if (addressableBus.write(adr, data)) {
-            windex = adr;
+            adr &= 0xffff;
+            if (ioON && ((adr & 0xf000) == 0xd000)) {
+                // do nothing
+            } else {
+                windex = adr;
+            }
             return;
         }
         // END: a new way of writing data.
@@ -180,13 +200,14 @@ public class CPU extends MOS6510Core {
             // System.out.println("IO Write at: " + Integer.toString(adr, 16));
             chips.performWrite(adr, data, cycles);
         } else {
-            memory[windex = adr] = data;
+            setMemory(windex = adr, data);
         }
     }
 
     private void fixRindex(int adr) {
         // ROM/RAM address fix
-        if ((kernalROM && ((adr & 0xe000) == 0xe000)) || (charROM && ((adr & 0xf000) == 0xd000))) {
+        if ((basicROM && ((adr & 0xe000) == 0xa000)) || (kernalROM && ((adr & 0xe000) == 0xe000))
+                || (charROM && ((adr & 0xf000) == 0xd000))) {
             // Add ROM address for the read!
             adr |= 0x10000;
         }
@@ -201,21 +222,21 @@ public class CPU extends MOS6510Core {
         this.list = list;
 
         int pos = 0xf49e | 0x10000;
-        memory[pos++] = M6510Ops.JSR;
-        memory[pos++] = 0xd2;
-        memory[pos++] = 0xf5;
+        setMemory(pos++, M6510Ops.JSR);
+        setMemory(pos++, 0xd2);
+        setMemory(pos++, 0xf5);
 
         System.out.println("Patched LOAD at: " + Hex.hex2(pos));
-        memory[pos++] = LOAD_FILE;
-        memory[pos++] = M6510Ops.RTS;
+        setMemory(pos++, LOAD_FILE);
+        setMemory(pos++, M6510Ops.RTS);
     }
 
     public void runBasic() {
-        memory[631] = (int) 'R';
-        memory[632] = (int) 'U';
-        memory[633] = (int) 'N';
-        memory[634] = 13;// enter
-        memory[198] = 4; // length
+        setMemory(631, (int) 'R');
+        setMemory(632, (int) 'U');
+        setMemory(633, (int) 'N');
+        setMemory(634, 13);// enter
+        setMemory(198, 4); // length
     }
 
     public void enterText(String txt) {
@@ -227,13 +248,13 @@ public class CPU extends MOS6510Core {
             char c = txt.charAt(i);
             if (c == '~')
                 c = 13;
-            memory[631 + pos] = c;
+            setMemory(631 + pos, c);
             pos++;
             if (pos == 5) {
-                memory[198] = pos;
+                setMemory(198, pos);
                 pos = 0;
                 int tries = 5;
-                while (tries > 0 && memory[198] > 0) {
+                while (tries > 0 && getMemory(198) > 0) {
                     try {
                         Thread.sleep(50);
                     } catch (Exception e) {
@@ -241,14 +262,14 @@ public class CPU extends MOS6510Core {
                     }
                     tries--;
                     if (tries == 0) {
-                        System.out.println("Buffer still full: " + memory[198]);
+                        System.out.println("Buffer still full: " + getMemory(198));
                     }
                 }
             }
         }
-        memory[198] = pos;
+        setMemory(198, pos);
         int tries = 5;
-        while (tries > 0 && memory[198] > 0) {
+        while (tries > 0 && getMemory(198) > 0) {
             try {
                 Thread.sleep(50);
             } catch (Exception e) {
@@ -256,12 +277,13 @@ public class CPU extends MOS6510Core {
             }
             tries--;
             if (tries == 0) {
-                System.out.println("Buffer still full: " + memory[198]);
+                System.out.println("Buffer still full: " + getMemory(198));
             }
         }
     }
 
     protected void installROMS() {
+        loadROM(loader.getResourceStream("/roms/basic.c64"), BASIC_ROM2, 0x2000);
         loadROM(loader.getResourceStream("/roms/kernal.c64"), KERNAL_ROM2, 0x2000);
         loadROM(loader.getResourceStream("/roms/chargen.c64"), CHAR_ROM2, 0x1000);
 
@@ -290,18 +312,18 @@ public class CPU extends MOS6510Core {
                 else
                     monitor.info("**** VERIFY!    ***** PC = " + pc + " => " + rindex);
                 int len;
-                int mptr = memory[0xbb] + (memory[0xbc] << 8);
-                monitor.info("Filename len:" + (len = memory[0xb7]));
+                int mptr = getMemory(0xbb) + (getMemory(0xbc) << 8);
+                monitor.info("Filename len:" + (len = getMemory(0xb7)));
                 String name = "";
                 for (int i = 0; i < len; i++)
-                    name += (char) memory[mptr++];
+                    name += (char) getMemory(mptr++);
                 name += '\n';
-                int sec = memory[0xb9];
+                int sec = getMemory(0xb9);
                 monitor.info("name = " + name);
                 monitor.info("Sec Address: " + sec);
                 int loadAdr = -1;
                 if (sec == 0)
-                    loadAdr = memory[0x2b] + (memory[0x2c] << 8);
+                    loadAdr = getMemory(0x2b) + (getMemory(0x2c) << 8);
                 if (list != null) {
                     if (list.readFile(name, loadAdr)) {
                         acc = 0;
@@ -395,7 +417,7 @@ public class CPU extends MOS6510Core {
                 if (monitor.isEnabled()) { // || interruptInExec > 0) {
                     if (baLowUntil <= cycles) {
                         fixRindex(pc); // sets the rindex!
-                        monitor.disAssemble(memory, rindex, acc, x, y, (byte) getStatusByte(), interruptInExec,
+                        monitor.disAssemble(getMemory(), rindex, acc, x, y, (byte) getStatusByte(), interruptInExec,
                                 lastInterrupt);
                     }
                 }
@@ -419,7 +441,7 @@ public class CPU extends MOS6510Core {
                                 + "  " + " clk: " + cycles + " clk/s: " + ((CYCLES_PER_DEBUG * 1000) / sec) + "\n"
                                 + ((nr_irq * 1000) / sec));
                         if (level > 2)
-                            monitor.disAssemble(memory, rindex, acc, x, y, (byte) getStatusByte(), interruptInExec,
+                            monitor.disAssemble(getMemory(), rindex, acc, x, y, (byte) getStatusByte(), interruptInExec,
                                     lastInterrupt);
                         monitor.info("--------------------------");
                     }
@@ -442,7 +464,7 @@ public class CPU extends MOS6510Core {
         } catch (Exception e) {
             monitor.error("Exception in loop " + pc + " : " + e);
             e.printStackTrace();
-            monitor.disAssemble(memory, rindex, acc, x, y, (byte) getStatusByte(), interruptInExec, lastInterrupt);
+            monitor.disAssemble(getMemory(), rindex, acc, x, y, (byte) getStatusByte(), interruptInExec, lastInterrupt);
         }
     }
 
@@ -494,7 +516,7 @@ public class CPU extends MOS6510Core {
                         if ((t & CH_MONITOR_READ) != 0) {
                             for (int i = 0, n = autoStore.length; i < n; i++) {
                                 if (autoStore[i] != null)
-                                    autoStore[i].checkRules(memory);
+                                    autoStore[i].checkRules(getMemory());
                             }
                         }
                     }
@@ -503,12 +525,12 @@ public class CPU extends MOS6510Core {
                     if ((t = cheatMon[windex]) != 0) {
                         if ((t & CH_PROTECT) != 0) {
                             // Write back value from then protected...
-                            memory[windex] = (cheatMon[windex] >> 16) & 0xff;
+                            setMemory(windex, (cheatMon[windex] >> 16) & 0xff);
                         }
                         if ((t & CH_MONITOR_WRITE) != 0) {
                             for (int i = 0, n = autoStore.length; i < n; i++) {
                                 if (autoStore[i] != null)
-                                    autoStore[i].checkRules(memory);
+                                    autoStore[i].checkRules(getMemory());
                             }
                         }
                     }
@@ -522,7 +544,12 @@ public class CPU extends MOS6510Core {
         } catch (Exception e) {
             monitor.error("Exception in loop " + pc + " : " + e);
             e.printStackTrace();
-            monitor.disAssemble(memory, rindex, acc, x, y, (byte) getStatusByte(), interruptInExec, lastInterrupt);
+            monitor.disAssemble(getMemory(), rindex, acc, x, y, (byte) getStatusByte(), interruptInExec, lastInterrupt);
         }
+    }
+
+    @Override
+    protected int getMemorySize() {
+        return 0x20000;
     }
 }
