@@ -142,10 +142,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     protected boolean disableInterupt = false;
 
-    // Used for actual address...
-    protected int rindex = 0;
-    protected int lastReadOP = 0;
-
     public int getSP() {
         return s;
     }
@@ -330,7 +326,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
         int adr = 0;
         int tmp = 0;
         boolean nxtcarry = false;
-        lastReadOP = rindex;
 
         // System.out.println("AddrMode:" + Hex.hex2(addrMode) +
         // " op: " + Hex.hex2(op)
@@ -869,7 +864,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
         disableInterupt = false;
         interruptInExec = 0;
-        rindex = 0;
 
         checkInterrupt = false;
         NMILow = false;
@@ -964,10 +958,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     public int getY() {
         return y;
-    }
-
-    public int getLastReadOP() {
-        return lastReadOP;
     }
 
     public int getInterruptInExec() {
