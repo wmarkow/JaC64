@@ -197,12 +197,15 @@ public class CPU extends MOS6510Core {
         // END: a new way of writing data.
 
         adr &= 0xffff;
-        if (ioON && ((adr & 0xf000) == 0xd000)) {
+        if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
             // System.out.println("IO Write at: " + Integer.toString(adr, 16));
             chips.performWrite(adr, data, cycles);
-        } else {
-            setMemory(windex = adr, data);
+
+            return;
         }
+
+        setMemory(windex = adr, data);
+
         // if (basicROM && adr >= 0xA000 && adr <= 0xBFFF) {
         // // should never happen because Basic ROM is not writable
         // throw new RuntimeException();
