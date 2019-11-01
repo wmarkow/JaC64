@@ -283,7 +283,7 @@ public class CPU extends MOS6510Core {
     }
 
     protected void installROMS() {
-        loadROM(loader.getResourceStream("/roms/basic.c64"), BASIC_ROM2, 0x2000);
+//        loadROM(loader.getResourceStream("/roms/basic.c64"), BASIC_ROM2, 0x2000);
         loadROM(loader.getResourceStream("/roms/kernal.c64"), KERNAL_ROM2, 0x2000);
         loadROM(loader.getResourceStream("/roms/chargen.c64"), CHAR_ROM2, 0x1000);
 

@@ -6,17 +6,12 @@ import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dreamfabric.jac64.Hex;
-import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.SELoader;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
 import com.dreamfabric.jac64.emu.cia.CIA1;
-import com.dreamfabric.jac64.emu.cpu.M6510Ops;
-import com.dreamfabric.jac64.emu.cpu.MOS6510Ops;
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
-import com.dreamfabric.jac64.emu.memory.KernalROM;
 import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.sid.RESID;
 import com.dreamfabric.jac64.emu.sid.SIDIf;

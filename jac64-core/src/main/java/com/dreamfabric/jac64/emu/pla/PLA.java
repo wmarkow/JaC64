@@ -65,6 +65,7 @@ public class PLA {
                 break;
             case 7:
                 io.setEnabled(true);
+                basicRom.setEnabled(true);
                 break;
         }
     }
