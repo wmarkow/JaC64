@@ -204,24 +204,8 @@ public class CPU extends MOS6510Core {
             return;
         }
 
-        if (basicROM && adr >= 0xA000 && adr <= 0xBFFF) {
-            // it should write to the underlying RAM:
-            // https://www.c64-wiki.com/wiki/Memory_Map
-            setMemory(windex = adr, data);
-            return;
-        }
-        if (kernalROM && adr >= 0xE000 && adr <= 0xFFFF) {
-            // it should write to the underlying RAM:
-            // https://www.c64-wiki.com/wiki/Memory_Map
-            setMemory(windex = adr, data);
-            return;
-        }
-        if (charROM && adr >= 0xD000 && adr <= 0xDFFF) {
-            // it should write to the underlying RAM:
-            // https://www.c64-wiki.com/wiki/Memory_Map
-            setMemory(windex = adr, data);
-            return;
-        }
+        // it should write to the underlying RAM:
+        // https://www.c64-wiki.com/wiki/Memory_Map
         setMemory(windex = adr, data);
     }
 
