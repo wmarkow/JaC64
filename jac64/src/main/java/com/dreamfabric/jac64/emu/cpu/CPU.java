@@ -128,10 +128,10 @@ public class CPU extends MOS6510Core {
 
         if (basicROM && adr >= 0xA000 && adr <= 0xBFFF) {
             // should never happen because Basic ROM is handled by addressable bus
-            return getMemory(adr | 0x10000);
+            throw new IllegalArgumentException("should never happen because Basic ROM is handled by addressable bus");
         }
         if (kernalROM && adr >= 0xE000 && adr <= 0xFFFF) {
-            return getMemory(adr | 0x10000);
+            throw new IllegalArgumentException("should never happen because Kernal ROM is handled by addressable bus");
         }
         if (charROM && adr >= 0xD000 && adr <= 0xDFFF) {
             return getMemory(adr | 0x10000);
@@ -140,19 +140,6 @@ public class CPU extends MOS6510Core {
             return chips.performRead(adr, cycles);
         }
         return getMemory(adr);
-        // if ((romFlag & adr) == romFlag) {
-        // return getMemory(adr | 0x10000);
-        // } else if ((adr & 0xf000) == 0xd000) {
-        // if (ioON) {
-        // return chips.performRead(adr, cycles);
-        // } else if (charROM) {
-        // return getMemory(adr | 0x10000);
-        // } else {
-        // return getMemory(adr);
-        // }
-        // } else {
-        // return getMemory(adr);
-        // }
     }
 
     // A byte is written directly to memory or to ioChips
@@ -278,8 +265,6 @@ public class CPU extends MOS6510Core {
     }
 
     protected void installROMS() {
-        // loadROM(loader.getResourceStream("/roms/basic.c64"), BASIC_ROM2, 0x2000);
-        loadROM(loader.getResourceStream("/roms/kernal.c64"), KERNAL_ROM2, 0x2000);
         loadROM(loader.getResourceStream("/roms/chargen.c64"), CHAR_ROM2, 0x1000);
 
         C64Emulation.installROMs();

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROMIf;
+import com.dreamfabric.jac64.emu.memory.KernalROMIf;
 
 public class PLA {
 
@@ -18,6 +19,7 @@ public class PLA {
 
     private IO io = null;
     private BasicROMIf basicRom = null;
+    private KernalROMIf kernalRom = null;
 
     public PLA() {
         LOGGER.info("Test");
@@ -28,7 +30,8 @@ public class PLA {
         hiram = (byteValue & 0b010) == 0b010 ? true : false;
         loram = (byteValue & 0b001) == 0b001 ? true : false;
 
-//        LOGGER.info(String.format("Setting CHAREN = %s, HIRAM = %s, LORAM = %s", charen, hiram, loram));
+        // LOGGER.info(String.format("Setting CHAREN = %s, HIRAM = %s, LORAM = %s",
+        // charen, hiram, loram));
 
         enableChips();
     }
@@ -41,9 +44,14 @@ public class PLA {
         this.basicRom = basicRom;
     }
 
+    public void setKernalROM(KernalROMIf kernalRom) {
+        this.kernalRom = kernalRom;
+    }
+
     private void enableChips() {
         io.setEnabled(false);
         basicRom.setEnabled(false);
+        kernalRom.setEnabled(false);
 
         switch (getMode()) {
             case 0:
@@ -51,9 +59,11 @@ public class PLA {
             case 1:
                 break;
             case 2:
+                kernalRom.setEnabled(true);
                 break;
             case 3:
                 basicRom.setEnabled(true);
+                kernalRom.setEnabled(true);
                 break;
             case 4:
                 break;
@@ -62,10 +72,12 @@ public class PLA {
                 break;
             case 6:
                 io.setEnabled(true);
+                kernalRom.setEnabled(true);
                 break;
             case 7:
                 io.setEnabled(true);
                 basicRom.setEnabled(true);
+                kernalRom.setEnabled(true);
                 break;
         }
     }
