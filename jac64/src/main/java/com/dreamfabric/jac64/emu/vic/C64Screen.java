@@ -28,15 +28,12 @@ import org.slf4j.LoggerFactory;
 import com.dreamfabric.jac64.C64Canvas;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Observer;
-import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.disk.C1541Chips;
 import com.dreamfabric.jac64.emu.sid.AudioDriver;
 import com.dreamfabric.jac64.emu.sid.AudioDriverSE;
-import com.dreamfabric.jac64.emu.sid.RESID;
-import com.dreamfabric.jac64.emu.sid.SIDIf;
 import com.dreamfabric.jac64.emu.tfe.TFE_CS8900;
 
 /**
@@ -57,9 +54,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     public static final int SERIAL_DATA_OUT = (1 << 5);
     public static final int SERIAL_CLK_IN = (1 << 6);
     public static final int SERIAL_DATA_IN = (1 << 7);
-
-    public static final int RESID_6581 = 1;
-    public static final int RESID_8580 = 2;
 
     public static final boolean IRQDEBUG = false;
     public static final boolean SPRITEDEBUG = false;
@@ -306,26 +300,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         return cia;
     }
 
-    public void setSID(int sid) {
-        switch (sid) {
-            case RESID_6581:
-            case RESID_8580:
-                if (getSid() instanceof RESID) {
-                    ((RESID) getSid()).setChipVersion(sid);
-                } else {
-                    getSid().stop();
-                    RESID newSid = new RESID();
-                    newSid.setChipVersion(sid);
-                    newSid.start();
-
-                    setSid(newSid);
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
     public void setScanRate(double hertz) {
         // Scan time for 10 scans...
         targetScanTime = (int) (1000000 / hertz);
@@ -433,7 +407,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
         audioDriver = new AudioDriverSE();
         audioDriver.init(44000, 22000);
-        setSID(RESID_6581);
         charMemoryIndex = CPU.CHAR_ROM2;
 
         for (int i = 0; i < SC_WIDTH * SC_HEIGHT; i++) {
@@ -1664,7 +1637,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     public void stop() {
         motorSound(false);
-        // sidChip.stop();
         audioDriver.shutdown();
     }
 
@@ -1954,14 +1926,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     public int getIecLines() {
         return iecLines;
-    }
-
-    private SIDIf getSid() {
-        return C64Emulation.getSid();
-    }
-
-    private void setSid(SIDIf sid) {
-        C64Emulation.setSid(sid);
     }
 
     protected int getMemory(int address) {

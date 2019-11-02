@@ -1,8 +1,6 @@
 package com.dreamfabric.jac64.emu.sid;
 
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
-import com.dreamfabric.jac64.emu.sid.SIDIf;
-import com.dreamfabric.jac64.emu.vic.C64Screen;
 import com.dreamfabric.resid.ISIDDefs;
 import com.dreamfabric.resid.ISIDDefs.sampling_method;
 import com.dreamfabric.resid.SID;
@@ -17,6 +15,9 @@ import com.dreamfabric.resid.SID;
  *
  */
 public class RESID extends AddressableChip implements SIDIf {
+
+    public static final int RESID_6581 = 1;
+    public static final int RESID_8580 = 2;
 
     static final int SAMPLE_RATE = 44000;
     static final int DL_BUFFER_SIZE = 44000;
@@ -42,7 +43,7 @@ public class RESID extends AddressableChip implements SIDIf {
         sid = new SID();
 
         sid.set_sampling_parameters(CPUFrq, sampling_method.SAMPLE_FAST, SAMPLE_RATE, -1, 0.97);
-        setChipVersion(C64Screen.RESID_6581);
+        setChipVersion(RESID_6581);
 
     }
 
@@ -92,7 +93,7 @@ public class RESID extends AddressableChip implements SIDIf {
     }
 
     public void setChipVersion(int version) {
-        if (version == C64Screen.RESID_6581) {
+        if (version == RESID_6581) {
             sid.set_chip_model(ISIDDefs.chip_model.MOS6581);
         } else {
             sid.set_chip_model(ISIDDefs.chip_model.MOS8580);

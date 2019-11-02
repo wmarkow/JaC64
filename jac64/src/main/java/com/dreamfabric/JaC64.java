@@ -47,7 +47,10 @@ import com.dreamfabric.c64utils.Debugger;
 import com.dreamfabric.jac64.C64Reader;
 import com.dreamfabric.jac64.DirEntry;
 import com.dreamfabric.jac64.SELoader;
+import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.sid.RESID;
+import com.dreamfabric.jac64.emu.sid.SIDIf;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 public class JaC64 implements ActionListener, KeyEventDispatcher {
@@ -256,9 +259,9 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
             System.out.println("Color set: " + cs);
             scr.setColorSet(cs);
         } else if (cmd.equals(SID_TYPES[0])) {
-            scr.setSID(C64Screen.RESID_6581);
+            setSID(RESID.RESID_6581);
         } else if (cmd.equals(SID_TYPES[1])) {
-            scr.setSID(C64Screen.RESID_8580);
+            setSID(RESID.RESID_8580);
         }
     }
 
@@ -397,6 +400,30 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
                 event.consume();
             }
         }
+    }
+
+    private void setSID(int sid) {
+        switch (sid) {
+            case RESID.RESID_6581:
+            case RESID.RESID_8580:
+                if (getSid() instanceof RESID) {
+                    ((RESID) getSid()).setChipVersion(sid);
+                } else {
+                    getSid().stop();
+                    RESID newSid = new RESID();
+                    newSid.setChipVersion(sid);
+                    newSid.start();
+
+                    C64Emulation.setSid(newSid);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    private SIDIf getSid() {
+        return C64Emulation.getSid();
     }
 
     public static void main(String[] args) {
