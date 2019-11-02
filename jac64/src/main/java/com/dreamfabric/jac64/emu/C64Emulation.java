@@ -40,9 +40,9 @@ public class C64Emulation {
         pla.setBasicROM(basicROM);
 
         // prepare AddressableBus
-        addressableBus.addAddressable(io);
+        addressableBus.setIO(io);
         // addressableBus.addAddressable(kernalROM);
-        addressableBus.addAddressable(basicROM);
+        addressableBus.setBasicRom(basicROM);
     }
 
     public static PLA getPla() {
