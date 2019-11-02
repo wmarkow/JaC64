@@ -2,6 +2,7 @@ package com.dreamfabric.jac64.emu.bus;
 
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROMIf;
+import com.dreamfabric.jac64.emu.memory.CharROMIf;
 import com.dreamfabric.jac64.emu.memory.KernalROMIf;
 
 public class AddressableBus implements AddressableIf {
@@ -11,6 +12,7 @@ public class AddressableBus implements AddressableIf {
 
     private BasicROMIf basicRom;
     private KernalROMIf kernalRom;
+    private CharROMIf charRom;
     private IO io;
 
     public void setBasicRom(BasicROMIf basicRom) {
@@ -19,6 +21,10 @@ public class AddressableBus implements AddressableIf {
 
     public void setKernalRom(KernalROMIf kernalRom) {
         this.kernalRom = kernalRom;
+    }
+
+    public void setCharRom(CharROMIf charRom) {
+        this.charRom = charRom;
     }
 
     public void setIO(IO io) {
@@ -46,10 +52,17 @@ public class AddressableBus implements AddressableIf {
         if (result != null) {
             return result;
         }
+
         result = kernalRom.read(address);
         if (result != null) {
             return result;
         }
+
+        result = charRom.read(address);
+        if (result != null) {
+            return result;
+        }
+
         result = io.read(address);
         if (result != null) {
             return result;

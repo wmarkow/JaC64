@@ -14,4 +14,9 @@ public interface ROMIf extends AddressableIf {
      * @return
      */
     public boolean load(int address, int data);
+
+    @Override
+    public default boolean isWritable() {
+        return false;
+    }
 }

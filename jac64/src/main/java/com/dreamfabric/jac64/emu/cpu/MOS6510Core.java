@@ -983,7 +983,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
     abstract protected int getMemorySize();
 
     private void validateAddress(int address) {
-        if (address >= CPU.BASIC_ROM2 && address < CPU.BASIC_ROM2 + 0x2000) {
+        if (address >= 0x1D000 && address < 0x1DFFF) {
             LOGGER.warn(String.format("Invalid address 0x%05X", address));
 
             return;

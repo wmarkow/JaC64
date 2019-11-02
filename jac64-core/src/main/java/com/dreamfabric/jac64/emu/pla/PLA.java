@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROMIf;
+import com.dreamfabric.jac64.emu.memory.CharROMIf;
 import com.dreamfabric.jac64.emu.memory.KernalROMIf;
 
 public class PLA {
@@ -20,6 +21,7 @@ public class PLA {
     private IO io = null;
     private BasicROMIf basicRom = null;
     private KernalROMIf kernalRom = null;
+    private CharROMIf charRom = null;
 
     public PLA() {
         LOGGER.info("Test");
@@ -48,22 +50,30 @@ public class PLA {
         this.kernalRom = kernalRom;
     }
 
+    public void setCharROM(CharROMIf charRom) {
+        this.charRom = charRom;
+    }
+
     private void enableChips() {
         io.setEnabled(false);
         basicRom.setEnabled(false);
         kernalRom.setEnabled(false);
+        charRom.setEnabled(false);
 
         switch (getMode()) {
             case 0:
                 break;
             case 1:
+                charRom.setEnabled(true);
                 break;
             case 2:
                 kernalRom.setEnabled(true);
+                charRom.setEnabled(true);
                 break;
             case 3:
                 basicRom.setEnabled(true);
                 kernalRom.setEnabled(true);
+                charRom.setEnabled(true);
                 break;
             case 4:
                 break;

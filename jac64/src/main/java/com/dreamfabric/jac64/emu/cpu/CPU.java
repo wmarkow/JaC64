@@ -134,7 +134,7 @@ public class CPU extends MOS6510Core {
             throw new IllegalArgumentException("should never happen because Kernal ROM is handled by addressable bus");
         }
         if (charROM && adr >= 0xD000 && adr <= 0xDFFF) {
-            return getMemory(adr | 0x10000);
+            throw new IllegalArgumentException("should never happen because Char ROM is handled by addressable bus");
         }
         if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
             return chips.performRead(adr, cycles);
@@ -153,6 +153,8 @@ public class CPU extends MOS6510Core {
         if (adr <= 1) {
             setMemory(adr, data);
             int p = (getMemory(0) ^ 0xff) | getMemory(1);
+
+            // pla.setCharenHiramLoram(p);
 
             kernalROM = ((p & 2) == 2); // Kernal on
             basicROM = ((p & 3) == 3); // Basic on
@@ -174,7 +176,7 @@ public class CPU extends MOS6510Core {
 
         if (addressableBus.write(adr, data)) {
             adr &= 0xffff;
-            if (ioON && ((adr & 0xf000) == 0xd000)) {
+            if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
                 // do nothing
             } else {
                 windex = adr;

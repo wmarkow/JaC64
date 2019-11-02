@@ -15,6 +15,7 @@ import com.dreamfabric.jac64.emu.cpu.M6510Ops;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Ops;
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
+import com.dreamfabric.jac64.emu.memory.CharROM;
 import com.dreamfabric.jac64.emu.memory.KernalROM;
 import com.dreamfabric.jac64.emu.memory.ROMIf;
 import com.dreamfabric.jac64.emu.pla.PLA;
@@ -34,6 +35,7 @@ public class C64Emulation {
 
     private static BasicROM basicROM = new BasicROM();
     private static KernalROM kernalROM = new KernalROM();
+    private static CharROM charROM = new CharROM();
 
     static {
         // prepare IO
@@ -44,11 +46,13 @@ public class C64Emulation {
         pla.setIO(io);
         pla.setBasicROM(basicROM);
         pla.setKernalROM(kernalROM);
+        pla.setCharROM(charROM);
 
         // prepare AddressableBus
         addressableBus.setIO(io);
         addressableBus.setBasicRom(basicROM);
         addressableBus.setKernalRom(kernalROM);
+        addressableBus.setCharRom(charROM);
     }
 
     public static PLA getPla() {
@@ -70,11 +74,17 @@ public class C64Emulation {
     public static CIA1 getCia1() {
         return cia1;
     }
+    
+    public static CharROM getCharRom()
+    {
+        return charROM;
+    }
 
     public static void installROMs() {
         loadROM("/roms/kernal.c64", kernalROM, 0x2000);
         patchKernalROM();
         loadROM("/roms/basic.c64", basicROM, 0x2000);
+        loadROM("/roms/chargen.c64", charROM, 0x1000);
     }
 
     private static void loadROM(String resource, ROMIf rom, int len) {
