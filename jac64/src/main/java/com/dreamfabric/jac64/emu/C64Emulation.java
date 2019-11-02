@@ -12,6 +12,7 @@ import com.dreamfabric.jac64.emu.bus.AddressableChip;
 import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
+import com.dreamfabric.jac64.emu.memory.ROMIf;
 import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.sid.RESID;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
@@ -70,9 +71,7 @@ public class C64Emulation {
         loadROM("/roms/basic.c64", basicROM, 0x2000);
     }
 
-    private static void loadROM(String resource, AddressableChip addressableChip, int len) {
-        addressableChip.setEnabled(true);
-
+    private static void loadROM(String resource, ROMIf rom, int len) {
         try {
             SELoader loader = new SELoader();
             InputStream ins = loader.getResourceStream(resource);
@@ -83,14 +82,14 @@ public class C64Emulation {
                 int pos = 0;
                 int t;
                 try {
-                    int startMem = addressableChip.getStartAddress();
+                    int startMem = rom.getStartAddress();
                     while ((t = stream.read(charBuf, pos, len - pos)) > 0) {
                         pos += t;
                     }
                     LOGGER.info("Installing rom at :" + Integer.toString(startMem, 16) + " size:" + pos);
                     for (int i = 0; i < charBuf.length; i++) {
                         int data = ((int) charBuf[i]) & 0xff;
-                        boolean result = addressableChip.write(startMem + i, data);
+                        boolean result = rom.load(startMem + i, data);
                         if (!result) {
                             throw new RuntimeException(
                                     "Problem writing rom file: can't write to addressable. Addres out of range or addressable is disabled.");

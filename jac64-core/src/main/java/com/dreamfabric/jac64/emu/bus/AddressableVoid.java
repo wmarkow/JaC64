@@ -3,8 +3,8 @@ package com.dreamfabric.jac64.emu.bus;
 /***
  * A basic implementation of {@link AddressableIf} which actually doesn't
  * perform any write and read operations. This class is useful to implement a
- * 'fake' devices that exist in the system but do nothing (like i.e. a {@link VoidSID}
- * device that will not produce any sound).
+ * 'fake' devices that exist in the system but do nothing (like i.e. a
+ * {@link VoidSID} device that will not produce any sound).
  * 
  * @see {@link AddressableVoid#write}
  * @see {@link AddressableVoid#read}
@@ -24,7 +24,7 @@ public abstract class AddressableVoid implements AddressableIf {
      */
     @Override
     public boolean write(int address, int data) {
-        if (!canWriteOrRead(address)) {
+        if (!canWrite(address)) {
             return false;
         }
 
@@ -52,7 +52,27 @@ public abstract class AddressableVoid implements AddressableIf {
         return enabled;
     }
 
-    protected boolean canWriteOrRead(int address) {
+    protected boolean canRead(int address) {
+        if (!isEnabled()) {
+            return false;
+        }
+
+        if (address < getStartAddress()) {
+            return false;
+        }
+
+        if (address > getEndAddress()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected boolean canWrite(int address) {
+        if (!isWritable()) {
+            return false;
+        }
+
         if (!isEnabled()) {
             return false;
         }

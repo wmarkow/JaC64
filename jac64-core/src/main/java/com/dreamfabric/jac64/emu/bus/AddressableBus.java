@@ -59,5 +59,4 @@ public class AddressableBus implements AddressableIf {
         // always true
         return true;
     }
-
 }

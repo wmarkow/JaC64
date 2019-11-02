@@ -26,7 +26,7 @@ public abstract class AddressableChip extends AddressableVoid {
      */
     @Override
     public boolean write(int address, int data) {
-        if (!canWriteOrRead(address)) {
+        if (!canWrite(address)) {
             return false;
         }
 
@@ -43,7 +43,7 @@ public abstract class AddressableChip extends AddressableVoid {
      */
     @Override
     public Integer read(int address) {
-        if (!canWriteOrRead(address)) {
+        if (!canRead(address)) {
             return null;
         }
 

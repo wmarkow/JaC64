@@ -1,8 +1,6 @@
 package com.dreamfabric.jac64.emu.memory;
 
-import com.dreamfabric.jac64.emu.bus.AddressableIf;
-
-public interface BasicROMIf extends AddressableIf {
+public interface BasicROMIf extends ROMIf {
 
     public final static int START_ADDRESS = 0xA000;
     public final static int END_ADDRESS = 0xBFFF;
@@ -15,5 +13,9 @@ public interface BasicROMIf extends AddressableIf {
     @Override
     public default int getEndAddress() {
         return END_ADDRESS;
+    }
+
+    public default boolean isWritable() {
+        return false;
     }
 }

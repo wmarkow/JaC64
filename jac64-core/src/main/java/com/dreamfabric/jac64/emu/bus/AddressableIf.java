@@ -13,4 +13,8 @@ public interface AddressableIf {
     public void setEnabled(boolean enabled);
 
     public boolean isEnabled();
+
+    public default boolean isWritable() {
+        return true;
+    }
 }
