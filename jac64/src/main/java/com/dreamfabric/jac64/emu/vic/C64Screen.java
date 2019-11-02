@@ -32,8 +32,6 @@ import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.disk.C1541Chips;
-import com.dreamfabric.jac64.emu.sid.AudioDriver;
-import com.dreamfabric.jac64.emu.sid.AudioDriverSE;
 import com.dreamfabric.jac64.emu.tfe.TFE_CS8900;
 
 /**
@@ -226,7 +224,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     public Image screen = null;
     private MemoryImageSource mis = null;
-    private AudioDriver audioDriver;
 
     // The array to generate the screen in Extra rows for sprite clipping
     // And for clipping when scrolling (smooth)
@@ -324,10 +321,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         return canvas;
     }
 
-    public AudioDriver getAudioDriver() {
-        return audioDriver;
-    }
-
     public boolean ready() {
         return isrRunning;
     }
@@ -373,10 +366,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         monitor.info("Next IO update: " + nextIOUpdate);
     }
 
-    public void setSoundOn(boolean on) {
-        audioDriver.setSoundOn(on);
-    }
-
     public void init(CPU cpu) {
         super.init(cpu);
 
@@ -405,8 +394,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         canvas.addMouseMotionListener(this);
         canvas.addMouseListener(this);
 
-        audioDriver = new AudioDriverSE();
-        audioDriver.init(44000, 22000);
         charMemoryIndex = CPU.CHAR_ROM2;
 
         for (int i = 0; i < SC_WIDTH * SC_HEIGHT; i++) {
@@ -1396,8 +1383,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                     if (vPos == 285) {
                         mis.newPixels();
                         canvas.repaint();
-                        actualScanTime = (actualScanTime * 9 + (int) ((audioDriver.getMicros() - lastScan))) / 10;
-                        lastScan = audioDriver.getMicros();
+                        actualScanTime = (actualScanTime * 9) / 10;
                         updating = false;
                     }
                 }
@@ -1637,7 +1623,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     public void stop() {
         motorSound(false);
-        audioDriver.shutdown();
     }
 
     public void reset() {

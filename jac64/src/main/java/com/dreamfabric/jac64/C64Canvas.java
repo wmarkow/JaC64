@@ -104,7 +104,6 @@ public class C64Canvas extends JPanel implements KeyListener, FocusListener {
         char chr = event.getKeyChar();
         if (chr == 'w') {
             if ((event.getModifiers() & KeyEvent.ALT_MASK) != 0) {
-                scr.getAudioDriver().setFullSpeed(!scr.getAudioDriver().fullSpeed());
             }
         }
     }
