@@ -130,104 +130,104 @@ public class CIA1Test {
     public void testPortA_forJoy2WhenInput() {
         subject.write(CIA1.DDRA, 0x00);
         subject.write(CIA1.PRA, 0xFF);
-        
-        subject.joy2KeyPressed(Joy2Key.VK_UP);
+
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_UP);
         assertEquals(254, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_UP);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_UP);
 
-        subject.joy2KeyPressed(Joy2Key.VK_DOWN);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_DOWN);
         assertEquals(253, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_DOWN);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_DOWN);
 
-        subject.joy2KeyPressed(Joy2Key.VK_LEFT);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_LEFT);
         assertEquals(251, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_LEFT);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_LEFT);
 
-        subject.joy2KeyPressed(Joy2Key.VK_RIGHT);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_RIGHT);
         assertEquals(247, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_RIGHT);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_RIGHT);
 
-        subject.joy2KeyPressed(Joy2Key.VK_FIRE);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_FIRE);
         assertEquals(239, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_FIRE);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_FIRE);
     }
 
     @Test
     public void testPortA_forJoy2WhenOutput() {
         subject.write(CIA1.DDRA, 0xFF);
         subject.write(CIA1.PRA, 0xFF);
-        
-        subject.joy2KeyPressed(Joy2Key.VK_UP);
+
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_UP);
         assertEquals(254, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_UP);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_UP);
 
-        subject.joy2KeyPressed(Joy2Key.VK_DOWN);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_DOWN);
         assertEquals(253, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_DOWN);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_DOWN);
 
-        subject.joy2KeyPressed(Joy2Key.VK_LEFT);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_LEFT);
         assertEquals(251, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_LEFT);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_LEFT);
 
-        subject.joy2KeyPressed(Joy2Key.VK_RIGHT);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_RIGHT);
         assertEquals(247, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_RIGHT);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_RIGHT);
 
-        subject.joy2KeyPressed(Joy2Key.VK_FIRE);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_FIRE);
         assertEquals(239, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_FIRE);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_FIRE);
     }
 
     @Test
     public void testPortB_forJoy1WhenInput() {
         subject.write(CIA1.DDRB, 0x00);
         subject.write(CIA1.PRB, 0xFF);
-        
-        subject.joy1KeyPressed(Joy1Key.VK_UP);
+
+        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_UP);
         assertEquals(254, subject.read(CIA1.PRB).intValue());
-        subject.joy1KeyReleased(Joy1Key.VK_UP);
+        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_UP);
 
-        subject.joy1KeyPressed(Joy1Key.VK_DOWN);
+        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_DOWN);
         assertEquals(253, subject.read(CIA1.PRB).intValue());
-        subject.joy1KeyReleased(Joy1Key.VK_DOWN);
+        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_DOWN);
 
-        subject.joy1KeyPressed(Joy1Key.VK_LEFT);
+        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_LEFT);
         assertEquals(251, subject.read(CIA1.PRB).intValue());
-        subject.joy1KeyReleased(Joy1Key.VK_LEFT);
+        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_LEFT);
 
-        subject.joy1KeyPressed(Joy1Key.VK_RIGHT);
+        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_RIGHT);
         assertEquals(247, subject.read(CIA1.PRB).intValue());
-        subject.joy1KeyReleased(Joy1Key.VK_RIGHT);
+        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_RIGHT);
 
-        subject.joy1KeyPressed(Joy1Key.VK_FIRE);
+        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_FIRE);
         assertEquals(239, subject.read(CIA1.PRB).intValue());
-        subject.joy1KeyReleased(Joy1Key.VK_FIRE);
+        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_FIRE);
     }
 
     @Test
     public void testPortB_forJoy1WhenOutput() {
         subject.write(CIA1.DDRB, 0xFF);
         subject.write(CIA1.PRB, 0xFF);
-        
-        subject.joy1KeyPressed(Joy1Key.VK_UP);
+
+        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_UP);
         assertEquals(254, subject.read(CIA1.PRB).intValue());
-        subject.joy1KeyReleased(Joy1Key.VK_UP);
+        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_UP);
 
-        subject.joy1KeyPressed(Joy1Key.VK_DOWN);
+        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_DOWN);
         assertEquals(253, subject.read(CIA1.PRB).intValue());
-        subject.joy1KeyReleased(Joy1Key.VK_DOWN);
+        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_DOWN);
 
-        subject.joy1KeyPressed(Joy1Key.VK_LEFT);
+        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_LEFT);
         assertEquals(251, subject.read(CIA1.PRB).intValue());
-        subject.joy1KeyReleased(Joy1Key.VK_LEFT);
+        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_LEFT);
 
-        subject.joy1KeyPressed(Joy1Key.VK_RIGHT);
+        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_RIGHT);
         assertEquals(247, subject.read(CIA1.PRB).intValue());
-        subject.joy1KeyReleased(Joy1Key.VK_RIGHT);
+        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_RIGHT);
 
-        subject.joy1KeyPressed(Joy1Key.VK_FIRE);
+        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_FIRE);
         assertEquals(239, subject.read(CIA1.PRB).intValue());
-        subject.joy1KeyReleased(Joy1Key.VK_FIRE);
+        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_FIRE);
     }
 
     /***
@@ -272,27 +272,27 @@ public class CIA1Test {
         subject.write(CIA1.DDRA, 224); // output and input
         subject.write(CIA1.PRA, 127);
 
-        subject.joy2KeyPressed(Joy2Key.VK_UP);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_UP);
         assertEquals(126, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_UP);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_UP);
 
-        subject.joy2KeyPressed(Joy2Key.VK_DOWN);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_DOWN);
         assertEquals(125, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_DOWN);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_DOWN);
 
-        subject.joy2KeyPressed(Joy2Key.VK_LEFT);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_LEFT);
         assertEquals(123, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_LEFT);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_LEFT);
 
-        subject.joy2KeyPressed(Joy2Key.VK_RIGHT);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_RIGHT);
         assertEquals(119, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_RIGHT);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_RIGHT);
 
-        subject.joy2KeyPressed(Joy2Key.VK_FIRE);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_FIRE);
         assertEquals(111, subject.read(CIA1.PRA).intValue());
-        subject.joy2KeyReleased(Joy2Key.VK_FIRE);
+        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_FIRE);
     }
-    
+
     /***
      * https://www.c64-wiki.com/wiki/Keyboard#direct_addressing_of_a_key
      */
@@ -308,12 +308,12 @@ public class CIA1Test {
         subject.write(CIA1.PRA, 0b1111101); // testing row 1 (ROW1) of the matrix
 
         // press S key
-        subject.keyPressed(Key.VK_S);
+        subject.getKeyListener().keyPressed(Key.VK_S);
         // check if PortB contains a correct value
         assertEquals(0b11011111, subject.read(CIA1.PRB).intValue());
 
         // release S key
-        subject.keyReleased(Key.VK_S);
+        subject.getKeyListener().keyReleased(Key.VK_S);
         // check if PortB contains a correct value
         assertEquals(0b11111111, subject.read(CIA1.PRB).intValue());
     }
@@ -330,12 +330,12 @@ public class CIA1Test {
         subject.write(CIA1.PRB, 0b11011111); // testing column 5 (COL5) of the matrix
 
         // perform a click of S key
-        subject.keyPressed(Key.VK_S);
+        subject.getKeyListener().keyPressed(Key.VK_S);
         // check if PortA contains a correct value
         assertEquals(0b11111101, subject.read(CIA1.PRA).intValue());
 
         // release S key
-        subject.keyReleased(Key.VK_S);
+        subject.getKeyListener().keyReleased(Key.VK_S);
         // check if PortB contains a correct value
         assertEquals(0b11111111, subject.read(CIA1.PRA).intValue());
     }
@@ -359,7 +359,7 @@ public class CIA1Test {
         subject.write(CIA1.PRA, 127);
         subject.write(CIA1.PRB, 251);
 
-        subject.joy2KeyPressed(Joy2Key.VK_FIRE);
+        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_FIRE);
         assertEquals(111, subject.read(CIA1.PRA).intValue());
     }
 
@@ -380,7 +380,7 @@ public class CIA1Test {
         subject.write(CIA1.PRB, 127);
         subject.write(CIA1.PRA, 251);
 
-        subject.joy1KeyPressed(Joy1Key.VK_FIRE);
+        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_FIRE);
         assertEquals(111, subject.read(CIA1.PRB).intValue());
     }
 }
