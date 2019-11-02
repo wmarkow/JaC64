@@ -1,29 +1,29 @@
 package com.dreamfabric.jac64.emu.bus;
 
 import com.dreamfabric.jac64.emu.io.IO;
-import com.dreamfabric.jac64.emu.memory.BasicROMIf;
-import com.dreamfabric.jac64.emu.memory.CharROMIf;
-import com.dreamfabric.jac64.emu.memory.KernalROMIf;
+import com.dreamfabric.jac64.emu.memory.BasicROM;
+import com.dreamfabric.jac64.emu.memory.CharROM;
+import com.dreamfabric.jac64.emu.memory.KernalROM;
 
 public class AddressableBus implements AddressableIf {
 
     private final static int START_ADDRESS = 0x0000;
     private final static int END_ADDRESS = 0xFFFF;
 
-    private BasicROMIf basicRom;
-    private KernalROMIf kernalRom;
-    private CharROMIf charRom;
+    private BasicROM basicRom;
+    private KernalROM kernalRom;
+    private CharROM charRom;
     private IO io;
 
-    public void setBasicRom(BasicROMIf basicRom) {
+    public void setBasicRom(BasicROM basicRom) {
         this.basicRom = basicRom;
     }
 
-    public void setKernalRom(KernalROMIf kernalRom) {
+    public void setKernalRom(KernalROM kernalRom) {
         this.kernalRom = kernalRom;
     }
 
-    public void setCharRom(CharROMIf charRom) {
+    public void setCharRom(CharROM charRom) {
         this.charRom = charRom;
     }
 

@@ -19,15 +19,12 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JPanel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dreamfabric.c64utils.C64Script;
 import com.dreamfabric.jac64.C64Canvas;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Observer;
@@ -36,7 +33,6 @@ import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.disk.C1541Chips;
-import com.dreamfabric.jac64.emu.memory.BasicROMIf;
 import com.dreamfabric.jac64.emu.sid.AudioDriver;
 import com.dreamfabric.jac64.emu.sid.AudioDriverSE;
 import com.dreamfabric.jac64.emu.sid.RESID;
@@ -1983,7 +1979,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     private void validateAddress(int address) {
         if (address >= 0x1D000 && address < 0x1DFFF) {
-//            LOGGER.warn(String.format("Invalid address 0x%05X", address));
+            // LOGGER.warn(String.format("Invalid address 0x%05X", address));
 
             return;
         }

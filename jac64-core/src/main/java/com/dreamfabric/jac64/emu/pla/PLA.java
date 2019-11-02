@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.emu.io.IO;
-import com.dreamfabric.jac64.emu.memory.BasicROMIf;
-import com.dreamfabric.jac64.emu.memory.CharROMIf;
-import com.dreamfabric.jac64.emu.memory.KernalROMIf;
+import com.dreamfabric.jac64.emu.memory.BasicROM;
+import com.dreamfabric.jac64.emu.memory.CharROM;
+import com.dreamfabric.jac64.emu.memory.KernalROM;
 
 public class PLA {
 
@@ -19,9 +19,9 @@ public class PLA {
     private boolean loram = true;
 
     private IO io = null;
-    private BasicROMIf basicRom = null;
-    private KernalROMIf kernalRom = null;
-    private CharROMIf charRom = null;
+    private BasicROM basicRom = null;
+    private KernalROM kernalRom = null;
+    private CharROM charRom = null;
 
     public PLA() {
         LOGGER.info("Test");
@@ -42,15 +42,15 @@ public class PLA {
         this.io = io;
     }
 
-    public void setBasicROM(BasicROMIf basicRom) {
+    public void setBasicROM(BasicROM basicRom) {
         this.basicRom = basicRom;
     }
 
-    public void setKernalROM(KernalROMIf kernalRom) {
+    public void setKernalROM(KernalROM kernalRom) {
         this.kernalRom = kernalRom;
     }
 
-    public void setCharROM(CharROMIf charRom) {
+    public void setCharROM(CharROM charRom) {
         this.charRom = charRom;
     }
 

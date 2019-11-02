@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.SELoader;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
-import com.dreamfabric.jac64.emu.bus.AddressableChip;
 import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.cpu.M6510Ops;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Ops;
@@ -17,7 +16,7 @@ import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
 import com.dreamfabric.jac64.emu.memory.CharROM;
 import com.dreamfabric.jac64.emu.memory.KernalROM;
-import com.dreamfabric.jac64.emu.memory.ROMIf;
+import com.dreamfabric.jac64.emu.memory.ROM;
 import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.sid.RESID;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
@@ -74,9 +73,8 @@ public class C64Emulation {
     public static CIA1 getCia1() {
         return cia1;
     }
-    
-    public static CharROM getCharRom()
-    {
+
+    public static CharROM getCharRom() {
         return charROM;
     }
 
@@ -87,7 +85,7 @@ public class C64Emulation {
         loadROM("/roms/chargen.c64", charROM, 0x1000);
     }
 
-    private static void loadROM(String resource, ROMIf rom, int len) {
+    private static void loadROM(String resource, ROM rom, int len) {
         try {
             SELoader loader = new SELoader();
             InputStream ins = loader.getResourceStream(resource);
