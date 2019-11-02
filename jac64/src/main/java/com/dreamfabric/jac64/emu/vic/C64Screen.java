@@ -101,9 +101,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     private IMonitor monitor;
 
-    private int targetScanTime = 20000;
-    private int actualScanTime = 20000;
-    private long lastScan = 0;
     private long nextIOUpdate = 0;
     private boolean DOUBLE = false;
     private int reset = 100;
@@ -254,7 +251,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         monitor = m;
         DOUBLE = dob;
 
-        setScanRate(50);
         makeColors(darks, DARKER_0, DARKER_N);
         makeColors(lites, LIGHTER_0, LIGHTER_N);
     }
@@ -295,22 +291,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     public CIA[] getCIAs() {
         return cia;
-    }
-
-    public void setScanRate(double hertz) {
-        // Scan time for 10 scans...
-        targetScanTime = (int) (1000000 / hertz);
-        float diff = 1.0f * VICConstants.SCAN_RATE / 65;
-    }
-
-    public int getScanRate() {
-        return (1000000 / targetScanTime);
-    }
-
-    public int getActualScanRate() {
-        // This should be calculated... if it is too slow it will be
-        // shown here
-        return (1000000 / actualScanTime);
     }
 
     public void setIntegerScaling(boolean yes) {
@@ -1383,7 +1363,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                     if (vPos == 285) {
                         mis.newPixels();
                         canvas.repaint();
-                        actualScanTime = (actualScanTime * 9) / 10;
                         updating = false;
                     }
                 }
