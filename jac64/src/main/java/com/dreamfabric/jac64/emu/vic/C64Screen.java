@@ -32,7 +32,6 @@ import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.disk.C1541Chips;
-import com.dreamfabric.jac64.emu.tfe.TFE_CS8900;
 
 /**
  * Implements the VIC chip + some other HW
@@ -111,8 +110,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     CIA cia[];
     // C1541 c1541;
     C1541Chips c1541Chips;
-
-    TFE_CS8900 tfe;
 
     int iecLines = 0;
 
@@ -365,8 +362,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         cia[0] = new CIA(cpu, IO_OFFSET + 0xdc00, this);
         cia[1] = new CIA(cpu, IO_OFFSET + 0xdd00, this);
 
-        tfe = new TFE_CS8900(IO_OFFSET + 0xde00);
-
         // c1541 = new C1541(memory);
         // c1541.addObserver(this);
 
@@ -527,8 +522,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                     return cia[1].performRead(address + IO_OFFSET, cycles);
                 } else if (pos == 0xc) {
                     return cia[0].performRead(address + IO_OFFSET, cycles);
-                } else if (pos == 0xe) {
-                    return tfe.performRead(address + IO_OFFSET, cycles);
                 } else if (pos >= 0x8) {
                     return getMemory(IO_OFFSET + address) | 0xf0;
                 }
@@ -817,8 +810,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                     cia[1].performWrite(address + IO_OFFSET, data, cycles);
                 } else if (pos == 0xc) {
                     cia[0].performWrite(address + IO_OFFSET, data, cycles);
-                } else if (pos == 0xe) {
-                    tfe.performWrite(address + IO_OFFSET, data, cycles);
                 }
                 // handle color ram!
         }
