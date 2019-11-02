@@ -1671,7 +1671,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     public void reset() {
         // Clear a lot of stuff...???
         initUpdate();
-        getSid().reset();
         lastLine = cpu.cycles;
         nextIOUpdate = cpu.cycles + 47;
 
