@@ -11,7 +11,7 @@ public class CIATimer {
     public static final boolean TIMER_DEBUG = false; // true;
 
     // The states of the timer
-    static final int STOP = 0;
+    private static final int STOP = 0;
     private static final int WAIT = 1;
     private static final int LOAD_STOP = 2;
     private static final int LOAD_COUNT = 3;
@@ -24,7 +24,7 @@ public class CIATimer {
 
     int state = STOP;
     // The latch for this timer
-    int latch = 0;
+    private int latch = 0;
     int timer = 0;
 
     // When is an update needed for this timer?
@@ -90,6 +90,31 @@ public class CIATimer {
         }
         timer = t;
         return t;
+    }
+    
+    public int getTimerLowByteValue(long cycles)
+    {
+        return getTimer(cycles) & 0xff;
+    }
+    
+    public int getTimerHighByteValue(long cycles)
+    {
+        return getTimer(cycles) >> 8;
+    }
+
+    public void setLatchLowByte(int value) {
+        latch = (latch & 0xff00) | value;
+    }
+
+    public void setLatchHighByte(int value) {
+        latch = (latch & 0xff) | (value << 8);
+        if (state == CIATimer.STOP) {
+            timer = latch;
+        }
+    }
+
+    public int getLatch() {
+        return latch;
     }
 
     private void loadTimer(long cycles) {

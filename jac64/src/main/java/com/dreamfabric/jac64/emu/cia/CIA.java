@@ -176,17 +176,13 @@ public class CIA {
                 }
                 return data;
             case TIMALO:
-                // System.out.println(ciaID() + " getTimerA LO, timer = " +
-                // timerA.getTimer(cycles));
-                return timerA.getTimer(cycles) & 0xff;
+                return timerA.getTimerLowByteValue(cycles);
             case TIMAHI:
-                return timerA.getTimer(cycles) >> 8;
+                return timerA.getTimerHighByteValue(cycles);
             case TIMBLO:
-                // System.out.println(ciaID() + " getTimerB LO, timer = " +
-                // timerB.getTimer(cycles));
-                return timerB.getTimer(cycles) & 0xff;
+                return timerB.getTimerLowByteValue(cycles);
             case TIMBHI:
-                return timerB.getTimer(cycles) & 0xff;
+                return timerB.getTimerHighByteValue(cycles);
             case TODTEN:
                 return tod10sec;
             case TODSEC:
@@ -238,28 +234,20 @@ public class CIA {
                 prb = data;
                 break;
             case TIMALO:
-                // Update latch value
-                timerA.latch = (timerA.latch & 0xff00) | data;
+                // Update TimerA latch low byte value
+                timerA.setLatchLowByte(data);
                 break;
             case TIMAHI:
-                timerA.latch = (timerA.latch & 0xff) | (data << 8);
-                if (timerA.state == CIATimer.STOP) {
-                    timerA.timer = timerA.latch;
-                }
-                if (CIATimer.TIMER_DEBUG && offset == 0x10d00)
-                    println(ciaID() + ": Timer A latch: " + timerA.latch + ": " + cycles);
+                // Update TimerA latch high byte value
+                timerA.setLatchHighByte(data);
                 break;
             case TIMBLO:
-                timerB.latch = (timerB.latch & 0xff00) | data;
+                // Update TimerB latch low byte value
+                timerB.setLatchLowByte(data);
                 break;
             case TIMBHI:
-                timerB.latch = (timerB.latch & 0xff) | (data << 8);
-                if (timerB.state == CIATimer.STOP) {
-                    timerB.timer = timerB.latch;
-                }
-
-                if (CIATimer.TIMER_DEBUG && offset == 0x10d00)
-                    println(ciaID() + ": Timer B latch: " + timerB.latch + ": " + cycles);
+                // Update TimerA latch high byte value
+                timerB.setLatchHighByte(data);
                 break;
             case TODTEN:
                 tod10sec = data;
@@ -332,13 +320,13 @@ public class CIA {
         System.out.println(
                 "CIA CRA: " + Hex.hex2(timerA.cr) + " => " + (((timerA.cr & 0x08) == 0) ? "cont" : "one-shot"));
         // System.out.println("Timer A Interrupt: " + timerATrigg);
-        System.out.println("Timer A Latch: " + timerA.latch);
+        System.out.println("Timer A Latch: " + timerA.getLatch());
         System.out.println("Timer B state: " + timerB.state);
         System.out.println("Timer B next trigger: " + timerB.nextZero);
         System.out.println(
                 "CIA CRB: " + Hex.hex2(timerA.cr) + " => " + (((timerB.cr & 0x08) == 0) ? "cont" : "one-shot"));
         // System.out.println("Timer B Interrupt: " + timerBTrigg);
-        System.out.println("Timer B Latch: " + timerB.latch);
+        System.out.println("Timer B Latch: " + timerB.getLatch());
         System.out.println("--------------------------");
     }
 
