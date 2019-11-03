@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CIA1Test {
+public class KeyboardTest {
 
     private CIA1 subject;
 
