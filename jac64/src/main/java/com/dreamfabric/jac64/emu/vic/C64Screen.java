@@ -31,7 +31,6 @@ import com.dreamfabric.jac64.Observer;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
-import com.dreamfabric.jac64.emu.disk.C1541Chips;
 
 /**
  * Implements the VIC chip + some other HW
@@ -108,8 +107,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     private int[] memory;
 
     CIA cia[];
-    // C1541 c1541;
-    C1541Chips c1541Chips;
 
     int iecLines = 0;
 
@@ -348,11 +345,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
         this.memory = cpu.getMemory();
 
-        c1541Chips = cpu.getDrive().chips;
-        c1541Chips.initIEC2(this);
-        c1541Chips = cpu.getDrive().chips;
-        c1541Chips.setObserver(this);
-
         for (int i = 0, n = sprites.length; i < n; i++) {
             sprites[i] = new Sprite();
             sprites[i].spriteNo = i;
@@ -390,15 +382,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         // }
         // });
         initUpdate();
-    }
-
-    public void update(Object src, Object data) {
-        if (src != c1541Chips) {
-            // Print some kind of message...
-            message = (String) data;
-        } else {
-            updateDisk(src, data);
-        }
     }
 
     public void restoreKey(boolean down) {
@@ -513,7 +496,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
             case 0xdd00:
                 // System.out.print("Read dd00 IEC1: ");
                 // Try the frodo way... again...
-                val = (cia2PRA | ~cia2DDRA) & 0x3f | iecLines & c1541Chips.getIecLines();
+                val = (cia2PRA | ~cia2DDRA) & 0x3f;
 
                 val &= 0xff;
                 return val;
@@ -787,11 +770,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                         | (data << 2) & 0x40 // CLK
                         | (data << 1) & 0x10; // ATN
 
-                if (((oldLines ^ iecLines) & 0x10) != 0) {
-                    c1541Chips.atnChanged((iecLines & 0x10) == 0);
-                }
-                c1541Chips.updateIECLines();
-
                 if (DEBUG_IEC)
                     printIECLines();
                 setVideoMem();
@@ -828,15 +806,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         System.out.print(" C" + sdata);
         sdata = ((iecLines & 0x80) == 0) ? 1 : 0;
         System.out.print(" D" + sdata);
-
-        // The 1541 has id = 2
-        sdata = ((c1541Chips.getIecLines() & 0x40) == 0) ? 1 : 0;
-        System.out.print(" c" + sdata);
-        sdata = ((c1541Chips.getIecLines() & 0x80) == 0) ? 1 : 0;
-        System.out.print(" d" + sdata);
-
-        System.out.println(" => C" + ((iecLines & c1541Chips.getIecLines() & 0x80) == 0 ? 1 : 0) + " D"
-                + ((iecLines & c1541Chips.getIecLines() & 0x40) == 0 ? 1 : 0));
     }
 
     private void setVideoMem() {
@@ -1787,34 +1756,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
             pixelsLeft = 0;
 
         }
-    }
-
-    // -------------------------------------------------------------------
-    // Observer (1541) - should probably be in C64 screen later...
-    // -------------------------------------------------------------------
-
-    public void updateDisk(Object obs, Object msg) {
-        if (msg == C1541Chips.HEAD_MOVED) {
-            if (lastTrack != c1541Chips.currentTrack) {
-                lastTrack = c1541Chips.currentTrack;
-                trackSound();
-            } else {
-                // Head could not move any more... maybe other sound here?
-                trackSound();
-            }
-        }
-
-        // add head beyond here...
-        lastSector = c1541Chips.currentSector;
-
-        if (motorOn != c1541Chips.motorOn) {
-            motorSound(c1541Chips.motorOn);
-        }
-
-        tmsg = " track: " + lastTrack + " / " + lastSector;
-
-        ledOn = c1541Chips.ledOn;
-        motorOn = c1541Chips.motorOn;
     }
 
     private void trackSound() {

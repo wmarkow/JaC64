@@ -25,7 +25,6 @@ import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.SlowDownCalculator;
 import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
-import com.dreamfabric.jac64.emu.disk.C1541Emu;
 import com.dreamfabric.jac64.emu.pla.PLA;
 
 /**
@@ -45,8 +44,6 @@ public class CPU extends MOS6510Core {
     public static final int KERNAL_ROM2 = 0x1e000;
     public static final int CHAR_ROM2 = 0x1d000;
 
-    public static final boolean EMULATE_1541 = true;
-
     public static final int CH_PROTECT = 1;
     public static final int CH_MONITOR_WRITE = 2;
     public static final int CH_MONITOR_READ = 4;
@@ -64,7 +61,6 @@ public class CPU extends MOS6510Core {
     private static final long CYCLES_PER_DEBUG = 10000000;
     public static final boolean DEBUG = false;
 
-    private C1541Emu c1541;
     private Loader loader;
     private int windex = 0;
 
@@ -77,16 +73,6 @@ public class CPU extends MOS6510Core {
     public CPU(IMonitor m, String cb, Loader loader) {
         super(m, cb);
         this.loader = loader;
-        if (EMULATE_1541) {
-            IMonitor d = new DefaultIMon(); // new Debugger();
-            c1541 = new C1541Emu(d, cb);
-            // d.init(c1541);
-            // d.setEnabled(true);
-        }
-    }
-
-    public C1541Emu getDrive() {
-        return c1541;
     }
 
     private final void schedule(long cycles) {
@@ -359,10 +345,6 @@ public class CPU extends MOS6510Core {
         writeByte(1, 0x7);
         super.reset();
         C64Emulation.getSid().reset();
-
-        if (EMULATE_1541) {
-            c1541.reset();
-        }
     }
 
     public void setPC(int startAdress) {
@@ -405,11 +387,6 @@ public class CPU extends MOS6510Core {
 
                 // Run one instruction!
                 emulateOp();
-
-                // Also allow the 1541 to run an instruction!
-                if (EMULATE_1541) {
-                    c1541.tick(cycles);
-                }
 
                 nr_ins++;
                 if (next_print < cycles) {
@@ -504,11 +481,6 @@ public class CPU extends MOS6510Core {
                             }
                         }
                     }
-                }
-
-                // Also allow the 1541 to run an instruction!
-                if (EMULATE_1541) {
-                    c1541.tick(cycles);
                 }
             }
         } catch (Exception e) {

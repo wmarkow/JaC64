@@ -25,7 +25,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import com.dreamfabric.jac64.emu.cpu.CPU;
-import com.dreamfabric.jac64.emu.disk.DiskListener;
 
 /**
  *
@@ -45,8 +44,6 @@ public class C64Reader {
     private ArrayList dirNames = new ArrayList();
     private Hashtable dirEntries = new Hashtable();
 
-    private DiskListener listener;
-
     private int type = 0;
     private int diskSize = 0; // Size in sectors
 
@@ -60,10 +57,6 @@ public class C64Reader {
     public void setCPU(CPU cpu) {
         /* CPU argument is ignored for now */
         this.memory = cpu.getMemory();
-    }
-
-    public void setDiskListener(DiskListener l) {
-        listener = l;
     }
 
     public int getLoadedType() {
@@ -116,10 +109,6 @@ public class C64Reader {
                 reader.close();
             } catch (Exception x) {
             }
-        }
-
-        if (listener != null) {
-            listener.diskChanged();
         }
 
         return true;

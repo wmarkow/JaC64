@@ -121,7 +121,6 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
 
         reader = new C64Reader(); // scr.getDiskDrive().getReader();
         reader.setCPU(cpu);
-        cpu.getDrive().setReader(reader);
 
         C64Win = new JFrame("JaC64 - A Java C64 Emulator");
         C64Win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
