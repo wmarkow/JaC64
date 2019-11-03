@@ -8,7 +8,6 @@
 package com.dreamfabric.jac64.emu.cia;
 
 import com.dreamfabric.jac64.Hex;
-import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 
@@ -42,15 +41,12 @@ public class CIA {
 
     CIATimer timerA;
     CIATimer timerB;
+    private RealTimeClock rtc;
 
     int pra = 0;
     int prb = 0;
     int ddra = 0;
     int ddrb = 0;
-    int tod10sec = 0;
-    int todsec = 0;
-    int todmin = 0;
-    int todhour = 0;
     int sdr;
 
     // For the CPU to read (contains status)
@@ -69,51 +65,6 @@ public class CIA {
     public int serialFake = 0;
     private ExtChip chips;
 
-    public TimeEvent todEvent = new TimeEvent(0) {
-        public void execute(long cycle) {
-            time = time + 100000; // Approx a tenth of a second...
-            int tmp = (tod10sec & 0x0f) + 1;
-            tod10sec = tmp % 10;
-            if (tmp > 9) {
-                // Maxval == 0x59
-                tmp = (todsec & 0x7f) + 1;
-                if ((tmp & 0x0f) > 9)
-                    tmp += 0x06;
-                if (tmp > 0x59)
-                    tmp = 0;
-                todsec = tmp;
-                // Wrapped seconds...
-                // Minutes inc - max 0x59
-                if (tmp == 0) {
-                    tmp = (todmin & 0x7f) + 1;
-                    if ((tmp & 0x0f) > 9)
-                        tmp += 0x06;
-                    if (tmp > 0x59)
-                        tmp = 0;
-                    todmin = tmp;
-
-                    // Hours, max 0x12
-                    if (tmp == 0) {
-                        tmp = (todhour & 0x1f) + 1;
-                        if ((tmp & 0x0f) > 9)
-                            tmp += 0x06;
-
-                        if (tmp > 0x11)
-                            tmp = 0;
-                        // how is hour? 1 - 12 or 0 - 11 ??
-                        todhour = tmp;
-                    }
-                }
-            }
-
-            // TODO: fix alarms and latches !!
-            // Since this should continue run, just reschedule...
-            // System.out.println("TOD ticked..." + (todhour>>4) + (todhour & 0xf) + ":" +
-            // (todmin>>4) + (todmin&0xf) + ":" + (todsec>>4) + (todsec&0xf));
-            cpu.getScheduler().addEvent(this);
-        }
-    };
-
     /**
      * Creates a new <code>CIA</code> instance.
      *
@@ -125,8 +76,7 @@ public class CIA {
         timerA = new CIATimer("TimerA", 1, true, null, cpu.getScheduler(), this);
         timerB = new CIATimer("TimerB", 2, false, timerA, cpu.getScheduler(), this);
         timerA.otherTimer = timerB;
-        todEvent.setTime(cpu.cycles + 10000);
-        cpu.getScheduler().addEvent(todEvent);
+        rtc = new RealTimeClock(cpu.getScheduler(), cpu.cycles);
     }
 
     public void reset() {
@@ -135,10 +85,6 @@ public class CIA {
 
         timerA.reset();
         timerB.reset();
-        tod10sec = 0;
-        todsec = 0;
-        todmin = 0;
-        todhour = 0;
 
         updateInterrupts();
     }
@@ -184,13 +130,13 @@ public class CIA {
             case TIMBHI:
                 return timerB.getTimerHighByteValue(cycles);
             case TODTEN:
-                return tod10sec;
+                return rtc.getTod10sec();
             case TODSEC:
-                return todsec;
+                return rtc.getTodsec();
             case TODMIN:
-                return todmin;
+                return rtc.getTodmin();
             case TODHRS:
-                return todhour;
+                return rtc.getTodhour();
             case SDR:
                 return sdr;
             case CRA:
@@ -250,16 +196,16 @@ public class CIA {
                 timerB.setLatchHighByte(data);
                 break;
             case TODTEN:
-                tod10sec = data;
+                rtc.setTod10sec(data);
                 break;
             case TODSEC:
-                todsec = data;
+                rtc.setTodsec(data);
                 break;
             case TODMIN:
-                todmin = data;
+                rtc.setTodmin(data);
                 break;
             case TODHRS:
-                todhour = data;
+                rtc.setTodhour(data);
                 break;
             case ICR: // dc0d - CIAICR - CIA Interrupt Control Register
                 boolean val = (data & 0x80) != 0;
