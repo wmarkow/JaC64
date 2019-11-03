@@ -158,17 +158,17 @@ public class CIA {
                 return (pra | ~ddra) & 0xff;
             case PRB:
                 int data = (prb | ~ddrb) & 0xff;
-                if ((timerA.cr & 0x02) > 0) {
+                if ((timerA.getCR() & 0x02) > 0) {
                     data &= 0xbf;
-                    if ((timerA.cr & 0x04) > 0) {
+                    if ((timerA.getCR() & 0x04) > 0) {
                         data |= timerA.flipflop ? 0x40 : 0;
                     } else {
                         data |= timerA.underflow ? 0x40 : 0;
                     }
                 }
-                if ((timerB.cr & 0x02) > 0) {
+                if ((timerB.getCR() & 0x02) > 0) {
                     data &= 0x7f;
-                    if ((timerB.cr & 0x04) > 0) {
+                    if ((timerB.getCR() & 0x04) > 0) {
                         data |= timerB.flipflop ? 0x80 : 0;
                     } else {
                         data |= timerB.underflow ? 0x80 : 0;
@@ -194,9 +194,9 @@ public class CIA {
             case SDR:
                 return sdr;
             case CRA:
-                return timerA.cr;
+                return timerA.getCR();
             case CRB:
-                return timerB.cr;
+                return timerB.getCR();
             case ICR:
                 // Clear interrupt register (flags)!
                 if (CIATimer.TIMER_DEBUG && offset == 0x10d00)
@@ -275,14 +275,14 @@ public class CIA {
                 System.out.println(ciaID() + " ====> IE = " + ciaie);
                 break;
             case CRA:
-                timerA.writeCR(cycles, data);
-                timerA.countCycles = (data & 0x20) == 0;
+                timerA.setCR(cycles, data);
+                timerA.setCountCycles((data & 0x20) == 0);
                 break;
 
             case CRB:
-                timerB.writeCR(cycles, data);
-                timerB.countCycles = (data & 0x60) == 0;
-                timerB.countUnderflow = (data & 0x60) == 0x40;
+                timerB.setCR(cycles, data);
+                timerB.setCountCycles((data & 0x60) == 0);
+                timerB.setCountUnderflow((data & 0x60) == 0x40);
                 break;
         }
     }
@@ -317,14 +317,14 @@ public class CIA {
         println(" status");
         System.out.println("Timer A state: " + timerA.state);
         System.out.println("Timer A next trigger: " + timerA.nextZero);
-        System.out.println(
-                "CIA CRA: " + Hex.hex2(timerA.cr) + " => " + (((timerA.cr & 0x08) == 0) ? "cont" : "one-shot"));
+        System.out.println("CIA CRA: " + Hex.hex2(timerA.getCR()) + " => "
+                + (((timerA.getCR() & 0x08) == 0) ? "cont" : "one-shot"));
         // System.out.println("Timer A Interrupt: " + timerATrigg);
         System.out.println("Timer A Latch: " + timerA.getLatch());
         System.out.println("Timer B state: " + timerB.state);
         System.out.println("Timer B next trigger: " + timerB.nextZero);
-        System.out.println(
-                "CIA CRB: " + Hex.hex2(timerA.cr) + " => " + (((timerB.cr & 0x08) == 0) ? "cont" : "one-shot"));
+        System.out.println("CIA CRB: " + Hex.hex2(timerA.getCR()) + " => "
+                + (((timerB.getCR() & 0x08) == 0) ? "cont" : "one-shot"));
         // System.out.println("Timer B Interrupt: " + timerBTrigg);
         System.out.println("Timer B Latch: " + timerB.getLatch());
         System.out.println("--------------------------");

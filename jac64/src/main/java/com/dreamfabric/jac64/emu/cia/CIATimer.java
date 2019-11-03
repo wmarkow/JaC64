@@ -36,8 +36,8 @@ public class CIATimer {
     boolean underflow = false;
     boolean flipflop = false;
 
-    boolean countCycles = false;
-    boolean countUnderflow = false;
+    private boolean countCycles = false;
+    private boolean countUnderflow = false;
 
     private EventQueue scheduler;
     private CIA cia;
@@ -53,8 +53,8 @@ public class CIATimer {
         }
     };
 
-    int writeCR = -1;
-    int cr = 0;
+    private int writeCR = -1;
+    private int cr = 0;
     String id;
     int iflag;
     boolean updateOther;
@@ -91,14 +91,12 @@ public class CIATimer {
         timer = t;
         return t;
     }
-    
-    public int getTimerLowByteValue(long cycles)
-    {
+
+    public int getTimerLowByteValue(long cycles) {
         return getTimer(cycles) & 0xff;
     }
-    
-    public int getTimerHighByteValue(long cycles)
-    {
+
+    public int getTimerHighByteValue(long cycles) {
         return getTimer(cycles) >> 8;
     }
 
@@ -148,12 +146,16 @@ public class CIATimer {
           // }
     }
 
-    void writeCR(long cycles, int data) {
+    public void setCR(long cycles, int data) {
         writeCR = data;
         if (nextUpdate > cycles + 1 || !updateEvent.isScheduled()) {
             nextUpdate = cycles + 1;
             scheduler.addEvent(updateEvent, nextUpdate);
         }
+    }
+
+    public int getCR() {
+        return cr;
     }
 
     public void doUpdate(long cycles) {
@@ -173,6 +175,14 @@ public class CIATimer {
                 update(nextUpdate);
             }
         }
+    }
+
+    public void setCountCycles(boolean countCycles) {
+        this.countCycles = countCycles;
+    }
+
+    public void setCountUnderflow(boolean countUnderflow) {
+        this.countUnderflow = countUnderflow;
     }
 
     // maybe only update when "needed" and when registers read???
