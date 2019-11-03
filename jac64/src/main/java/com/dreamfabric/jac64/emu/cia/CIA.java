@@ -39,8 +39,8 @@ public class CIA {
     public static final int CRA = 0x0e;
     public static final int CRB = 0x0f;
 
-    CIATimer timerA;
-    CIATimer timerB;
+    private CIATimer timerA;
+    private CIATimer timerB;
     private RealTimeClock rtc;
 
     int pra = 0;
@@ -59,7 +59,6 @@ public class CIA {
 
     public long nextCIAUpdate = 0;
 
-    private MOS6510Core cpu;
     int offset;
 
     public int serialFake = 0;
@@ -70,7 +69,6 @@ public class CIA {
      *
      */
     public CIA(MOS6510Core cpu, int offset, ExtChip chips) {
-        this.cpu = cpu;
         this.offset = offset;
         this.chips = chips;
         timerA = new CIATimer("TimerA", 1, true, null, cpu.getScheduler(), this);
@@ -275,21 +273,4 @@ public class CIA {
         System.out.println("Timer B Latch: " + timerB.getLatch());
         System.out.println("--------------------------");
     }
-
-    public int getPra() {
-        return pra;
-    }
-
-    public int getPrb() {
-        return prb;
-    }
-
-    public int getDdra() {
-        return ddra;
-    }
-
-    public int getDdrb() {
-        return ddrb;
-    }
-
 }
