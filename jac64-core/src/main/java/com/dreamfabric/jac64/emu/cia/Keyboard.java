@@ -27,32 +27,32 @@ public class Keyboard implements KeyListener, Joy1KeyListener, Joy2KeyListener {
     private int prbPinRead;
 
     public Keyboard() {
-        setDdra(0x00);
-        setPra(0xFF);
-        setDdrb(0x00);
-        setPrb(0xFF);
+        setDDRA(0x00);
+        setPRA(0xFF);
+        setDDRB(0x00);
+        setPRB(0xFF);
 
         praPinRead = 255;
         prbPinRead = 255;
     }
 
-    public void setPra(int pra) {
+    public void setPRA(int pra) {
         this.pra = pra;
     }
 
-    public void setPrb(int prb) {
+    public void setPRB(int prb) {
         this.prb = prb;
     }
 
-    public void setDdra(int ddra) {
+    public void setDDRA(int ddra) {
         this.ddra = ddra;
     }
 
-    public void setDdrb(int ddrb) {
+    public void setDDRB(int ddrb) {
         this.ddrb = ddrb;
     }
 
-    public int getPraPin() {
+    public int getPRAPin() {
         updateKeyboardState();
         int portA = calculatePortAValueForJoy2();
 
@@ -61,13 +61,21 @@ public class Keyboard implements KeyListener, Joy1KeyListener, Joy2KeyListener {
         return praPinRead;
     }
 
-    public int getPrbPin() {
+    public int getPRBPin() {
         updateKeyboardState();
         int portB = calculatePortBValeForJoy1();
 
         prbPinRead &= portB;
 
         return prbPinRead;
+    }
+
+    public int getDDRA() {
+        return ddra;
+    }
+
+    public int getDDRB() {
+        return ddrb;
     }
 
     @Override
@@ -203,14 +211,6 @@ public class Keyboard implements KeyListener, Joy1KeyListener, Joy2KeyListener {
         }
 
         return portA;
-    }
-
-    private int getDDRA() {
-        return ddra;
-    }
-
-    private int getDDRB() {
-        return ddrb;
     }
 
     private int getPRA() {

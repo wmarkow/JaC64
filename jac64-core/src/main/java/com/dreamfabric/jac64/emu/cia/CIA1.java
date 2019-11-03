@@ -61,16 +61,16 @@ public class CIA1 extends AddressableChip {
 
         switch (address) {
             case PRA:
-                keyboard.setPra(data);
+                keyboard.setPRA(data);
                 return true;
             case PRB:
-                keyboard.setPrb(data);
+                keyboard.setPRB(data);
                 return true;
             case DDRA:
-                keyboard.setDdra(data);
+                keyboard.setDDRA(data);
                 return true;
             case DDRB:
-                keyboard.setDdrb(data);
+                keyboard.setDDRB(data);
                 return true;
         }
 
@@ -87,9 +87,9 @@ public class CIA1 extends AddressableChip {
 
         switch (address) {
             case PRA:
-                return keyboard.getPraPin();
+                return keyboard.getPRAPin();
             case PRB:
-                return keyboard.getPrbPin();
+                return keyboard.getPRBPin();
             case DDRA:
                 return result;
             case DDRB:

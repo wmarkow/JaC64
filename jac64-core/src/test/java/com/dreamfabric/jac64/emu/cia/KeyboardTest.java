@@ -7,120 +7,119 @@ import org.junit.Test;
 
 public class KeyboardTest {
 
-    private CIA1 subject;
+    private Keyboard subject;
 
     @Before
     public void init() {
-        subject = new CIA1();
-        subject.setEnabled(true);
+        subject = new Keyboard();
     }
 
     /* DEFAULT TESTS FOR PORT A */
 
     @Test
     public void testPortA_forDefault() {
-        assertEquals(0, subject.read(CIA1.DDRA).intValue()); // input
-        assertEquals(255, subject.read(CIA1.PRA).intValue()); // all high
+        assertEquals(0, subject.getDDRA()); // input
+        assertEquals(255, subject.getPRAPin()); // all high
     }
 
     @Test
     public void testPortA_forDefaultWhenInput() {
-        subject.write(CIA1.DDRA, 0x00); // input
+        subject.setDDRA(0x00); // input
 
-        assertEquals(255, subject.read(CIA1.PRA).intValue());
+        assertEquals(255, subject.getPRAPin());
     }
 
     @Test
     public void testPortA_forDefaultWhenOutput() {
-        subject.write(CIA1.DDRA, 0xFF); // output
+        subject.setDDRA(0xFF); // output
 
-        assertEquals(255, subject.read(CIA1.PRA).intValue());
+        assertEquals(255, subject.getPRAPin());
     }
 
     @Test
     public void testPortA_whenInputAndAllHigh() {
-        subject.write(CIA1.DDRA, 0x00); // input
-        subject.write(CIA1.PRA, 255); // all low
+        subject.setDDRA(0x00); // input
+        subject.setPRA(255); // all low
 
-        assertEquals(255, subject.read(CIA1.PRA).intValue());
+        assertEquals(255, subject.getPRAPin());
     }
 
     @Test
     public void testPortA_whenInputAndAllLow() {
-        subject.write(CIA1.DDRA, 0x00); // input
-        subject.write(CIA1.PRA, 0); // all low
+        subject.setDDRA(0x00); // input
+        subject.setPRA(0); // all low
 
         // what here?
     }
 
     @Test
     public void testPortA_whenOutputAndAllHigh() {
-        subject.write(CIA1.DDRA, 0xFF); // output
-        subject.write(CIA1.PRA, 255); // all high
+        subject.setDDRA(0xFF); // output
+        subject.setPRA(255); // all high
 
-        assertEquals(255, subject.read(CIA1.PRA).intValue());
+        assertEquals(255, subject.getPRAPin());
     }
 
     @Test
     public void testPortA_whenOutputAndAllLow() {
-        subject.write(CIA1.DDRA, 0xFF); // output
-        subject.write(CIA1.PRA, 0); // all low
+        subject.setDDRA(0xFF); // output
+        subject.setPRA(0); // all low
 
-        assertEquals(0, subject.read(CIA1.PRA).intValue());
+        assertEquals(0, subject.getPRAPin());
     }
 
     /* DEFAULT TESTS FOR PORT B */
 
     @Test
     public void testPortB_forDefault() {
-        assertEquals(0, subject.read(CIA1.DDRB).intValue()); // input
-        assertEquals(255, subject.read(CIA1.PRB).intValue()); // all high
+        assertEquals(0, subject.getDDRB()); // input
+        assertEquals(255, subject.getPRBPin()); // all high
     }
 
     @Test
     public void testPortB_forDefaultWhenInput() {
-        subject.write(CIA1.DDRB, 0x00);
+        subject.setDDRB(0x00);
 
-        assertEquals(255, subject.read(CIA1.PRB).intValue());
+        assertEquals(255, subject.getPRBPin());
     }
 
     @Test
     public void testPortB_forDefaultWhenOutput() {
-        subject.write(CIA1.DDRB, 0xFF); // output
+        subject.setDDRB(0xFF); // output
 
-        assertEquals(255, subject.read(CIA1.PRB).intValue());
+        assertEquals(255, subject.getPRBPin());
     }
 
     @Test
     public void testPortB_whenInputAndAllHigh() {
-        subject.write(CIA1.DDRB, 0x00); // input
-        subject.write(CIA1.PRB, 255); // all low
+        subject.setDDRB(0x00); // input
+        subject.setPRB(255); // all low
 
-        assertEquals(255, subject.read(CIA1.PRB).intValue());
+        assertEquals(255, subject.getPRBPin());
     }
 
     @Test
     public void testPortB_whenInputAndAllLow() {
-        subject.write(CIA1.DDRB, 0x00); // input
-        subject.write(CIA1.PRB, 0); // all low
+        subject.setDDRB(0x00); // input
+        subject.setPRB(0); // all low
 
         // what here?
     }
 
     @Test
     public void testPortB_whenOutputAndAllHigh() {
-        subject.write(CIA1.DDRB, 0xFF); // output
-        subject.write(CIA1.PRB, 255); // all high
+        subject.setDDRB(0xFF); // output
+        subject.setPRB(255); // all high
 
-        assertEquals(255, subject.read(CIA1.PRB).intValue());
+        assertEquals(255, subject.getPRBPin());
     }
 
     @Test
     public void testPortB_whenOutputAndAllLow() {
-        subject.write(CIA1.DDRB, 0xFF); // output
-        subject.write(CIA1.PRB, 0); // all low
+        subject.setDDRB(0xFF); // output
+        subject.setPRB(0); // all low
 
-        assertEquals(0, subject.read(CIA1.PRB).intValue());
+        assertEquals(0, subject.getPRBPin());
     }
 
     /* TESTS FOR PORTS AND JOYSTICKS */
@@ -128,106 +127,106 @@ public class KeyboardTest {
 
     @Test
     public void testPortA_forJoy2WhenInput() {
-        subject.write(CIA1.DDRA, 0x00);
-        subject.write(CIA1.PRA, 0xFF);
+        subject.setDDRA(0x00);
+        subject.setPRA(0xFF);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_UP);
-        assertEquals(254, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_UP);
+        subject.joy2KeyPressed(Joy2Key.VK_UP);
+        assertEquals(254, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_UP);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_DOWN);
-        assertEquals(253, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_DOWN);
+        subject.joy2KeyPressed(Joy2Key.VK_DOWN);
+        assertEquals(253, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_DOWN);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_LEFT);
-        assertEquals(251, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_LEFT);
+        subject.joy2KeyPressed(Joy2Key.VK_LEFT);
+        assertEquals(251, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_LEFT);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_RIGHT);
-        assertEquals(247, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_RIGHT);
+        subject.joy2KeyPressed(Joy2Key.VK_RIGHT);
+        assertEquals(247, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_RIGHT);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_FIRE);
-        assertEquals(239, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_FIRE);
+        subject.joy2KeyPressed(Joy2Key.VK_FIRE);
+        assertEquals(239, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_FIRE);
     }
 
     @Test
     public void testPortA_forJoy2WhenOutput() {
-        subject.write(CIA1.DDRA, 0xFF);
-        subject.write(CIA1.PRA, 0xFF);
+        subject.setDDRA(0xFF);
+        subject.setPRA(0xFF);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_UP);
-        assertEquals(254, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_UP);
+        subject.joy2KeyPressed(Joy2Key.VK_UP);
+        assertEquals(254, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_UP);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_DOWN);
-        assertEquals(253, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_DOWN);
+        subject.joy2KeyPressed(Joy2Key.VK_DOWN);
+        assertEquals(253, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_DOWN);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_LEFT);
-        assertEquals(251, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_LEFT);
+        subject.joy2KeyPressed(Joy2Key.VK_LEFT);
+        assertEquals(251, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_LEFT);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_RIGHT);
-        assertEquals(247, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_RIGHT);
+        subject.joy2KeyPressed(Joy2Key.VK_RIGHT);
+        assertEquals(247, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_RIGHT);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_FIRE);
-        assertEquals(239, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_FIRE);
+        subject.joy2KeyPressed(Joy2Key.VK_FIRE);
+        assertEquals(239, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_FIRE);
     }
 
     @Test
     public void testPortB_forJoy1WhenInput() {
-        subject.write(CIA1.DDRB, 0x00);
-        subject.write(CIA1.PRB, 0xFF);
+        subject.setDDRB(0x00);
+        subject.setPRB(0xFF);
 
-        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_UP);
-        assertEquals(254, subject.read(CIA1.PRB).intValue());
-        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_UP);
+        subject.joy1KeyPressed(Joy1Key.VK_UP);
+        assertEquals(254, subject.getPRBPin());
+        subject.joy1KeyReleased(Joy1Key.VK_UP);
 
-        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_DOWN);
-        assertEquals(253, subject.read(CIA1.PRB).intValue());
-        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_DOWN);
+        subject.joy1KeyPressed(Joy1Key.VK_DOWN);
+        assertEquals(253, subject.getPRBPin());
+        subject.joy1KeyReleased(Joy1Key.VK_DOWN);
 
-        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_LEFT);
-        assertEquals(251, subject.read(CIA1.PRB).intValue());
-        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_LEFT);
+        subject.joy1KeyPressed(Joy1Key.VK_LEFT);
+        assertEquals(251, subject.getPRBPin());
+        subject.joy1KeyReleased(Joy1Key.VK_LEFT);
 
-        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_RIGHT);
-        assertEquals(247, subject.read(CIA1.PRB).intValue());
-        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_RIGHT);
+        subject.joy1KeyPressed(Joy1Key.VK_RIGHT);
+        assertEquals(247, subject.getPRBPin());
+        subject.joy1KeyReleased(Joy1Key.VK_RIGHT);
 
-        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_FIRE);
-        assertEquals(239, subject.read(CIA1.PRB).intValue());
-        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_FIRE);
+        subject.joy1KeyPressed(Joy1Key.VK_FIRE);
+        assertEquals(239, subject.getPRBPin());
+        subject.joy1KeyReleased(Joy1Key.VK_FIRE);
     }
 
     @Test
     public void testPortB_forJoy1WhenOutput() {
-        subject.write(CIA1.DDRB, 0xFF);
-        subject.write(CIA1.PRB, 0xFF);
+        subject.setDDRB(0xFF);
+        subject.setPRB(0xFF);
 
-        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_UP);
-        assertEquals(254, subject.read(CIA1.PRB).intValue());
-        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_UP);
+        subject.joy1KeyPressed(Joy1Key.VK_UP);
+        assertEquals(254, subject.getPRBPin());
+        subject.joy1KeyReleased(Joy1Key.VK_UP);
 
-        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_DOWN);
-        assertEquals(253, subject.read(CIA1.PRB).intValue());
-        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_DOWN);
+        subject.joy1KeyPressed(Joy1Key.VK_DOWN);
+        assertEquals(253, subject.getPRBPin());
+        subject.joy1KeyReleased(Joy1Key.VK_DOWN);
 
-        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_LEFT);
-        assertEquals(251, subject.read(CIA1.PRB).intValue());
-        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_LEFT);
+        subject.joy1KeyPressed(Joy1Key.VK_LEFT);
+        assertEquals(251, subject.getPRBPin());
+        subject.joy1KeyReleased(Joy1Key.VK_LEFT);
 
-        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_RIGHT);
-        assertEquals(247, subject.read(CIA1.PRB).intValue());
-        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_RIGHT);
+        subject.joy1KeyPressed(Joy1Key.VK_RIGHT);
+        assertEquals(247, subject.getPRBPin());
+        subject.joy1KeyReleased(Joy1Key.VK_RIGHT);
 
-        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_FIRE);
-        assertEquals(239, subject.read(CIA1.PRB).intValue());
-        subject.getJoy1KeyListener().joy1KeyReleased(Joy1Key.VK_FIRE);
+        subject.joy1KeyPressed(Joy1Key.VK_FIRE);
+        assertEquals(239, subject.getPRBPin());
+        subject.joy1KeyReleased(Joy1Key.VK_FIRE);
     }
 
     /***
@@ -269,28 +268,28 @@ public class KeyboardTest {
      */
     @Test
     public void testPortA_forJoy2_whenKeyboardPartiallyDisabled() {
-        subject.write(CIA1.DDRA, 224); // output and input
-        subject.write(CIA1.PRA, 127);
+        subject.setDDRA(224); // output and input
+        subject.setPRA(127);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_UP);
-        assertEquals(126, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_UP);
+        subject.joy2KeyPressed(Joy2Key.VK_UP);
+        assertEquals(126, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_UP);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_DOWN);
-        assertEquals(125, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_DOWN);
+        subject.joy2KeyPressed(Joy2Key.VK_DOWN);
+        assertEquals(125, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_DOWN);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_LEFT);
-        assertEquals(123, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_LEFT);
+        subject.joy2KeyPressed(Joy2Key.VK_LEFT);
+        assertEquals(123, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_LEFT);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_RIGHT);
-        assertEquals(119, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_RIGHT);
+        subject.joy2KeyPressed(Joy2Key.VK_RIGHT);
+        assertEquals(119, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_RIGHT);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_FIRE);
-        assertEquals(111, subject.read(CIA1.PRA).intValue());
-        subject.getJoy2KeyListener().joy2KeyReleased(Joy2Key.VK_FIRE);
+        subject.joy2KeyPressed(Joy2Key.VK_FIRE);
+        assertEquals(111, subject.getPRAPin());
+        subject.joy2KeyReleased(Joy2Key.VK_FIRE);
     }
 
     /***
@@ -298,89 +297,83 @@ public class KeyboardTest {
      */
     @Test
     public void testKeyboardForS_fromtAtoB() {
-        CIA1 subject = new CIA1();
-        subject.setEnabled(true);
-
         // configure ports A and B
-        subject.write(CIA1.DDRA, 0xFF); // CIA#1 port A = outputs
-        subject.write(CIA1.DDRB, 0x00); // CIA#1 port B = inputs
+        subject.setDDRA(0xFF); // CIA#1 port A = outputs
+        subject.setDDRB(0x00); // CIA#1 port B = inputs
         // put a sequence for port A
-        subject.write(CIA1.PRA, 0b1111101); // testing row 1 (ROW1) of the matrix
+        subject.setPRA(0b1111101); // testing row 1 (ROW1) of the matrix
 
         // press S key
-        subject.getKeyListener().keyPressed(Key.VK_S);
+        subject.keyPressed(Key.VK_S);
         // check if PortB contains a correct value
-        assertEquals(0b11011111, subject.read(CIA1.PRB).intValue());
+        assertEquals(0b11011111, subject.getPRBPin());
 
         // release S key
-        subject.getKeyListener().keyReleased(Key.VK_S);
+        subject.keyReleased(Key.VK_S);
         // check if PortB contains a correct value
-        assertEquals(0b11111111, subject.read(CIA1.PRB).intValue());
+        assertEquals(0b11111111, subject.getPRBPin());
     }
 
     @Test
     public void testKeyboardForS_fromBtoA() {
-        CIA1 subject = new CIA1();
-        subject.setEnabled(true);
-
         // configure ports A and B
-        subject.write(CIA1.DDRB, 0xFF); // CIA#1 port B = outputs
-        subject.write(CIA1.DDRA, 0x00); // CIA#1 port A = inputs
+        subject.setDDRB(0xFF); // CIA#1 port B = outputs
+        subject.setDDRA(0x00); // CIA#1 port A = inputs
         // put a sequence for port B
-        subject.write(CIA1.PRB, 0b11011111); // testing column 5 (COL5) of the matrix
+        subject.setPRB(0b11011111); // testing column 5 (COL5) of the matrix
 
         // perform a click of S key
-        subject.getKeyListener().keyPressed(Key.VK_S);
+        subject.keyPressed(Key.VK_S);
         // check if PortA contains a correct value
-        assertEquals(0b11111101, subject.read(CIA1.PRA).intValue());
+        assertEquals(0b11111101, subject.getPRAPin());
 
         // release S key
-        subject.getKeyListener().keyReleased(Key.VK_S);
+        subject.keyReleased(Key.VK_S);
         // check if PortB contains a correct value
-        assertEquals(0b11111111, subject.read(CIA1.PRA).intValue());
+        assertEquals(0b11111111, subject.getPRAPin());
     }
 
     /* TEST RICK DANGEROUS REAL LIFE SCENARIO */
     @Test
     public void testPortA_forJoy2_forRickDangerous2CreditsScreen_whenNoKeyPressed() {
-        subject.write(CIA1.DDRA, 0xFF); // PortA as output
-        subject.write(CIA1.DDRB, 0x00); // PortB as input
-        subject.write(CIA1.PRA, 127);
-        subject.write(CIA1.PRB, 251);
+        subject.setDDRA(0xFF); // PortA as output
+        subject.setDDRB(0x00); // PortB as input
+        subject.setPRA(127);
+        subject.setPRB(251);
 
-        assertEquals(0b01111111, subject.read(CIA1.PRA).intValue());
+        assertEquals(0b01111111, subject.getPRAPin());
     }
 
     @Test
     public void testPortA_forJoy2_forRickDangerous2CreditsScreen_whenFirePressed() {
         // configure Port A and B
-        subject.write(CIA1.DDRA, 0xFF); // PortA as output
-        subject.write(CIA1.DDRB, 0x00); // PortB as input
-        subject.write(CIA1.PRA, 127);
-        subject.write(CIA1.PRB, 251);
+        subject.setDDRA(0xFF); // PortA as output
+        subject.setDDRB(0x00); // PortB as input
+        subject.setPRA(127);
+        subject.setPRB(251);
 
-        subject.getJoy2KeyListener().joy2KeyPressed(Joy2Key.VK_FIRE);
-        assertEquals(111, subject.read(CIA1.PRA).intValue());
+        subject.joy2KeyPressed(Joy2Key.VK_FIRE);
+        assertEquals(111, subject.getPRAPin());
     }
 
     @Test
     public void testPortB_forJoy1_forRickDangerous2CreditsScreen_whenNoKeyPressed() {
-        subject.write(CIA1.DDRB, 0xFF); // PortA as output
-        subject.write(CIA1.DDRA, 0x00); // PortB as input
-        subject.write(CIA1.PRB, 127);
-        subject.write(CIA1.PRA, 251);
+        subject.setDDRA(0xFF); // PortA as output
+        subject.setDDRA(0x00); // PortB as input
+        subject.setPRB(127);
+        subject.setPRA(251);
 
-        assertEquals(0b01111111, subject.read(CIA1.PRB).intValue());
+        assertEquals(0b01111111, subject.getPRBPin());
     }
 
     @Test
     public void testPortB_forJoy1_forRickDangerous2CreditsScreen_whenFirePressed() {
-        subject.write(CIA1.DDRB, 0xFF); // PortA as output
-        subject.write(CIA1.DDRA, 0x00); // PortB as input
-        subject.write(CIA1.PRB, 127);
-        subject.write(CIA1.PRA, 251);
+        subject.setDDRB(0xFF); // PortA as output
+        subject.setDDRA(0x00); // PortB as input
+        subject.setPRB(127);
+        subject.setPRA(251);
 
-        subject.getJoy1KeyListener().joy1KeyPressed(Joy1Key.VK_FIRE);
-        assertEquals(111, subject.read(CIA1.PRB).intValue());
+        subject.joy1KeyPressed(Joy1Key.VK_FIRE);
+        assertEquals(111, subject.getPRBPin());
     }
 }
