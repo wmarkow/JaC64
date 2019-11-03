@@ -8,8 +8,6 @@ import com.dreamfabric.jac64.emu.TimeEvent;
 // Frodo emulator
 public class Timer {
 
-    public static final boolean TIMER_DEBUG = false; // true;
-
     // The states of the timer
     private static final int STOP = 0;
     private static final int WAIT = 1;
@@ -40,7 +38,6 @@ public class Timer {
     private boolean countUnderflow = false;
 
     private EventQueue scheduler;
-    private CIA cia;
 
     TimeEvent updateEvent = new TimeEvent(0) {
         public void execute(long cycles) {
@@ -58,14 +55,17 @@ public class Timer {
     String id;
     int iflag;
     boolean updateOther;
+    private TimerListenerIf timerListener;
 
-    public Timer(String id, int flag, boolean uo, Timer other, EventQueue scheduler, CIA cia) {
+    public Timer(String id, boolean uo, Timer other, EventQueue scheduler) {
         this.id = id;
         this.otherTimer = other;
-        this.iflag = flag;
         updateOther = uo;
         this.scheduler = scheduler;
-        this.cia = cia;
+    }
+
+    public void setTimerListener(TimerListenerIf timerListener) {
+        this.timerListener = timerListener;
     }
 
     public void reset() {
@@ -118,18 +118,9 @@ public class Timer {
     private void loadTimer(long cycles) {
         timer = latch;
         nextZero = cycles + latch;
-
-        if (TIMER_DEBUG && cia.offset == 0x10d00) {
-            System.out.println(cia.ciaID() + ": " + id + " - timer loaded at " + cycles + " with: " + latch + " diff "
-                    + (cycles - lastLatch));
-            lastLatch = cycles;
-        }
     }
 
     private void triggerInterrupt(long cycles) {
-        if (TIMER_DEBUG && cia.offset == 0x10d00)
-            System.out.println(cia.ciaID() + ": " + id + " - trigger interrupt at: " + cycles + " nextZero: " + nextZero
-                    + " nextUpdate: " + nextUpdate);
         interruptNext = true;
         underflow = true;
         flipflop = !flipflop;
@@ -170,8 +161,6 @@ public class Timer {
             // As long as cycles is larger than next update, just continue
             // call it!
             while (cycles >= nextUpdate) {
-                System.out.println(cia.ciaID() + ": " + id + " ** update at: " + cycles + " expected: " + nextUpdate
-                        + " state: " + state);
                 update(nextUpdate);
             }
         }
@@ -193,10 +182,8 @@ public class Timer {
         underflow = false;
         nextUpdate = cycles + 1;
         if (interruptNext) {
-            cia.ciaicrRead |= iflag;
             interruptNext = false;
-            // Trigg the stuff...
-            cia.updateInterrupts();
+            timerListener.onTimerUnderflow();
         }
         // Update timer...
         getTimer(cycles);

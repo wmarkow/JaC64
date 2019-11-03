@@ -4,8 +4,8 @@ import com.dreamfabric.jac64.emu.EventQueue;
 
 public class TimerA extends Timer {
 
-    public TimerA(String id, int flag, boolean uo, Timer other, EventQueue scheduler, CIA cia) {
-        super(id, flag, uo, other, scheduler, cia);
+    public TimerA(String id, boolean uo, Timer other, EventQueue scheduler) {
+        super(id, uo, other, scheduler);
     }
 
     public void setCR(long cycles, int data) {

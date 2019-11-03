@@ -39,6 +39,8 @@ public class CIA {
     public static final int CRA = 0x0e;
     public static final int CRB = 0x0f;
 
+    private final static int INTERRUPT_ORIGIN_TIMER_A_UNDERFLOW_VALUE = 1;
+    private final static int INTERRUPT_ORIGIN_TIMER_B_UNDERFLOW_VALUE = 2;
     private Timer timerA;
     private Timer timerB;
     private RealTimeClock rtc;
@@ -50,7 +52,7 @@ public class CIA {
     int sdr;
 
     // For the CPU to read (contains status)
-    int ciaicrRead;
+    private int ciaicrRead;
     int ciaie = 0; // interrupt enable
 
     // B-Div is set if mode (bit 5,6 of CIACRB) = 10
@@ -71,10 +73,28 @@ public class CIA {
     public CIA(MOS6510Core cpu, int offset, ExtChip chips) {
         this.offset = offset;
         this.chips = chips;
-        timerA = new TimerA("TimerA", 1, true, null, cpu.getScheduler(), this);
-        timerB = new TimerB("TimerB", 2, false, timerA, cpu.getScheduler(), this);
+        timerA = new TimerA("TimerA", true, null, cpu.getScheduler());
+        timerB = new TimerB("TimerB", false, timerA, cpu.getScheduler());
         timerA.otherTimer = timerB;
         rtc = new RealTimeClock(cpu.getScheduler(), cpu.cycles);
+
+        timerA.setTimerListener(new TimerListenerIf() {
+
+            @Override
+            public void onTimerUnderflow() {
+                ciaicrRead |= INTERRUPT_ORIGIN_TIMER_A_UNDERFLOW_VALUE;
+                updateInterrupts();
+            }
+        });
+
+        timerB.setTimerListener(new TimerListenerIf() {
+
+            @Override
+            public void onTimerUnderflow() {
+                ciaicrRead |= INTERRUPT_ORIGIN_TIMER_B_UNDERFLOW_VALUE;
+                updateInterrupts();
+            }
+        });
     }
 
     public void reset() {
@@ -143,8 +163,6 @@ public class CIA {
                 return timerB.getCR();
             case ICR:
                 // Clear interrupt register (flags)!
-                if (Timer.TIMER_DEBUG && offset == 0x10d00)
-                    println("clear Interrupt register, was: " + Hex.hex2(ciaicrRead));
                 int val = ciaicrRead;
                 ciaicrRead = 0;
 
