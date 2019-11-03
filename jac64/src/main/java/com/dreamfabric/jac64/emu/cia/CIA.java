@@ -39,8 +39,8 @@ public class CIA {
     public static final int CRA = 0x0e;
     public static final int CRB = 0x0f;
 
-    private CIATimer timerA;
-    private CIATimer timerB;
+    private Timer timerA;
+    private Timer timerB;
     private RealTimeClock rtc;
 
     int pra = 0;
@@ -71,8 +71,8 @@ public class CIA {
     public CIA(MOS6510Core cpu, int offset, ExtChip chips) {
         this.offset = offset;
         this.chips = chips;
-        timerA = new CIATimer("TimerA", 1, true, null, cpu.getScheduler(), this);
-        timerB = new CIATimer("TimerB", 2, false, timerA, cpu.getScheduler(), this);
+        timerA = new TimerA("TimerA", 1, true, null, cpu.getScheduler(), this);
+        timerB = new TimerB("TimerB", 2, false, timerA, cpu.getScheduler(), this);
         timerA.otherTimer = timerB;
         rtc = new RealTimeClock(cpu.getScheduler(), cpu.cycles);
     }
@@ -143,7 +143,7 @@ public class CIA {
                 return timerB.getCR();
             case ICR:
                 // Clear interrupt register (flags)!
-                if (CIATimer.TIMER_DEBUG && offset == 0x10d00)
+                if (Timer.TIMER_DEBUG && offset == 0x10d00)
                     println("clear Interrupt register, was: " + Hex.hex2(ciaicrRead));
                 int val = ciaicrRead;
                 ciaicrRead = 0;
@@ -220,13 +220,9 @@ public class CIA {
                 break;
             case CRA:
                 timerA.setCR(cycles, data);
-                timerA.setCountCycles((data & 0x20) == 0);
                 break;
-
             case CRB:
                 timerB.setCR(cycles, data);
-                timerB.setCountCycles((data & 0x60) == 0);
-                timerB.setCountUnderflow((data & 0x60) == 0x40);
                 break;
         }
     }

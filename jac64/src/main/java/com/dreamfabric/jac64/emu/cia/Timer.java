@@ -6,7 +6,7 @@ import com.dreamfabric.jac64.emu.TimeEvent;
 //A timer class for handling the Timer state machines
 // The CIATimer is inspired by the CIA Timer State Machine in the
 // Frodo emulator
-public class CIATimer {
+public class Timer {
 
     public static final boolean TIMER_DEBUG = false; // true;
 
@@ -20,7 +20,7 @@ public class CIATimer {
     private static final int COUNT_STOP = 7;
 
     // If timer is connected...
-    CIATimer otherTimer;
+    Timer otherTimer;
 
     int state = STOP;
     // The latch for this timer
@@ -59,7 +59,7 @@ public class CIATimer {
     int iflag;
     boolean updateOther;
 
-    CIATimer(String id, int flag, boolean uo, CIATimer other, EventQueue scheduler, CIA cia) {
+    public Timer(String id, int flag, boolean uo, Timer other, EventQueue scheduler, CIA cia) {
         this.id = id;
         this.otherTimer = other;
         this.iflag = flag;
@@ -106,7 +106,7 @@ public class CIATimer {
 
     public void setLatchHighByte(int value) {
         latch = (latch & 0xff) | (value << 8);
-        if (state == CIATimer.STOP) {
+        if (state == Timer.STOP) {
             timer = latch;
         }
     }
