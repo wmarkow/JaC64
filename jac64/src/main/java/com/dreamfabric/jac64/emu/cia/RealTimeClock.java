@@ -1,6 +1,6 @@
 package com.dreamfabric.jac64.emu.cia;
 
-import com.dreamfabric.jac64.emu.C64Thread;
+import java.util.TimerTask;
 
 public class RealTimeClock {
 
@@ -9,8 +9,7 @@ public class RealTimeClock {
     private int todmin = 0;
     private int todhour = 0;
 
-    private long nextExecInMillis = 0;
-    private RTCThread thread;
+    private java.util.Timer timer;
 
     public RealTimeClock() {
         start();
@@ -56,21 +55,13 @@ public class RealTimeClock {
     }
 
     public void start() {
-        if (thread != null && thread.isAlive()) {
-            return;
+        if (timer == null) {
+            timer = new java.util.Timer();
+            timer.schedule(new RTCTimerTask(), 100, 100);
         }
-
-        thread = new RTCThread();
-        thread.start();
     }
 
     private void execute() {
-        if (System.currentTimeMillis() < nextExecInMillis) {
-            return;
-        }
-        // Approx a tenth of a second...
-        nextExecInMillis = System.currentTimeMillis() + 100;
-
         int tmp = (tod10sec & 0x0f) + 1;
         tod10sec = tmp % 10;
         if (tmp > 9) {
@@ -111,14 +102,10 @@ public class RealTimeClock {
         // (todmin>>4) + (todmin&0xf) + ":" + (todsec>>4) + (todsec&0xf));
     }
 
-    private class RTCThread extends C64Thread {
-
-        public RTCThread() {
-            super("RTC Thread");
-        }
+    private class RTCTimerTask extends TimerTask {
 
         @Override
-        public void executeInLoop() {
+        public void run() {
             execute();
         }
     }
