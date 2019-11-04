@@ -1,7 +1,5 @@
 package com.dreamfabric.jac64.emu.interrupt;
 
-import java.util.Hashtable;
-
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 
 public class InterruptManager {
@@ -13,9 +11,6 @@ public class InterruptManager {
     public static final int KEYBOARD_NMI = 1;
     public static final int CIA_TIMER_NMI = 2;
 
-    // One InterruptManager per named CPU.
-    private static Hashtable<String, InterruptManager> managers = new Hashtable<String, InterruptManager>();
-
     private int nmiFlags;
     private int irqFlags;
     private int oldIrqFlags;
@@ -26,14 +21,6 @@ public class InterruptManager {
         this.cpu = cpu;
     }
 
-    public static InterruptManager getInterruptManager(MOS6510Core cpu) {
-        if (!managers.contains(cpu.getName())) {
-            managers.put(cpu.getName(), new InterruptManager(cpu));
-        }
-
-        return managers.get(cpu.getName());
-    }
-    
     public void reset() {
         nmiFlags = 0;
         irqFlags = 0;

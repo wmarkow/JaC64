@@ -107,14 +107,12 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     };
 
     public JaC64() {
-        Debugger monitor = new Debugger();
-
-        cpu = new CPU(monitor, "", new SELoader());
-        scr = new C64Screen(monitor, true);
+        cpu = C64Emulation.getCpu();
+        scr = new C64Screen(C64Emulation.getMonitor(), true);
         cpu.init(scr);
 
         // Reader available after init!
-        scr.init(cpu);
+        scr.init(cpu, C64Emulation.getInterruptManager());
 
         registerHotKey(KeyEvent.VK_BACK_SPACE, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK, "reset()", cpu);
         registerHotKey(KeyEvent.VK_F12, KeyEvent.CTRL_DOWN_MASK, "toggleFullScreen()", this);

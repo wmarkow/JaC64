@@ -6,12 +6,15 @@ import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dreamfabric.c64utils.Debugger;
 import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.SELoader;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.cia.CIA1;
+import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.cpu.M6510Ops;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Ops;
+import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
 import com.dreamfabric.jac64.emu.memory.CharROM;
@@ -25,6 +28,11 @@ public class C64Emulation {
     private static Logger LOGGER = LoggerFactory.getLogger(C64Emulation.class);
 
     public final static int CPUFrq = 985248;
+
+    private static Debugger monitor = new Debugger();
+    private static CPU cpu = new CPU(monitor, "", new SELoader());
+    // One InterruptManager per named CPU. For now just one interrupt manager.
+    private static InterruptManager interruptManager = new InterruptManager(cpu);
     private static AddressableBus addressableBus = new AddressableBus();
 
     private static PLA pla = new PLA();
@@ -54,6 +62,14 @@ public class C64Emulation {
         addressableBus.setCharRom(charROM);
     }
 
+    public static CPU getCpu() {
+        return cpu;
+    }
+
+    public static InterruptManager getInterruptManager() {
+        return interruptManager;
+    }
+
     public static PLA getPla() {
         return pla;
     }
@@ -74,8 +90,8 @@ public class C64Emulation {
         return cia1;
     }
 
-    public static CharROM getCharRom() {
-        return charROM;
+    public static Debugger getMonitor() {
+        return monitor;
     }
 
     public static void installROMs() {

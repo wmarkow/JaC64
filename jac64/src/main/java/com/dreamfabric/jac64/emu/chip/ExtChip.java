@@ -29,9 +29,9 @@ public abstract class ExtChip {
     private Observer observer;
     private InterruptManager im;
 
-    public void init(MOS6510Core cpu) {
-        im = InterruptManager.getInterruptManager(cpu);
+    public void init(MOS6510Core cpu, InterruptManager interruptManager) {
         this.cpu = cpu;
+        this.im = interruptManager;
     }
 
     public int getNMIFlags() {

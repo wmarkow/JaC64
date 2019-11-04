@@ -341,8 +341,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         monitor.info("Next IO update: " + nextIOUpdate);
     }
 
-    public void init(CPU cpu) {
-        super.init(cpu);
+    public void init(CPU cpu, InterruptManager interruptManager) {
+        super.init(cpu, interruptManager);
 
         this.memory = cpu.getMemory();
 
