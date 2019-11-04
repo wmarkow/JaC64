@@ -505,9 +505,9 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 return val;
             default:
                 if (pos == 0xd) {
-                    return cia[1].performRead(address + IO_OFFSET, currentCpuCycles);
+                    return cia[1].performRead(address, currentCpuCycles);
                 } else if (pos == 0xc) {
-                    return cia[0].performRead(address + IO_OFFSET, currentCpuCycles);
+                    return cia[0].performRead(address, currentCpuCycles);
                 } else if (pos >= 0x8) {
                     return getMemory(IO_OFFSET + address) | 0xf0;
                 }
@@ -764,7 +764,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 if (VIC_MEM_DEBUG)
                     System.out.println("Set dd00 to " + Integer.toHexString(data));
 
-                cia[1].performWrite(address + IO_OFFSET, data, cpu.currentCpuCycles);
+                cia[1].performWrite(address, data, cpu.currentCpuCycles);
                 cia2PRA = data;
 
                 data = ~cia2PRA & cia2DDRA;
@@ -782,15 +782,15 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 cia2DDRA = data;
                 // System.out.println("C64: Wrote to DDRA (IEC): " +
                 // Integer.toHexString(data));
-                cia[1].performWrite(address + IO_OFFSET, data, cpu.currentCpuCycles);
+                cia[1].performWrite(address, data, cpu.currentCpuCycles);
                 setVideoMem();
                 break;
 
             default:
                 if (pos == 0xd) {
-                    cia[1].performWrite(address + IO_OFFSET, data, currentCpuCycles);
+                    cia[1].performWrite(address, data, currentCpuCycles);
                 } else if (pos == 0xc) {
-                    cia[0].performWrite(address + IO_OFFSET, data, currentCpuCycles);
+                    cia[0].performWrite(address, data, currentCpuCycles);
                 }
                 // handle color ram!
         }
