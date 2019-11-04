@@ -30,6 +30,8 @@ import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Observer;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
+import com.dreamfabric.jac64.emu.cia.CCIA1;
+import com.dreamfabric.jac64.emu.cia.CCIA2;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 
@@ -352,8 +354,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         }
 
         cia = new CIA[2];
-        cia[0] = new CIA(cpu.getScheduler(), IO_OFFSET + 0xdc00, getInterruptManager());
-        cia[1] = new CIA(cpu.getScheduler(), IO_OFFSET + 0xdd00, getInterruptManager());
+        cia[0] = new CCIA1(cpu.getScheduler(), getInterruptManager());
+        cia[1] = new CCIA2(cpu.getScheduler(), getInterruptManager());
 
         // c1541 = new C1541(memory);
         // c1541.addObserver(this);

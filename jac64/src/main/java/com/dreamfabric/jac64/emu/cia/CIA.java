@@ -10,7 +10,6 @@ package com.dreamfabric.jac64.emu.cia;
 import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.emu.EventQueue;
 import com.dreamfabric.jac64.emu.SimulableIf;
-import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 
 /**
@@ -21,7 +20,7 @@ import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
  * @author Joakim Eriksson
  * @version 1.0
  */
-public class CIA implements SimulableIf {
+public abstract class CIA implements SimulableIf {
     public static final boolean WRITE_DEBUG = false; // true;
 
     public static final int PRA = 0x00;

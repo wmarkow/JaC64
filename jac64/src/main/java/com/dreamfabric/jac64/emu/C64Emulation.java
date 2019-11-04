@@ -10,6 +10,7 @@ import com.dreamfabric.c64utils.Debugger;
 import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.SELoader;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
+import com.dreamfabric.jac64.emu.cia.CCIA1;
 import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.cpu.M6510Ops;
