@@ -67,12 +67,20 @@ public class CPU extends MOS6510Core {
     private int cheatMon[];
     private AutoStore[] autoStore;
 
-    private PLA pla = C64Emulation.getPla();
-    private AddressableBus addressableBus = C64Emulation.getAddressableBus();
+    private PLA pla;
+    private AddressableBus addressableBus;
 
     public CPU(IMonitor m, String cb, Loader loader) {
         super(m, cb);
         this.loader = loader;
+    }
+    
+    public void setPla(PLA pla) {
+        this.pla = pla;
+    }
+
+    public void setAddressableBus(AddressableBus addressableBus) {
+        this.addressableBus = addressableBus;
     }
 
     private final void schedule(long cycles) {

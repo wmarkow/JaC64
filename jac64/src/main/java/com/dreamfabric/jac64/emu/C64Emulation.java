@@ -60,6 +60,10 @@ public class C64Emulation {
         addressableBus.setBasicRom(basicROM);
         addressableBus.setKernalRom(kernalROM);
         addressableBus.setCharRom(charROM);
+        
+        // prepare CPU
+        cpu.setPla(pla);
+        cpu.setAddressableBus(addressableBus);
     }
 
     public static CPU getCpu() {
