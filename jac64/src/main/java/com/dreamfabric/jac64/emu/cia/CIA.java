@@ -8,6 +8,7 @@
 package com.dreamfabric.jac64.emu.cia;
 
 import com.dreamfabric.jac64.Hex;
+import com.dreamfabric.jac64.emu.EventQueue;
 import com.dreamfabric.jac64.emu.SimulableIf;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
@@ -71,13 +72,13 @@ public class CIA implements SimulableIf {
      * Creates a new <code>CIA</code> instance.
      *
      */
-    public CIA(MOS6510Core cpu, int offset, InterruptManager interruptManager) {
+    public CIA(EventQueue scheduler, int offset, InterruptManager interruptManager) {
         this.offset = offset;
         this.interruptManager = interruptManager;
-        timerA = new TimerA("TimerA", true, null, cpu.getScheduler());
-        timerB = new TimerB("TimerB", false, timerA, cpu.getScheduler());
+        timerA = new TimerA("TimerA", true, null, scheduler);
+        timerB = new TimerB("TimerB", false, timerA, scheduler);
         timerA.otherTimer = timerB;
-        rtc = new RealTimeClock(cpu.getScheduler());
+        rtc = new RealTimeClock(scheduler);
 
         timerA.setTimerListener(new TimerListenerIf() {
 
@@ -108,7 +109,7 @@ public class CIA implements SimulableIf {
     @Override
     public void stop() {
     }
-    
+
     @Override
     public void reset() {
         ciaicrRead = 0;

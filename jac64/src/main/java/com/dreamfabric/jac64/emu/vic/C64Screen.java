@@ -352,8 +352,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         }
 
         cia = new CIA[2];
-        cia[0] = new CIA(cpu, IO_OFFSET + 0xdc00, getInterruptManager());
-        cia[1] = new CIA(cpu, IO_OFFSET + 0xdd00, getInterruptManager());
+        cia[0] = new CIA(cpu.getScheduler(), IO_OFFSET + 0xdc00, getInterruptManager());
+        cia[1] = new CIA(cpu.getScheduler(), IO_OFFSET + 0xdd00, getInterruptManager());
 
         // c1541 = new C1541(memory);
         // c1541.addObserver(this);
