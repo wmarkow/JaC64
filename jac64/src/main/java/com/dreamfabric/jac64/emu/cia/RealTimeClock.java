@@ -1,7 +1,6 @@
 package com.dreamfabric.jac64.emu.cia;
 
-import com.dreamfabric.jac64.emu.EventQueue;
-import com.dreamfabric.jac64.emu.TimeEvent;
+import com.dreamfabric.jac64.emu.C64Thread;
 
 public class RealTimeClock {
 
@@ -10,13 +9,11 @@ public class RealTimeClock {
     private int todmin = 0;
     private int todhour = 0;
 
-    private EventQueue scheduler;
+    private long nextExecInMillis = 0;
+    private RTCThread thread;
 
-    public RealTimeClock(EventQueue scheduler, long cycles) {
-        this.scheduler = scheduler;
-
-        todEvent.setTime(cycles + 10000);
-        scheduler.addEvent(todEvent);
+    public RealTimeClock() {
+        start();
     }
 
     public void reset() {
@@ -58,56 +55,71 @@ public class RealTimeClock {
         this.todhour = todhour;
     }
 
-    public TimeEvent getTodEvent() {
-        return todEvent;
+    public void start() {
+        if (thread != null && thread.isAlive()) {
+            return;
+        }
+
+        thread = new RTCThread();
+        thread.start();
     }
 
-    public void setTodEvent(TimeEvent todEvent) {
-        this.todEvent = todEvent;
-    }
+    private void execute() {
+        if (System.currentTimeMillis() < nextExecInMillis) {
+            return;
+        }
+        // Approx a tenth of a second...
+        nextExecInMillis = System.currentTimeMillis() + 100;
 
-    private TimeEvent todEvent = new TimeEvent(0) {
-        public void execute(long cycle) {
-            time = time + 100000; // Approx a tenth of a second...
-            int tmp = (tod10sec & 0x0f) + 1;
-            tod10sec = tmp % 10;
-            if (tmp > 9) {
-                // Maxval == 0x59
-                tmp = (todsec & 0x7f) + 1;
+        int tmp = (tod10sec & 0x0f) + 1;
+        tod10sec = tmp % 10;
+        if (tmp > 9) {
+            // Maxval == 0x59
+            tmp = (todsec & 0x7f) + 1;
+            if ((tmp & 0x0f) > 9)
+                tmp += 0x06;
+            if (tmp > 0x59)
+                tmp = 0;
+            todsec = tmp;
+            // Wrapped seconds...
+            // Minutes inc - max 0x59
+            if (tmp == 0) {
+                tmp = (todmin & 0x7f) + 1;
                 if ((tmp & 0x0f) > 9)
                     tmp += 0x06;
                 if (tmp > 0x59)
                     tmp = 0;
-                todsec = tmp;
-                // Wrapped seconds...
-                // Minutes inc - max 0x59
+                todmin = tmp;
+
+                // Hours, max 0x12
                 if (tmp == 0) {
-                    tmp = (todmin & 0x7f) + 1;
+                    tmp = (todhour & 0x1f) + 1;
                     if ((tmp & 0x0f) > 9)
                         tmp += 0x06;
-                    if (tmp > 0x59)
+
+                    if (tmp > 0x11)
                         tmp = 0;
-                    todmin = tmp;
-
-                    // Hours, max 0x12
-                    if (tmp == 0) {
-                        tmp = (todhour & 0x1f) + 1;
-                        if ((tmp & 0x0f) > 9)
-                            tmp += 0x06;
-
-                        if (tmp > 0x11)
-                            tmp = 0;
-                        // how is hour? 1 - 12 or 0 - 11 ??
-                        todhour = tmp;
-                    }
+                    // how is hour? 1 - 12 or 0 - 11 ??
+                    todhour = tmp;
                 }
             }
-
-            // TODO: fix alarms and latches !!
-            // Since this should continue run, just reschedule...
-            // System.out.println("TOD ticked..." + (todhour>>4) + (todhour & 0xf) + ":" +
-            // (todmin>>4) + (todmin&0xf) + ":" + (todsec>>4) + (todsec&0xf));
-            scheduler.addEvent(this);
         }
-    };
+
+        // TODO: fix alarms and latches !!
+        // Since this should continue run, just reschedule...
+        // System.out.println("TOD ticked..." + (todhour>>4) + (todhour & 0xf) + ":" +
+        // (todmin>>4) + (todmin&0xf) + ":" + (todsec>>4) + (todsec&0xf));
+    }
+
+    private class RTCThread extends C64Thread {
+
+        public RTCThread() {
+            super("RTC Thread");
+        }
+
+        @Override
+        public void executeInLoop() {
+            execute();
+        }
+    }
 }

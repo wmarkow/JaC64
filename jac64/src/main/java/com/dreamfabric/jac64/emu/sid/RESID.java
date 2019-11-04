@@ -1,5 +1,6 @@
 package com.dreamfabric.jac64.emu.sid;
 
+import com.dreamfabric.jac64.emu.C64Thread;
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
 import com.dreamfabric.resid.ISIDDefs;
 import com.dreamfabric.resid.ISIDDefs.sampling_method;
@@ -127,29 +128,15 @@ public class RESID extends AddressableChip implements SIDIf {
         pos = 0;
     }
 
-    private class RESIDThread extends Thread {
-
-        private boolean running = false;
+    private class RESIDThread extends C64Thread {
 
         public RESIDThread() {
             super("reSID Thread");
         }
 
         @Override
-        public void run() {
-            while (running) {
-                execute();
-            }
-        }
-
-        @Override
-        public synchronized void start() {
-            running = true;
-            super.start();
-        }
-
-        public synchronized void forceStop() {
-            running = false;
+        public void executeInLoop() {
+            execute();
         }
     }
 }

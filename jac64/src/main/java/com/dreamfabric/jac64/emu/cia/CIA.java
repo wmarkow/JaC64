@@ -76,7 +76,7 @@ public class CIA {
         timerA = new TimerA("TimerA", true, null, cpu.getScheduler());
         timerB = new TimerB("TimerB", false, timerA, cpu.getScheduler());
         timerA.otherTimer = timerB;
-        rtc = new RealTimeClock(cpu.getScheduler(), cpu.cycles);
+        rtc = new RealTimeClock();
 
         timerA.setTimerListener(new TimerListenerIf() {
 
