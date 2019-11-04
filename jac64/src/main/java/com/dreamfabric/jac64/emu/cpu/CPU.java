@@ -74,7 +74,7 @@ public class CPU extends MOS6510Core {
         super(m, cb);
         this.loader = loader;
     }
-    
+
     public void setPla(PLA pla) {
         this.pla = pla;
     }
@@ -83,16 +83,16 @@ public class CPU extends MOS6510Core {
         this.addressableBus = addressableBus;
     }
 
-    private final void schedule(long cycles) {
-        chips.clock(cycles);
-        while (cycles >= scheduler.nextTime) {
+    private final void schedule(long currentCpuCycles) {
+        chips.clock(currentCpuCycles);
+        while (currentCpuCycles >= scheduler.nextTime) {
             TimeEvent t = scheduler.popFirst();
             if (t != null) {
                 if (DEBUG_EVENT) {
                     System.out.println("Executing event: " + t.getShort());
                 }
                 // Give it the actual time also!!!
-                t.execute(cycles);
+                t.execute(currentCpuCycles);
             } else {
                 if (DEBUG_EVENT)
                     System.out.println("Nothign to execute...");
@@ -104,13 +104,13 @@ public class CPU extends MOS6510Core {
     // Reads the memory with all respect to all flags...
     protected final int fetchByte(int adr) {
         /* a cycles passes for this read */
-        cycles++;
+        currentCpuCycles++;
 
         /* Chips work first, then CPU */
-        schedule(cycles);
-        while (baLowUntil > cycles) {
-            cycles++;
-            schedule(cycles);
+        schedule(currentCpuCycles);
+        while (baLowUntil > currentCpuCycles) {
+            currentCpuCycles++;
+            schedule(currentCpuCycles);
         }
 
         // START: a new way of reading data from SID.
@@ -131,16 +131,16 @@ public class CPU extends MOS6510Core {
             throw new IllegalArgumentException("should never happen because Char ROM is handled by addressable bus");
         }
         if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
-            return chips.performRead(adr, cycles);
+            return chips.performRead(adr, currentCpuCycles);
         }
         return getMemory(adr);
     }
 
     // A byte is written directly to memory or to ioChips
     protected final void writeByte(int adr, int data) {
-        cycles++;
+        currentCpuCycles++;
 
-        schedule(cycles);
+        schedule(currentCpuCycles);
         // Locking only on fetch byte...
         // System.out.println("Writing byte at: " + Integer.toString(adr, 16)
         // + " = " + data);
@@ -182,7 +182,7 @@ public class CPU extends MOS6510Core {
         adr &= 0xffff;
         if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
             // System.out.println("IO Write at: " + Integer.toString(adr, 16));
-            chips.performWrite(adr, data, cycles);
+            chips.performWrite(adr, data, currentCpuCycles);
 
             return;
         }
@@ -279,7 +279,7 @@ public class CPU extends MOS6510Core {
     public void unknownInstruction(int pc, int op) {
         switch (op) {
             case SLEEP:
-                cycles += 100;
+                currentCpuCycles += 100;
                 break;
             case LOAD_FILE:
                 if (acc == 0)
@@ -376,18 +376,18 @@ public class CPU extends MOS6510Core {
             cheatLoop();
             return;
         }
-        long next_print = cycles + CYCLES_PER_DEBUG;
+        long next_print = currentCpuCycles + CYCLES_PER_DEBUG;
         // How much should this be???
         monitor.info("Starting CPU at: " + Integer.toHexString(pc));
         try {
             SlowDownCalculator slowDownCalculator = new SlowDownCalculator(C64Emulation.CPUFrq);
 
             while (running) {
-                slowDownCalculator.markLoopStart(System.nanoTime(), cycles);
+                slowDownCalculator.markLoopStart(System.nanoTime(), currentCpuCycles);
 
                 // Debugging?
                 if (monitor.isEnabled()) { // || interruptInExec > 0) {
-                    if (baLowUntil <= cycles) {
+                    if (baLowUntil <= currentCpuCycles) {
                         monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(), interruptInExec,
                                 lastInterrupt);
                     }
@@ -397,15 +397,15 @@ public class CPU extends MOS6510Core {
                 emulateOp();
 
                 nr_ins++;
-                if (next_print < cycles) {
+                if (next_print < currentCpuCycles) {
                     long sec = System.currentTimeMillis() - lastMillis;
                     int level = monitor.getLevel();
 
                     if (DEBUG && level > 1) {
                         monitor.info("--------------------------");
                         monitor.info("Nr ins:" + nr_ins + " sec:" + (sec) + " -> " + ((nr_ins * 1000) / sec) + " ins/s"
-                                + "  " + " clk: " + cycles + " clk/s: " + ((CYCLES_PER_DEBUG * 1000) / sec) + "\n"
-                                + ((nr_irq * 1000) / sec));
+                                + "  " + " clk: " + currentCpuCycles + " clk/s: " + ((CYCLES_PER_DEBUG * 1000) / sec)
+                                + "\n" + ((nr_irq * 1000) / sec));
                         if (level > 2)
                             monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(), interruptInExec,
                                     lastInterrupt);
@@ -414,10 +414,10 @@ public class CPU extends MOS6510Core {
                     nr_irq = 0;
                     nr_ins = 0;
                     lastMillis = System.currentTimeMillis();
-                    next_print = cycles + CYCLES_PER_DEBUG;
+                    next_print = currentCpuCycles + CYCLES_PER_DEBUG;
                 }
 
-                long delay = slowDownCalculator.calculateWaitInNanos(System.nanoTime(), cycles);
+                long delay = slowDownCalculator.calculateWaitInNanos(System.nanoTime(), currentCpuCycles);
                 if (delay == 0) {
                     continue;
                 }

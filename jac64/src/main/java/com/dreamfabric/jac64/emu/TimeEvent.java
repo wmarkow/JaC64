@@ -8,29 +8,29 @@ public abstract class TimeEvent {
 
     String name;
 
-    protected long time;
+    protected long cpuCyclesTime;
 
-    public TimeEvent(long time) {
-        this.time = time;
+    public TimeEvent(long cpuCyclesTime) {
+        this.cpuCyclesTime = cpuCyclesTime;
     }
 
-    public TimeEvent(long time, String name) {
-        this.time = time;
+    public TimeEvent(long cpuCyclesTime, String name) {
+        this.cpuCyclesTime = cpuCyclesTime;
         this.name = name;
     }
 
     public final long getTime() {
-        return time;
+        return cpuCyclesTime;
     }
 
-    public void setTime(long time) {
-        this.time = time;
+    public void setTime(long cpuCyclesTime) {
+        this.cpuCyclesTime = cpuCyclesTime;
     }
 
-    public abstract void execute(long t);
+    public abstract void execute(long currentCpuCycles);
 
     public String getShort() {
-        return "" + time + (name != null ? ": " + name : "");
+        return "" + cpuCyclesTime + (name != null ? ": " + name : "");
     }
 
     public boolean isScheduled() {

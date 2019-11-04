@@ -337,7 +337,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         monitor.info("NMIFlags: " + getNMIFlags());
         monitor.info("CPU IRQLow: " + cpu.getIRQLow());
         monitor.info("CPU NMILow: " + cpu.NMILow);
-        monitor.info("Current CPU cycles: " + cpu.cycles);
+        monitor.info("Current CPU cycles: " + cpu.currentCpuCycles);
         monitor.info("Next IO update: " + nextIOUpdate);
     }
 
@@ -398,7 +398,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
             0xdc0f, 0xdd0f, 0xdeff, 0xdfff, // CIA + Expansion...
     };
 
-    public int performRead(int address, long cycles) {
+    public int performRead(int address, long currentCpuCycles) {
         validateAddress(address);
 
         // dX00 => and address
@@ -503,9 +503,9 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 return val;
             default:
                 if (pos == 0xd) {
-                    return cia[1].performRead(address + IO_OFFSET, cycles);
+                    return cia[1].performRead(address + IO_OFFSET, currentCpuCycles);
                 } else if (pos == 0xc) {
-                    return cia[0].performRead(address + IO_OFFSET, cycles);
+                    return cia[0].performRead(address + IO_OFFSET, currentCpuCycles);
                 } else if (pos >= 0x8) {
                     return getMemory(IO_OFFSET + address) | 0xf0;
                 }
@@ -513,7 +513,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         }
     }
 
-    public void performWrite(int address, int data, long cycles) {
+    public void performWrite(int address, int data, long currentCpuCycles) {
         validateAddress(address);
 
         int pos = (address >> 8) & 0xf;
@@ -582,8 +582,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                     badLine = (displayEnabled && vbeam >= 0x30 && vbeam <= 0xf7) && (vbeam & 0x7) == vScroll;
                     if (BAD_LINE_DEBUG && oldBadLine != badLine) {
                         monitor.info("#### BadLC diff@" + vbeam + " => " + badLine + " vScroll: " + vScroll + " vmli: "
-                                + vmli + " vc: " + vc + " rc: " + rc + " cyc line: " + (cpu.cycles - lastLine)
-                                + " cyc IRQ: " + (cpu.cycles - lastIRQ));
+                                + vmli + " vc: " + vc + " rc: " + rc + " cyc line: " + (cpu.currentCpuCycles - lastLine)
+                                + " cyc IRQ: " + (cpu.currentCpuCycles - lastIRQ));
                     }
                 }
 
@@ -600,9 +600,9 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 // vbeam + " d011: " + Hex.hex2(data));
 
                 if (VIC_MEM_DEBUG || BAD_LINE_DEBUG) {
-                    monitor.info(
-                            "d011 = " + data + " at " + vbeam + " => YScroll = " + (data & 0x7) + " cyc since line: "
-                                    + (cpu.cycles - lastLine) + " cyc since IRQ: " + (cpu.cycles - lastIRQ));
+                    monitor.info("d011 = " + data + " at " + vbeam + " => YScroll = " + (data & 0x7)
+                            + " cyc since line: " + (cpu.currentCpuCycles - lastLine) + " cyc since IRQ: "
+                            + (cpu.currentCpuCycles - lastIRQ));
                 }
                 if (IRQDEBUG)
                     monitor.info("Setting raster position (hi) to: " + (data & 0x80));
@@ -762,7 +762,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 if (VIC_MEM_DEBUG)
                     System.out.println("Set dd00 to " + Integer.toHexString(data));
 
-                cia[1].performWrite(address + IO_OFFSET, data, cpu.cycles);
+                cia[1].performWrite(address + IO_OFFSET, data, cpu.currentCpuCycles);
                 cia2PRA = data;
 
                 data = ~cia2PRA & cia2DDRA;
@@ -780,15 +780,15 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 cia2DDRA = data;
                 // System.out.println("C64: Wrote to DDRA (IEC): " +
                 // Integer.toHexString(data));
-                cia[1].performWrite(address + IO_OFFSET, data, cpu.cycles);
+                cia[1].performWrite(address + IO_OFFSET, data, cpu.currentCpuCycles);
                 setVideoMem();
                 break;
 
             default:
                 if (pos == 0xd) {
-                    cia[1].performWrite(address + IO_OFFSET, data, cycles);
+                    cia[1].performWrite(address + IO_OFFSET, data, currentCpuCycles);
                 } else if (pos == 0xc) {
-                    cia[0].performWrite(address + IO_OFFSET, data, cycles);
+                    cia[0].performWrite(address + IO_OFFSET, data, currentCpuCycles);
                 }
                 // handle color ram!
         }
@@ -811,8 +811,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     private void setVideoMem() {
         if (VIC_MEM_DEBUG) {
-            monitor.info("setVideoMem() cycles since line: " + (cpu.cycles - lastLine) + " cycles since IRQ: "
-                    + (cpu.cycles - lastIRQ) + " at " + vbeam);
+            monitor.info("setVideoMem() cycles since line: " + (cpu.currentCpuCycles - lastLine) + " cycles since IRQ: "
+                    + (cpu.currentCpuCycles - lastIRQ) + " at " + vbeam);
         }
         // Set-up vars for screen rendering
         vicBank = (~(~cia2DDRA | cia2PRA) & 3) << 14;
@@ -871,22 +871,22 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     private int xPos = 0;
     private long lastCycle = 0;
 
-    public final void clock(long cycles) {
+    public final void clock(long currentCpuCycles) {
         if (DEBUG_CYCLES || true) {
-            if (lastCycle + 1 < cycles) {
-                System.out.println("More than one cycle passed: " + (cycles - lastCycle) + " at " + cycles + " PC: "
-                        + Integer.toHexString(cpu.getPc()));
+            if (lastCycle + 1 < currentCpuCycles) {
+                System.out.println("More than one cycle passed: " + (currentCpuCycles - lastCycle) + " at "
+                        + currentCpuCycles + " PC: " + Integer.toHexString(cpu.getPc()));
             }
 
-            if (lastCycle == cycles) {
-                System.out.println("No diff since last update!!!: " + (cycles - lastCycle) + " at " + cycles + " PC: "
-                        + Integer.toHexString(cpu.getPc()));
+            if (lastCycle == currentCpuCycles) {
+                System.out.println("No diff since last update!!!: " + (currentCpuCycles - lastCycle) + " at "
+                        + currentCpuCycles + " PC: " + Integer.toHexString(cpu.getPc()));
             }
-            lastCycle = cycles;
+            lastCycle = currentCpuCycles;
         }
 
         // Delta is cycles into the current raster line!
-        int vicCycle = (int) (cycles - lastLine);
+        int vicCycle = (int) (currentCpuCycles - lastLine);
 
         if (notVisible) {
             if (vicCycle < 62)
@@ -945,11 +945,11 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                         irqFlags |= 0x80;
                         irqTriggered = true;
                         setIRQ(VIC_IRQ);
-                        lastIRQ = cpu.cycles;
+                        lastIRQ = cpu.currentCpuCycles;
                         if (IRQDEBUG)
                             monitor.info("Generating IRQ at " + vbeam + " req:" + raster + " IRQs:"
                                     + cpu.getInterruptInExec() + " flags: " + irqFlags + " delta: "
-                                    + (cpu.cycles - lastLine));
+                                    + (cpu.currentCpuCycles - lastLine));
                     }
                 } else {
                     irqTriggered = false;
@@ -1568,8 +1568,8 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     public void reset() {
         // Clear a lot of stuff...???
         initUpdate();
-        lastLine = cpu.cycles;
-        nextIOUpdate = cpu.cycles + 47;
+        lastLine = cpu.currentCpuCycles;
+        nextIOUpdate = cpu.currentCpuCycles + 47;
 
         for (int i = 0; i < mem.length; i++)
             mem[i] = 0;

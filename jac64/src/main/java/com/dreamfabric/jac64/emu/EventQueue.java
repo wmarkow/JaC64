@@ -8,8 +8,8 @@ public class EventQueue {
     public EventQueue() {
     }
 
-    public void addEvent(TimeEvent event, long time) {
-        event.time = time;
+    public void addEvent(TimeEvent event, long cpuCyclesTime) {
+        event.cpuCyclesTime = cpuCyclesTime;
         addEvent(event);
     }
 
@@ -22,7 +22,7 @@ public class EventQueue {
         } else {
             TimeEvent pos = first;
             TimeEvent lastPos = first;
-            while (pos != null && pos.time < event.time) {
+            while (pos != null && pos.cpuCyclesTime < event.cpuCyclesTime) {
                 lastPos = pos;
                 pos = pos.nextEvent;
             }
@@ -38,7 +38,7 @@ public class EventQueue {
             }
         }
         if (first != null) {
-            nextTime = first.time;
+            nextTime = first.cpuCyclesTime;
         } else {
             nextTime = 0;
         }
@@ -69,7 +69,7 @@ public class EventQueue {
         pos.nextEvent = null;
 
         if (first != null) {
-            nextTime = first.time;
+            nextTime = first.cpuCyclesTime;
         } else {
             nextTime = 0;
         }
@@ -92,7 +92,7 @@ public class EventQueue {
         }
 
         if (first != null) {
-            nextTime = first.time;
+            nextTime = first.cpuCyclesTime;
         } else {
             nextTime = 0;
         }

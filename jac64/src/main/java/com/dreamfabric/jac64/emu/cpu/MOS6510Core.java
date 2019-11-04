@@ -100,14 +100,14 @@ public abstract class MOS6510Core extends MOS6510Ops {
     }
 
     public long getCycles() {
-        return cycles;
+        return currentCpuCycles;
     }
 
     public void setIRQLow(boolean low) {
         if (!IRQLow && low) {
             // If low -> will trigger an IRQ!
             checkInterrupt = true;
-            irqCycleStart = cycles + IRQ_DELAY;
+            irqCycleStart = currentCpuCycles + IRQ_DELAY;
         }
         IRQLow = low;
     }
@@ -116,7 +116,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
         if (!NMILow && low) {
             // If going from "high" to low -> will trigger an NMI!
             checkInterrupt = true;
-            nmiCycleStart = cycles + NMI_DELAY;
+            nmiCycleStart = currentCpuCycles + NMI_DELAY;
             // System.out.println("*** NMI Goes low!");
         }
         NMILow = low;
@@ -128,7 +128,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
     }
 
     protected int jumpTo = -1;
-    public long cycles = 0;
+    public long currentCpuCycles = 0;
     protected long lastMillis = 0;
 
     // Some temporary and other variables...
@@ -271,8 +271,8 @@ public abstract class MOS6510Core extends MOS6510Ops {
         // Before executing an operation - check for interrupts!!!
         if (checkInterrupt) {
             // Trigger on negative edge!
-            if ((NMILow && !NMILastLow) && (cycles >= nmiCycleStart)) {
-                log("NMI interrupt at " + cycles);
+            if ((NMILow && !NMILastLow) && (currentCpuCycles >= nmiCycleStart)) {
+                log("NMI interrupt at " + currentCpuCycles);
                 lastInterrupt = NMI_INT;
                 doInterrupt(0xfffa, getStatusByte() & 0xef);
                 disableInterupt = true;
@@ -282,7 +282,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 NMILastLow = NMILow;
                 // Just the interrupt handling... do nothing more...
                 return;
-            } else if ((IRQLow && cycles >= irqCycleStart) || brk) {
+            } else if ((IRQLow && currentCpuCycles >= irqCycleStart) || brk) {
                 if (!disableInterupt) {
                     log("IRQ interrupt > " + IRQLow + " BRK: " + brk);
                     lastInterrupt = IRQ_INT;

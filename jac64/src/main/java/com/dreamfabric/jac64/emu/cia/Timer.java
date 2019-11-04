@@ -40,8 +40,8 @@ public class Timer {
     private EventQueue scheduler;
 
     TimeEvent updateEvent = new TimeEvent(0) {
-        public void execute(long cycles) {
-            doUpdate(cycles);
+        public void execute(long currentCpuCycles) {
+            doUpdate(currentCpuCycles);
             if (state != STOP) {
                 // System.out.println(ciaID() + " Adding Timer update event at " + cycles +
                 // " with time: " + nextUpdate + " state: " + state);
@@ -92,12 +92,12 @@ public class Timer {
         return t;
     }
 
-    public int getTimerLowByteValue(long cycles) {
-        return getTimer(cycles) & 0xff;
+    public int getTimerLowByteValue(long currentCpuCycles) {
+        return getTimer(currentCpuCycles) & 0xff;
     }
 
-    public int getTimerHighByteValue(long cycles) {
-        return getTimer(cycles) >> 8;
+    public int getTimerHighByteValue(long currentCpuCycles) {
+        return getTimer(currentCpuCycles) >> 8;
     }
 
     public void setLatchLowByte(int value) {
@@ -115,12 +115,12 @@ public class Timer {
         return latch;
     }
 
-    private void loadTimer(long cycles) {
+    private void loadTimer(long currentCpuCycles) {
         timer = latch;
-        nextZero = cycles + latch;
+        nextZero = currentCpuCycles + latch;
     }
 
-    private void triggerInterrupt(long cycles) {
+    private void triggerInterrupt(long currentCpuCycles) {
         interruptNext = true;
         underflow = true;
         flipflop = !flipflop;
@@ -137,10 +137,10 @@ public class Timer {
           // }
     }
 
-    public void setCR(long cycles, int data) {
+    public void setCR(long currentCpuCycles, int data) {
         writeCR = data;
-        if (nextUpdate > cycles + 1 || !updateEvent.isScheduled()) {
-            nextUpdate = cycles + 1;
+        if (nextUpdate > currentCpuCycles + 1 || !updateEvent.isScheduled()) {
+            nextUpdate = currentCpuCycles + 1;
             scheduler.addEvent(updateEvent, nextUpdate);
         }
     }
@@ -149,18 +149,18 @@ public class Timer {
         return cr;
     }
 
-    public void doUpdate(long cycles) {
+    public void doUpdate(long currentCpuCycles) {
         if (nextUpdate == 0) {
-            nextUpdate = cycles;
-            nextZero = cycles;
+            nextUpdate = currentCpuCycles;
+            nextZero = currentCpuCycles;
         }
-        if (cycles == nextUpdate) {
+        if (currentCpuCycles == nextUpdate) {
             // If the call is on "spot" then just do it!
-            update(cycles);
+            update(currentCpuCycles);
         } else {
             // As long as cycles is larger than next update, just continue
             // call it!
-            while (cycles >= nextUpdate) {
+            while (currentCpuCycles >= nextUpdate) {
                 update(nextUpdate);
             }
         }
@@ -177,16 +177,16 @@ public class Timer {
     // maybe only update when "needed" and when registers read???
     // NEED TO CHECK IF WE ARE CALLED WHEN EXPECTED!!!
     // No - since BA Low will cause no updates of IO units..??
-    public void update(long cycles) {
+    public void update(long currentCpuCycles) {
         // set a default
         underflow = false;
-        nextUpdate = cycles + 1;
+        nextUpdate = currentCpuCycles + 1;
         if (interruptNext) {
             interruptNext = false;
             timerListener.onTimerUnderflow();
         }
         // Update timer...
-        getTimer(cycles);
+        getTimer(currentCpuCycles);
         // Timer state machine!
         switch (state) {
             case STOP:
@@ -197,24 +197,24 @@ public class Timer {
                 state = COUNT;
                 break;
             case LOAD_STOP:
-                loadTimer(cycles);
+                loadTimer(currentCpuCycles);
                 // Stop timer!
                 state = STOP;
                 break;
             case LOAD_COUNT:
-                loadTimer(cycles);
+                loadTimer(currentCpuCycles);
                 state = COUNT;
                 break;
             case LOAD_WAIT_COUNT:
-                if (nextZero == cycles + 1) {
-                    triggerInterrupt(cycles);
+                if (nextZero == currentCpuCycles + 1) {
+                    triggerInterrupt(currentCpuCycles);
                 }
                 state = WAIT;
-                loadTimer(cycles);
+                loadTimer(currentCpuCycles);
                 break;
             case COUNT_STOP:
                 if (!countUnderflow) {
-                    timer = (int) (cycles - nextZero);
+                    timer = (int) (currentCpuCycles - nextZero);
                     if (timer < 0)
                         timer = 0;
                 }
@@ -227,13 +227,13 @@ public class Timer {
                     if (otherTimer.underflow)
                         timer--;
                     if (timer <= 0) {
-                        triggerInterrupt(cycles);
+                        triggerInterrupt(currentCpuCycles);
                     }
                 } else {
                     // TODO: check this!!!
-                    if (cycles >= nextZero && state != STOP) {
+                    if (currentCpuCycles >= nextZero && state != STOP) {
                         state = LOAD_COUNT;
-                        triggerInterrupt(cycles);
+                        triggerInterrupt(currentCpuCycles);
                     } else {
                         // We got here too early... what now?
                         nextUpdate = nextZero;
@@ -244,13 +244,13 @@ public class Timer {
 
         // Delayed write of CR - is that only for timers?
         if (writeCR != -1) {
-            delayedWrite(cycles);
+            delayedWrite(currentCpuCycles);
             writeCR = -1;
         }
     }
 
-    void delayedWrite(long cycles) {
-        nextUpdate = cycles + 1;
+    void delayedWrite(long currentCpuCycles) {
+        nextUpdate = currentCpuCycles + 1;
         switch (state) {
             case STOP:
             case LOAD_STOP:
@@ -261,7 +261,7 @@ public class Timer {
                         state = LOAD_WAIT_COUNT;
                     } else {
                         // Just count!
-                        loadTimer(cycles);
+                        loadTimer(currentCpuCycles);
                         state = WAIT;
                     }
                 } else {

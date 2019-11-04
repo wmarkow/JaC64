@@ -283,14 +283,14 @@ public class Debugger implements IMonitor, M6510Ops {
                         line.append(cpu.getIRQLow() ? "I" : "-");
                     }
                     line.append(" S:" + Hex.hex2(cpu.getSP()));
-                    line.append(" " + Hex.hex2((int) (cpu.cycles - lastCycles)));
+                    line.append(" " + Hex.hex2((int) (cpu.currentCpuCycles - lastCycles)));
 
                     // Print out system routine names
                     getFunction(memory, startPC, line);
                 }
                 System.out.println(line);
 
-                lastCycles = cpu.cycles;
+                lastCycles = cpu.currentCpuCycles;
 
                 // if (line.length() > 0)
                 // {
