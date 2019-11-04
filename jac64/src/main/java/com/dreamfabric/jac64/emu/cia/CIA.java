@@ -8,7 +8,6 @@
 package com.dreamfabric.jac64.emu.cia;
 
 import com.dreamfabric.jac64.Hex;
-import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 
@@ -65,15 +64,15 @@ public class CIA {
     int offset;
 
     public int serialFake = 0;
-    private ExtChip chips;
+    private InterruptManager interruptManager;
 
     /**
      * Creates a new <code>CIA</code> instance.
      *
      */
-    public CIA(MOS6510Core cpu, int offset, ExtChip chips) {
+    public CIA(MOS6510Core cpu, int offset, InterruptManager interruptManager) {
         this.offset = offset;
-        this.chips = chips;
+        this.interruptManager = interruptManager;
         timerA = new TimerA("TimerA", true, null, cpu.getScheduler());
         timerB = new TimerB("TimerB", false, timerA, cpu.getScheduler());
         timerA.otherTimer = timerB;
@@ -253,16 +252,16 @@ public class CIA {
             if (offset == 0x10c00) {
                 // cpu.log("CIA 1 *** TRIGGERING CIA TIMER!!!: " +
                 // ciaie + " " + chips.getIRQFlags() + " " + cpu.getIRQLow());
-                chips.setIRQ(InterruptManager.CIA_TIMER_IRQ);
+                interruptManager.setIRQ(InterruptManager.CIA_TIMER_IRQ);
             } else {
-                chips.setNMI(InterruptManager.CIA_TIMER_NMI);
+                interruptManager.setNMI(InterruptManager.CIA_TIMER_NMI);
             }
         } else {
             if (offset == 0x10c00) {
                 // System.out.println("*** CLEARING CIA TIMER!!!");
-                chips.clearIRQ(InterruptManager.CIA_TIMER_IRQ);
+                interruptManager.clearIRQ(InterruptManager.CIA_TIMER_IRQ);
             } else {
-                chips.clearNMI(InterruptManager.CIA_TIMER_NMI);
+                interruptManager.clearNMI(InterruptManager.CIA_TIMER_NMI);
             }
         }
     }

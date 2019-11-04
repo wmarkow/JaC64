@@ -81,4 +81,8 @@ public abstract class ExtChip {
             observer.update(source, data);
         }
     }
+
+    protected InterruptManager getInterruptManager() {
+        return this.im;
+    }
 }
