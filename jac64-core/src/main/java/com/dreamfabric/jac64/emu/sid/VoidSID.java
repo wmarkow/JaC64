@@ -11,7 +11,7 @@ import com.dreamfabric.jac64.emu.bus.AddressableVoid;
 public class VoidSID extends AddressableVoid implements SIDIf {
 
     @Override
-    public void start() {
+    public void start(long currentCpuCycles) {
         // nothing to do here
     }
 

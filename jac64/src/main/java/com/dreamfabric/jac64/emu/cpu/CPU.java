@@ -271,7 +271,7 @@ public class CPU extends MOS6510Core {
         running = true;
         setPC(address);
 
-        C64Emulation.getSid().start();
+        C64Emulation.getSid().start(getCycles());
 
         loop();
     }
@@ -352,6 +352,7 @@ public class CPU extends MOS6510Core {
     public void reset() {
         writeByte(1, 0x7);
         super.reset();
+        scheduler.empty();
         C64Emulation.getSid().reset();
     }
 
@@ -417,15 +418,15 @@ public class CPU extends MOS6510Core {
                     next_print = currentCpuCycles + CYCLES_PER_DEBUG;
                 }
 
-                long delay = slowDownCalculator.calculateWaitInNanos(System.nanoTime(), currentCpuCycles);
-                if (delay == 0) {
-                    continue;
-                }
-
-                long sleepUntilNanos = System.nanoTime() + delay;
-                while (System.nanoTime() <= sleepUntilNanos) {
-                    // just empty loop to slow down the simulation
-                }
+//                long delay = slowDownCalculator.calculateWaitInNanos(System.nanoTime(), currentCpuCycles);
+//                if (delay == 0) {
+//                    continue;
+//                }
+//
+//                long sleepUntilNanos = System.nanoTime() + delay;
+//                while (System.nanoTime() <= sleepUntilNanos) {
+//                    // just empty loop to slow down the simulation
+//                }
             }
         } catch (Exception e) {
             monitor.error("Exception in loop " + pc + " : " + e);

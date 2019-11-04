@@ -1,6 +1,7 @@
 package com.dreamfabric.jac64.emu.sid;
 
-import com.dreamfabric.jac64.emu.C64Thread;
+import com.dreamfabric.jac64.emu.EventQueue;
+import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
 import com.dreamfabric.resid.ISIDDefs;
 import com.dreamfabric.resid.ISIDDefs.sampling_method;
@@ -29,14 +30,11 @@ public class RESID extends AddressableChip implements SIDIf {
     private SID sid;
     private int CPUFrq = 985248;
     private int clocksPerSample = CPUFrq / SAMPLE_RATE;
-    private long nanosPerSample = (long) (1e9 / SAMPLE_RATE);
     private int pos = 0;
-    private long nextExecInNanos = 0;
     private AudioDriver audioDriver;
+    private EventQueue scheduler;
 
-    private RESIDThread thread;
-
-    public RESID() {
+    public RESID(EventQueue scheduler) {
         audioDriver = new AudioDriverSE();
         audioDriver.init(44000, 22000);
         audioDriver.setSoundOn(true);
@@ -46,7 +44,16 @@ public class RESID extends AddressableChip implements SIDIf {
         sid.set_sampling_parameters(CPUFrq, sampling_method.SAMPLE_FAST, SAMPLE_RATE, -1, 0.97);
         setChipVersion(RESID_6581);
 
+        this.scheduler = scheduler;
     }
+
+    TimeEvent updateEvent = new TimeEvent(0) {
+        public void execute(long currentCpuCycles) {
+            RESID.this.execute();
+
+            scheduler.addEvent(this, currentCpuCycles + clocksPerSample);
+        }
+    };
 
     public void clock(long cycles) {
     }
@@ -74,23 +81,19 @@ public class RESID extends AddressableChip implements SIDIf {
     }
 
     @Override
-    public void start() {
-        if (thread != null && thread.isAlive()) {
-            return;
-        }
-
-        thread = new RESIDThread();
-        thread.start();
+    public void start(long currentCpuCycles) {
+        scheduler.addEvent(updateEvent, currentCpuCycles + clocksPerSample);
     }
 
     @Override
     public void stop() {
-        thread.forceStop();
+        scheduler.removeEvent(updateEvent);
     }
 
     @Override
     public void reset() {
         sid.reset();
+        scheduler.addEvent(updateEvent, clocksPerSample);
     }
 
     public void setChipVersion(int version) {
@@ -102,11 +105,6 @@ public class RESID extends AddressableChip implements SIDIf {
     }
 
     private void execute() {
-        long nanos = System.nanoTime();
-        if (nanos < nextExecInNanos) {
-            return;
-        }
-
         // Clock resid!
         for (int q = 0; q < clocksPerSample; q++) {
             sid.clock();
@@ -119,24 +117,10 @@ public class RESID extends AddressableChip implements SIDIf {
         if (pos == buffer.length) {
             writeSamples();
         }
-
-        nextExecInNanos = nanos + (long) (nanosPerSample * 0.95);
     }
 
     private void writeSamples() {
         audioDriver.write(buffer);
         pos = 0;
-    }
-
-    private class RESIDThread extends C64Thread {
-
-        public RESIDThread() {
-            super("reSID Thread");
-        }
-
-        @Override
-        public void executeInLoop() {
-            execute();
-        }
     }
 }

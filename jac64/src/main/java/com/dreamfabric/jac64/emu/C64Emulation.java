@@ -30,6 +30,7 @@ public class C64Emulation {
     public final static int CPUFrq = 985248;
 
     private static Debugger monitor = new Debugger();
+    private static EventQueue scheduler = new EventQueue();
     private static CPU cpu = new CPU(monitor, "", new SELoader());
     // One InterruptManager per named CPU. For now just one interrupt manager.
     private static InterruptManager interruptManager = new InterruptManager(cpu);
@@ -37,7 +38,7 @@ public class C64Emulation {
 
     private static PLA pla = new PLA();
     private static IO io = new IO();
-    private static SIDIf sid = new RESID();
+    private static SIDIf sid = new RESID(scheduler);
     private static CIA1 cia1 = new CIA1();
 
     private static BasicROM basicROM = new BasicROM();
@@ -60,8 +61,9 @@ public class C64Emulation {
         addressableBus.setBasicRom(basicROM);
         addressableBus.setKernalRom(kernalROM);
         addressableBus.setCharRom(charROM);
-        
+
         // prepare CPU
+        cpu.setScheduler(scheduler);
         cpu.setPla(pla);
         cpu.setAddressableBus(addressableBus);
     }
@@ -96,6 +98,10 @@ public class C64Emulation {
 
     public static Debugger getMonitor() {
         return monitor;
+    }
+
+    public static EventQueue getScheduler() {
+        return scheduler;
     }
 
     public static void installROMs() {

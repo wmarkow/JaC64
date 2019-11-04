@@ -78,7 +78,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
     protected long nmiCycleStart = 0;
     protected long irqCycleStart = 0;
 
-    protected EventQueue scheduler = new EventQueue();
+    protected EventQueue scheduler;
 
     private String[] debugInfo;
 
@@ -870,7 +870,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
         log("Set IRQLOW to false...");
         resetFlag = false;
 
-        scheduler.empty();
         chips.reset();
 
         pc = fetchByte(0xfffc) + (fetchByte(0xfffd) << 8);
@@ -952,6 +951,10 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     public EventQueue getScheduler() {
         return scheduler;
+    }
+
+    public void setScheduler(EventQueue scheduler) {
+        this.scheduler = scheduler;
     }
 
     public int getY() {
