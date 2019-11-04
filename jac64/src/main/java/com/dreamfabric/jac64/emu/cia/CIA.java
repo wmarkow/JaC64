@@ -10,6 +10,7 @@ package com.dreamfabric.jac64.emu.cia;
 import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
+import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 
 /**
  * CIA emulation for JaC64.
@@ -252,16 +253,16 @@ public class CIA {
             if (offset == 0x10c00) {
                 // cpu.log("CIA 1 *** TRIGGERING CIA TIMER!!!: " +
                 // ciaie + " " + chips.getIRQFlags() + " " + cpu.getIRQLow());
-                chips.setIRQ(ExtChip.CIA_TIMER_IRQ);
+                chips.setIRQ(InterruptManager.CIA_TIMER_IRQ);
             } else {
-                chips.setNMI(ExtChip.CIA_TIMER_NMI);
+                chips.setNMI(InterruptManager.CIA_TIMER_NMI);
             }
         } else {
             if (offset == 0x10c00) {
                 // System.out.println("*** CLEARING CIA TIMER!!!");
-                chips.clearIRQ(ExtChip.CIA_TIMER_IRQ);
+                chips.clearIRQ(InterruptManager.CIA_TIMER_IRQ);
             } else {
-                chips.clearNMI(ExtChip.CIA_TIMER_NMI);
+                chips.clearNMI(InterruptManager.CIA_TIMER_NMI);
             }
         }
     }

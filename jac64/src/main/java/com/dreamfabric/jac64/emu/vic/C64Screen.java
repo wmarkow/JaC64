@@ -31,6 +31,7 @@ import com.dreamfabric.jac64.Observer;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
 import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 
 /**
  * Implements the VIC chip + some other HW
@@ -386,9 +387,9 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     public void restoreKey(boolean down) {
         if (down)
-            setNMI(KEYBOARD_NMI);
+            setNMI(InterruptManager.KEYBOARD_NMI);
         else
-            clearNMI(KEYBOARD_NMI);
+            clearNMI(InterruptManager.KEYBOARD_NMI);
     }
 
     // Should be checked up!!!
