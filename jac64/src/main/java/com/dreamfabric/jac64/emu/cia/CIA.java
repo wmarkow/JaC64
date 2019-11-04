@@ -8,6 +8,7 @@
 package com.dreamfabric.jac64.emu.cia;
 
 import com.dreamfabric.jac64.Hex;
+import com.dreamfabric.jac64.emu.SimulableIf;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 
@@ -19,7 +20,7 @@ import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
  * @author Joakim Eriksson
  * @version 1.0
  */
-public class CIA {
+public class CIA implements SimulableIf {
     public static final boolean WRITE_DEBUG = false; // true;
 
     public static final int PRA = 0x00;
@@ -76,7 +77,7 @@ public class CIA {
         timerA = new TimerA("TimerA", true, null, cpu.getScheduler());
         timerB = new TimerB("TimerB", false, timerA, cpu.getScheduler());
         timerA.otherTimer = timerB;
-        rtc = new RealTimeClock();
+        rtc = new RealTimeClock(cpu.getScheduler());
 
         timerA.setTimerListener(new TimerListenerIf() {
 
@@ -97,6 +98,18 @@ public class CIA {
         });
     }
 
+    @Override
+    public void start(long currentCpuCycles) {
+        rtc.start(currentCpuCycles);
+        timerA.start(currentCpuCycles);
+        timerB.start(currentCpuCycles);
+    }
+
+    @Override
+    public void stop() {
+    }
+    
+    @Override
     public void reset() {
         ciaicrRead = 0;
         ciaie = 0;

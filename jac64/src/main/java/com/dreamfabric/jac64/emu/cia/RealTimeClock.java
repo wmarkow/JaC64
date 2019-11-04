@@ -1,26 +1,33 @@
 package com.dreamfabric.jac64.emu.cia;
 
-import java.util.TimerTask;
+import com.dreamfabric.jac64.emu.EventQueue;
+import com.dreamfabric.jac64.emu.SimulableIf;
+import com.dreamfabric.jac64.emu.TimeEvent;
 
-public class RealTimeClock {
+public class RealTimeClock implements SimulableIf {
+
+    private static final int SAMPLE_RATE = 10;
+    private int CPUFrq = 985248;
 
     private int tod10sec = 0;
     private int todsec = 0;
     private int todmin = 0;
     private int todhour = 0;
 
-    private java.util.Timer timer;
+    private EventQueue scheduler;
+    private int clocksPerSample = CPUFrq / SAMPLE_RATE;
 
-    public RealTimeClock() {
-        start();
+    public RealTimeClock(EventQueue scheduler) {
+        this.scheduler = scheduler;
     }
 
-    public void reset() {
-        tod10sec = 0;
-        todsec = 0;
-        todmin = 0;
-        todhour = 0;
-    }
+    TimeEvent updateEvent = new TimeEvent(0) {
+        public void execute(long currentCpuCycles) {
+            RealTimeClock.this.execute();
+
+            scheduler.addEvent(this, currentCpuCycles + clocksPerSample);
+        }
+    };
 
     public int getTod10sec() {
         return tod10sec;
@@ -54,11 +61,22 @@ public class RealTimeClock {
         this.todhour = todhour;
     }
 
-    public void start() {
-        if (timer == null) {
-            timer = new java.util.Timer();
-            timer.schedule(new RTCTimerTask(), 100, 100);
-        }
+    @Override
+    public void start(long currentCpuCycles) {
+        scheduler.addEvent(updateEvent, currentCpuCycles + clocksPerSample);
+    }
+
+    @Override
+    public void stop() {
+        scheduler.removeEvent(updateEvent);
+    }
+
+    @Override
+    public void reset() {
+        tod10sec = 0;
+        todsec = 0;
+        todmin = 0;
+        todhour = 0;
     }
 
     private void execute() {
@@ -100,13 +118,5 @@ public class RealTimeClock {
         // Since this should continue run, just reschedule...
         // System.out.println("TOD ticked..." + (todhour>>4) + (todhour & 0xf) + ":" +
         // (todmin>>4) + (todmin&0xf) + ":" + (todsec>>4) + (todsec&0xf));
-    }
-
-    private class RTCTimerTask extends TimerTask {
-
-        @Override
-        public void run() {
-            execute();
-        }
     }
 }

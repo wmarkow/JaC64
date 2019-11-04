@@ -1,12 +1,13 @@
 package com.dreamfabric.jac64.emu.cia;
 
 import com.dreamfabric.jac64.emu.EventQueue;
+import com.dreamfabric.jac64.emu.SimulableIf;
 import com.dreamfabric.jac64.emu.TimeEvent;
 
 //A timer class for handling the Timer state machines
 // The CIATimer is inspired by the CIA Timer State Machine in the
 // Frodo emulator
-public class Timer {
+public class Timer implements SimulableIf {
 
     // The states of the timer
     private static final int STOP = 0;
@@ -68,6 +69,16 @@ public class Timer {
         this.timerListener = timerListener;
     }
 
+    @Override
+    public void start(long currentCpuCycles) {
+        // it looks like the timer is already started (automagically?)
+    }
+
+    @Override
+    public void stop() {
+    }
+
+    @Override
     public void reset() {
         latch = 0xffff;
         timer = 0xffff;
