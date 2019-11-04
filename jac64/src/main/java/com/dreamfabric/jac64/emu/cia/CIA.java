@@ -53,7 +53,7 @@ public abstract class CIA implements SimulableIf {
     int sdr;
 
     // For the CPU to read (contains status)
-    private int ciaicrRead;
+    protected int ciaicrRead;
     int ciaie = 0; // interrupt enable
 
     // B-Div is set if mode (bit 5,6 of CIACRB) = 10
@@ -62,17 +62,17 @@ public abstract class CIA implements SimulableIf {
 
     public long nextCIAUpdate = 0;
 
-    int offset;
+    private int startAddress;
 
     public int serialFake = 0;
-    private InterruptManager interruptManager;
+    protected InterruptManager interruptManager;
 
     /**
      * Creates a new <code>CIA</code> instance.
      *
      */
-    public CIA(EventQueue scheduler, int offset, InterruptManager interruptManager) {
-        this.offset = offset;
+    public CIA(EventQueue scheduler, int startAddress, InterruptManager interruptManager) {
+        this.startAddress = startAddress;
         this.interruptManager = interruptManager;
         timerA = new TimerA("TimerA", true, null, scheduler);
         timerB = new TimerB("TimerB", false, timerA, scheduler);
@@ -120,12 +120,12 @@ public abstract class CIA implements SimulableIf {
         updateInterrupts();
     }
 
-    public String ciaID() {
-        return offset == 0x10c00 ? "CIA 1" : "CIA 2";
+    private String ciaID() {
+        return this.getClass().getSimpleName();
     }
 
     public int performRead(int address, long cycles) {
-        address -= offset;
+        address -= startAddress;
         switch (address) {
             case DDRA:
                 return ddra;
@@ -189,7 +189,7 @@ public abstract class CIA implements SimulableIf {
     }
 
     public void performWrite(int address, int data, long cycles) {
-        address -= offset;
+        address -= startAddress;
 
         if (WRITE_DEBUG)
             println(ciaID() + " Write to :" + Integer.toString(address, 16) + " = " + Integer.toString(data, 16));
@@ -258,26 +258,7 @@ public abstract class CIA implements SimulableIf {
         }
     }
 
-    void updateInterrupts() {
-        if ((ciaie & ciaicrRead & 0x1f) != 0) {
-            ciaicrRead |= 0x80;
-            // Trigger the IRQ/NMI immediately!!!
-            if (offset == 0x10c00) {
-                // cpu.log("CIA 1 *** TRIGGERING CIA TIMER!!!: " +
-                // ciaie + " " + chips.getIRQFlags() + " " + cpu.getIRQLow());
-                interruptManager.setIRQ(InterruptManager.CIA_TIMER_IRQ);
-            } else {
-                interruptManager.setNMI(InterruptManager.CIA_TIMER_NMI);
-            }
-        } else {
-            if (offset == 0x10c00) {
-                // System.out.println("*** CLEARING CIA TIMER!!!");
-                interruptManager.clearIRQ(InterruptManager.CIA_TIMER_IRQ);
-            } else {
-                interruptManager.clearNMI(InterruptManager.CIA_TIMER_NMI);
-            }
-        }
-    }
+    protected abstract void updateInterrupts();
 
     private void println(String s) {
         System.out.println(ciaID() + ": " + s);
