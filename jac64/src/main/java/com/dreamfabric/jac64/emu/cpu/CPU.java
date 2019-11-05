@@ -23,9 +23,9 @@ import com.dreamfabric.jac64.Loader;
 import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.SlowDownCalculator;
-import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.pla.PLA;
+import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
 
 /**
  * CPU "implements" the C64s 6510 processor in java code. reimplemented from old

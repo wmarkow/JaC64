@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.PatchListener;
-import com.dreamfabric.jac64.emu.EventQueue;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
+import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 
 /**
  * MOS6510Core "implements" the 6510 processor in java code. Other classes are

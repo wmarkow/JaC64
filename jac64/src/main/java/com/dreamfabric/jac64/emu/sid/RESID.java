@@ -1,8 +1,8 @@
 package com.dreamfabric.jac64.emu.sid;
 
-import com.dreamfabric.jac64.emu.EventQueue;
-import com.dreamfabric.jac64.emu.TimeEvent;
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
+import com.dreamfabric.jac64.emu.scheduler.EventQueue;
+import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
 import com.dreamfabric.resid.ISIDDefs;
 import com.dreamfabric.resid.ISIDDefs.sampling_method;
 import com.dreamfabric.resid.SID;

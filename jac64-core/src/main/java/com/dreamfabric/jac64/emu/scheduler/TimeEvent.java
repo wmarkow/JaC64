@@ -1,4 +1,4 @@
-package com.dreamfabric.jac64.emu;
+package com.dreamfabric.jac64.emu.scheduler;
 
 public abstract class TimeEvent {
     // For linking events...

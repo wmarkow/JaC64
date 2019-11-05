@@ -1,6 +1,6 @@
 package com.dreamfabric.jac64.emu.cia;
 
-import com.dreamfabric.jac64.emu.EventQueue;
+import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 
 public class TimerB extends Timer {
 

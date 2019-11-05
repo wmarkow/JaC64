@@ -22,6 +22,7 @@ import com.dreamfabric.jac64.emu.memory.CharROM;
 import com.dreamfabric.jac64.emu.memory.KernalROM;
 import com.dreamfabric.jac64.emu.memory.ROM;
 import com.dreamfabric.jac64.emu.pla.PLA;
+import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 import com.dreamfabric.jac64.emu.sid.RESID;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
 
