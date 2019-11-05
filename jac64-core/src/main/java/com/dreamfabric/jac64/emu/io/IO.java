@@ -2,6 +2,7 @@ package com.dreamfabric.jac64.emu.io;
 
 import com.dreamfabric.jac64.emu.bus.AddressableVoid;
 import com.dreamfabric.jac64.emu.cia.CIA1;
+import com.dreamfabric.jac64.emu.cia.CIA2;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
 
 public class IO extends AddressableVoid {
@@ -11,6 +12,7 @@ public class IO extends AddressableVoid {
 
     private SIDIf sid;
     private CIA1 cia1;
+    private CIA2 cia2;
 
     public void setSid(SIDIf sid) {
         this.sid = sid;
@@ -20,32 +22,45 @@ public class IO extends AddressableVoid {
         this.cia1 = cia1;
     }
 
+    public void setCia2(CIA2 cia2) {
+        this.cia2 = cia2;
+    }
+
     @Override
-    public boolean write(int address, int data) {
-        if (sid.write(address, data)) {
+    public boolean write(int address, int data, long currentCpuCycles) {
+        if (sid.write(address, data, currentCpuCycles)) {
             return true;
         }
 
-        if (cia1.write(address, data)) {
+        if (cia1.write(address, data, currentCpuCycles)) {
             return true;
         }
+
+//        if (cia2.write(address, data, currentCpuCycles)) {
+//            return true;
+//        }
 
         return false;
     }
 
     @Override
-    public Integer read(int address) {
+    public Integer read(int address, long currentCpuCycles) {
         Integer result = null;
 
-        result = sid.read(address);
+        result = sid.read(address, currentCpuCycles);
         if (result != null) {
             return result;
         }
 
-        result = cia1.read(address);
+        result = cia1.read(address, currentCpuCycles);
         if (result != null) {
             return result;
         }
+
+//        result = cia2.read(address, currentCpuCycles);
+//        if (result != null) {
+//            return result;
+//        }
 
         return null;
     }

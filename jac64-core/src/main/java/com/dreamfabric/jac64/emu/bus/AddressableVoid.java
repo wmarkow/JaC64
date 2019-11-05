@@ -23,7 +23,7 @@ public abstract class AddressableVoid implements AddressableIf {
      *         operation was not possible (device disabled or address mismatch).
      */
     @Override
-    public boolean write(int address, int data) {
+    public boolean write(int address, int data, long currentCpuCycles) {
         if (!canWrite(address)) {
             return false;
         }
@@ -37,7 +37,7 @@ public abstract class AddressableVoid implements AddressableIf {
      * @return It returns null.
      */
     @Override
-    public Integer read(int address) {
+    public Integer read(int address, long currentCpuCycles) {
         // TODO: return null or maybe zero?
         return null;
     }

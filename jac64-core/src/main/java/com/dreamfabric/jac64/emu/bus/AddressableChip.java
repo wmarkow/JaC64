@@ -25,7 +25,7 @@ public abstract class AddressableChip extends AddressableVoid {
      *         operation was not possible (device disabled or address mismatch).
      */
     @Override
-    public boolean write(int address, int data) {
+    public boolean write(int address, int data, long currentCpuCycles) {
         if (!canWrite(address)) {
             return false;
         }
@@ -42,7 +42,7 @@ public abstract class AddressableChip extends AddressableVoid {
      *         operation was not possible (device disabled or address mismatch).
      */
     @Override
-    public Integer read(int address) {
+    public Integer read(int address, long currentCpuCycles) {
         if (!canRead(address)) {
             return null;
         }

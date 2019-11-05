@@ -3,44 +3,28 @@ package com.dreamfabric.jac64.emu.cia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dreamfabric.jac64.emu.bus.AddressableChip;
 import com.dreamfabric.jac64.emu.cia.keyboard.Joy1KeyListener;
 import com.dreamfabric.jac64.emu.cia.keyboard.Joy2KeyListener;
 import com.dreamfabric.jac64.emu.cia.keyboard.KeyListener;
 import com.dreamfabric.jac64.emu.cia.keyboard.Keyboard;
+import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
+import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 
-public class CIA1 extends AddressableChip {
+public class CIA1 extends CIA {
     private static Logger LOGGER = LoggerFactory.getLogger(CIA1.class);
 
     public final static int START_ADDRESS = 0xDC00;
     public final static int END_ADDRESS = 0xDCFF;
 
-    static final int PRA = 0x00 + START_ADDRESS;
-    static final int PRB = 0x01 + START_ADDRESS;
-    static final int DDRA = 0x02 + START_ADDRESS;
-    static final int DDRB = 0x03 + START_ADDRESS;
-    private static final int TIMALO = 0x04 + START_ADDRESS;
-    private static final int TIMAHI = 0x05 + START_ADDRESS;
-    private static final int TIMBLO = 0x06 + START_ADDRESS;
-    private static final int TIMBHI = 0x07 + START_ADDRESS;
-    private static final int TODTEN = 0x08 + START_ADDRESS;
-    private static final int TODSEC = 0x09 + START_ADDRESS;
-    private static final int TODMIN = 0x0a + START_ADDRESS;
-    private static final int TODHRS = 0x0b + START_ADDRESS;
-    private static final int SDR = 0x0c + START_ADDRESS;
-    private static final int ICR = 0x0d + START_ADDRESS;
-    private static final int CRA = 0x0e + START_ADDRESS;
-    private static final int CRB = 0x0f + START_ADDRESS;
-
     private Keyboard keyboard;
 
-    public CIA1() {
-        super();
+    public CIA1(EventQueue scheduler, InterruptManager interruptManager) {
+        super(scheduler, START_ADDRESS, interruptManager);
 
-        write0(CIA1.DDRA, 0x00); // input
-        write0(CIA1.PRA, 0xFF); // HIGH
-        write0(CIA1.DDRB, 0x00); // input
-        write0(CIA1.PRB, 0xFF); // HIGH
+        write0(DDRA + START_ADDRESS, 0x00); // input
+        write0(PRA + START_ADDRESS, 0xFF); // HIGH
+        write0(DDRB + START_ADDRESS, 0x00); // input
+        write0(PRB + START_ADDRESS, 0xFF); // HIGH
 
         keyboard = new Keyboard();
     }
@@ -56,40 +40,43 @@ public class CIA1 extends AddressableChip {
     }
 
     @Override
-    public boolean write(int address, int data) {
-        boolean result = super.write(address, data);
+    public boolean write(int address, int data, long currentCpuCycles) {
+        boolean result = super.write(address, data, currentCpuCycles);
 
         if (result == false) {
             return false;
         }
 
-        switch (address) {
+        int localAddress = address - getStartAddress();
+        switch (localAddress) {
             case PRA:
                 keyboard.setPRA(data);
-                return true;
+                break;
             case PRB:
                 keyboard.setPRB(data);
-                return true;
+                break;
             case DDRA:
                 keyboard.setDDRA(data);
-                return true;
+                break;
             case DDRB:
                 keyboard.setDDRB(data);
-                return true;
+                break;
+            default:
+                // already handled by super
         }
 
-        // just for sniffing return false
-        return false;
+        return true;
     }
 
     @Override
-    public Integer read(int address) {
-        Integer result = super.read(address);
+    public Integer read(int address, long currentCpuCycles) {
+        Integer result = super.read(address, currentCpuCycles);
         if (result == null) {
             return null;
         }
 
-        switch (address) {
+        int localAddress = address - getStartAddress();
+        switch (localAddress) {
             case PRA:
                 return keyboard.getPRAPin();
             case PRB:
@@ -98,10 +85,11 @@ public class CIA1 extends AddressableChip {
                 return result;
             case DDRB:
                 return result;
+            default:
+                // already handled by super
         }
 
-        // just for sniffing return null
-        return null;
+        return result;
     }
 
     public KeyListener getKeyListener() {
@@ -116,4 +104,18 @@ public class CIA1 extends AddressableChip {
         return keyboard;
     }
 
+    @Override
+    protected void updateInterrupts() {
+        if ((ciaie & ciaicrRead & 0x1f) != 0) {
+            ciaicrRead |= 0x80;
+            // Trigger the IRQ immediately!!!
+
+            // cpu.log("CIA 1 *** TRIGGERING CIA TIMER!!!: " +
+            // ciaie + " " + chips.getIRQFlags() + " " + cpu.getIRQLow());
+            interruptManager.setIRQ(InterruptManager.CIA_TIMER_IRQ);
+        } else {
+            // System.out.println("*** CLEARING CIA TIMER!!!");
+            interruptManager.clearIRQ(InterruptManager.CIA_TIMER_IRQ);
+        }
+    }
 }

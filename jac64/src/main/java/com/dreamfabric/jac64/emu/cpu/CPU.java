@@ -121,7 +121,7 @@ public class CPU extends MOS6510Core {
         }
 
         // START: a new way of reading data from SID.
-        Integer result = addressableBus.read(adr);
+        Integer result = addressableBus.read(adr, currentCpuCycles);
         if (result != null) {
             return (int) result;
         }
@@ -175,7 +175,7 @@ public class CPU extends MOS6510Core {
             pla.setCharenHiramLoram(data);
         }
 
-        if (addressableBus.write(adr, data)) {
+        if (addressableBus.write(adr, data, currentCpuCycles)) {
             adr &= 0xffff;
             if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
                 // do nothing

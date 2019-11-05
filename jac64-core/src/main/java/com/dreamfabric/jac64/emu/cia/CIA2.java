@@ -3,10 +3,23 @@ package com.dreamfabric.jac64.emu.cia;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 
-public class CCIA2 extends CIA {
+public class CIA2 extends CIA {
 
-    public CCIA2(EventQueue scheduler, InterruptManager interruptManager) {
-        super(scheduler, 0xdd00, interruptManager);
+    public final static int START_ADDRESS = 0xDD00;
+    public final static int END_ADDRESS = 0xDDFF;
+
+    public CIA2(EventQueue scheduler, InterruptManager interruptManager) {
+        super(scheduler, START_ADDRESS, interruptManager);
+    }
+
+    @Override
+    public int getStartAddress() {
+        return START_ADDRESS;
+    }
+
+    @Override
+    public int getEndAddress() {
+        return END_ADDRESS;
     }
 
     @Override

@@ -19,7 +19,7 @@ public class Timer implements SimulableIf {
     private static final int COUNT_STOP = 7;
 
     // If timer is connected...
-    Timer otherTimer;
+    private Timer otherTimer;
 
     int state = STOP;
     // The latch for this timer
@@ -76,6 +76,10 @@ public class Timer implements SimulableIf {
 
     @Override
     public void stop() {
+    }
+
+    public void setOtherTimer(Timer timer) {
+        this.otherTimer = timer;
     }
 
     @Override

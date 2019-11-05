@@ -32,11 +32,11 @@ public class AddressableBus implements AddressableIf {
     }
 
     @Override
-    public boolean write(int address, int data) {
+    public boolean write(int address, int data, long currentCpuCycles) {
         boolean result = false;
 
         // it makes no point to write to ROMs
-        result = io.write(address, data);
+        result = io.write(address, data, currentCpuCycles);
         if (result) {
             return result;
         }
@@ -45,25 +45,25 @@ public class AddressableBus implements AddressableIf {
     }
 
     @Override
-    public Integer read(int address) {
+    public Integer read(int address, long currentCpuCycles) {
         Integer result = null;
 
-        result = basicRom.read(address);
+        result = basicRom.read(address, currentCpuCycles);
         if (result != null) {
             return result;
         }
 
-        result = kernalRom.read(address);
+        result = kernalRom.read(address, currentCpuCycles);
         if (result != null) {
             return result;
         }
 
-        result = charRom.read(address);
+        result = charRom.read(address, currentCpuCycles);
         if (result != null) {
             return result;
         }
 
-        result = io.read(address);
+        result = io.read(address, currentCpuCycles);
         if (result != null) {
             return result;
         }

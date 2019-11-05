@@ -30,8 +30,8 @@ import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Observer;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA;
-import com.dreamfabric.jac64.emu.cia.CCIA1;
-import com.dreamfabric.jac64.emu.cia.CCIA2;
+import com.dreamfabric.jac64.emu.cia.CIA1;
+import com.dreamfabric.jac64.emu.cia.CIA2;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 
@@ -354,8 +354,9 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         }
 
         cia = new CIA[2];
-        cia[0] = new CCIA1(cpu.getScheduler(), getInterruptManager());
-        cia[1] = new CCIA2(cpu.getScheduler(), getInterruptManager());
+        cia[0] = new CIA1(cpu.getScheduler(), getInterruptManager());
+        cia[1] = new CIA2(cpu.getScheduler(), getInterruptManager());
+        cia[1].setEnabled(true);
 
         // c1541 = new C1541(memory);
         // c1541.addObserver(this);
@@ -505,9 +506,9 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 return val;
             default:
                 if (pos == 0xd) {
-                    return cia[1].performRead(address, currentCpuCycles);
+                    return cia[1].read(address, currentCpuCycles);
                 } else if (pos == 0xc) {
-                    return cia[0].performRead(address, currentCpuCycles);
+                    return cia[0].read(address, currentCpuCycles);
                 } else if (pos >= 0x8) {
                     return getMemory(IO_OFFSET + address) | 0xf0;
                 }
@@ -764,7 +765,7 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 if (VIC_MEM_DEBUG)
                     System.out.println("Set dd00 to " + Integer.toHexString(data));
 
-                cia[1].performWrite(address, data, cpu.currentCpuCycles);
+                cia[1].write(address, data, cpu.currentCpuCycles);
                 cia2PRA = data;
 
                 data = ~cia2PRA & cia2DDRA;
@@ -782,15 +783,15 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
                 cia2DDRA = data;
                 // System.out.println("C64: Wrote to DDRA (IEC): " +
                 // Integer.toHexString(data));
-                cia[1].performWrite(address, data, cpu.currentCpuCycles);
+                cia[1].write(address, data, cpu.currentCpuCycles);
                 setVideoMem();
                 break;
 
             default:
                 if (pos == 0xd) {
-                    cia[1].performWrite(address, data, currentCpuCycles);
+                    cia[1].write(address, data, currentCpuCycles);
                 } else if (pos == 0xc) {
-                    cia[0].performWrite(address, data, currentCpuCycles);
+                    cia[0].write(address, data, currentCpuCycles);
                 }
                 // handle color ram!
         }

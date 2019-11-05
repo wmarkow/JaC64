@@ -7,8 +7,9 @@
  */
 package com.dreamfabric.jac64.emu.cia;
 
-import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.emu.SimulableIf;
+import com.dreamfabric.jac64.emu.bus.AddressableChip;
+import com.dreamfabric.jac64.emu.cia.keyboard.Keyboard;
 import com.dreamfabric.jac64.emu.cia.timer.RealTimeClock;
 import com.dreamfabric.jac64.emu.cia.timer.Timer;
 import com.dreamfabric.jac64.emu.cia.timer.TimerA;
@@ -25,7 +26,7 @@ import com.dreamfabric.jac64.emu.scheduler.EventQueue;
  * @author Joakim Eriksson
  * @version 1.0
  */
-public abstract class CIA implements SimulableIf {
+public abstract class CIA extends AddressableChip implements SimulableIf {
     public static final boolean WRITE_DEBUG = false; // true;
 
     public static final int PRA = 0x00;
@@ -47,6 +48,7 @@ public abstract class CIA implements SimulableIf {
 
     private final static int INTERRUPT_ORIGIN_TIMER_A_UNDERFLOW_VALUE = 1;
     private final static int INTERRUPT_ORIGIN_TIMER_B_UNDERFLOW_VALUE = 2;
+
     private Timer timerA;
     private Timer timerB;
     private RealTimeClock rtc;
@@ -77,11 +79,13 @@ public abstract class CIA implements SimulableIf {
      *
      */
     public CIA(EventQueue scheduler, int startAddress, InterruptManager interruptManager) {
+        super();
         this.startAddress = startAddress;
+
         this.interruptManager = interruptManager;
         timerA = new TimerA("TimerA", true, null, scheduler);
         timerB = new TimerB("TimerB", false, timerA, scheduler);
-        timerA.otherTimer = timerB;
+        timerA.setOtherTimer(timerB);
         rtc = new RealTimeClock(scheduler);
 
         timerA.setTimerListener(new TimerListenerIf() {
@@ -129,89 +133,23 @@ public abstract class CIA implements SimulableIf {
         return this.getClass().getSimpleName();
     }
 
-    public int performRead(int address, long cycles) {
-        address -= startAddress;
-        switch (address) {
-            case DDRA:
-                return ddra;
-            case DDRB:
-                return ddrb;
-            case PRA:
-                return (pra | ~ddra) & 0xff;
-            case PRB:
-                int data = (prb | ~ddrb) & 0xff;
-                if ((timerA.getCR() & 0x02) > 0) {
-                    data &= 0xbf;
-                    if ((timerA.getCR() & 0x04) > 0) {
-                        data |= timerA.flipflop ? 0x40 : 0;
-                    } else {
-                        data |= timerA.underflow ? 0x40 : 0;
-                    }
-                }
-                if ((timerB.getCR() & 0x02) > 0) {
-                    data &= 0x7f;
-                    if ((timerB.getCR() & 0x04) > 0) {
-                        data |= timerB.flipflop ? 0x80 : 0;
-                    } else {
-                        data |= timerB.underflow ? 0x80 : 0;
-                    }
-                }
-                return data;
-            case TIMALO:
-                return timerA.getTimerLowByteValue(cycles);
-            case TIMAHI:
-                return timerA.getTimerHighByteValue(cycles);
-            case TIMBLO:
-                return timerB.getTimerLowByteValue(cycles);
-            case TIMBHI:
-                return timerB.getTimerHighByteValue(cycles);
-            case TODTEN:
-                return rtc.getTod10sec();
-            case TODSEC:
-                return rtc.getTodsec();
-            case TODMIN:
-                return rtc.getTodmin();
-            case TODHRS:
-                return rtc.getTodhour();
-            case SDR:
-                return sdr;
-            case CRA:
-                return timerA.getCR();
-            case CRB:
-                return timerB.getCR();
-            case ICR:
-                // Clear interrupt register (flags)!
-                int val = ciaicrRead;
-                ciaicrRead = 0;
+    @Override
+    public boolean write(int address, int data, long currentCpuCycles) {
+        boolean result = super.write(address, data, currentCpuCycles);
 
-                // Latch off the IRQ/NMI immediately!!!
-                updateInterrupts();
-
-                return val;
-            default:
-                return 0xff;
+        if (result == false) {
+            return false;
         }
-    }
 
-    public void performWrite(int address, int data, long cycles) {
-        address -= startAddress;
-
-        if (WRITE_DEBUG)
-            println(ciaID() + " Write to :" + Integer.toString(address, 16) + " = " + Integer.toString(data, 16));
-
-        switch (address) {
-            // monitor.println("Set Keyboard:" + data);
-            case DDRA:
-                ddra = data;
-                break;
-            case DDRB:
-                ddrb = data;
-                break;
+        int localAddress = address - getStartAddress();
+        switch (localAddress) {
             case PRA:
-                pra = data;
                 break;
             case PRB:
-                prb = data;
+                break;
+            case DDRA:
+                break;
+            case DDRB:
                 break;
             case TIMALO:
                 // Update TimerA latch low byte value
@@ -255,11 +193,66 @@ public abstract class CIA implements SimulableIf {
                 System.out.println(ciaID() + " ====> IE = " + ciaie);
                 break;
             case CRA:
-                timerA.setCR(cycles, data);
+                timerA.setCR(currentCpuCycles, data);
                 break;
             case CRB:
-                timerB.setCR(cycles, data);
+                timerB.setCR(currentCpuCycles, data);
                 break;
+        }
+
+        return true;
+    }
+
+    @Override
+    public Integer read(int address, long currentCpuCycles) {
+        Integer result = super.read(address, currentCpuCycles);
+        if (result == null) {
+            return null;
+        }
+
+        int localAddress = address - getStartAddress();
+        switch (localAddress) {
+            case PRA:
+                return result;
+            case PRB:
+                return result;
+            case DDRA:
+                return result;
+            case DDRB:
+                return result;
+            case TIMALO:
+                return timerA.getTimerLowByteValue(currentCpuCycles);
+            case TIMAHI:
+                return timerA.getTimerHighByteValue(currentCpuCycles);
+            case TIMBLO:
+                return timerB.getTimerLowByteValue(currentCpuCycles);
+            case TIMBHI:
+                return timerB.getTimerHighByteValue(currentCpuCycles);
+            case TODTEN:
+                return rtc.getTod10sec();
+            case TODSEC:
+                return rtc.getTodsec();
+            case TODMIN:
+                return rtc.getTodmin();
+            case TODHRS:
+                return rtc.getTodhour();
+            case SDR:
+                return sdr;
+            case CRA:
+                return timerA.getCR();
+            case CRB:
+                return timerB.getCR();
+            case ICR:
+                // Clear interrupt register (flags)!
+                int val = ciaicrRead;
+                ciaicrRead = 0;
+
+                // Latch off the IRQ/NMI immediately!!!
+                updateInterrupts();
+
+                return val;
+            default:
+                return 0xff;
         }
     }
 
@@ -270,20 +263,20 @@ public abstract class CIA implements SimulableIf {
     }
 
     public void printStatus() {
-        System.out.println("--------------------------");
-        println(" status");
-        System.out.println("Timer A state: " + timerA.state);
-        System.out.println("Timer A next trigger: " + timerA.nextZero);
-        System.out.println("CIA CRA: " + Hex.hex2(timerA.getCR()) + " => "
-                + (((timerA.getCR() & 0x08) == 0) ? "cont" : "one-shot"));
-        // System.out.println("Timer A Interrupt: " + timerATrigg);
-        System.out.println("Timer A Latch: " + timerA.getLatch());
-        System.out.println("Timer B state: " + timerB.state);
-        System.out.println("Timer B next trigger: " + timerB.nextZero);
-        System.out.println("CIA CRB: " + Hex.hex2(timerA.getCR()) + " => "
-                + (((timerB.getCR() & 0x08) == 0) ? "cont" : "one-shot"));
-        // System.out.println("Timer B Interrupt: " + timerBTrigg);
-        System.out.println("Timer B Latch: " + timerB.getLatch());
-        System.out.println("--------------------------");
+        // System.out.println("--------------------------");
+        // println(" status");
+        // System.out.println("Timer A state: " + timerA.state);
+        // System.out.println("Timer A next trigger: " + timerA.nextZero);
+        // System.out.println("CIA CRA: " + Hex.hex2(timerA.getCR()) + " => "
+        // + (((timerA.getCR() & 0x08) == 0) ? "cont" : "one-shot"));
+        // // System.out.println("Timer A Interrupt: " + timerATrigg);
+        // System.out.println("Timer A Latch: " + timerA.getLatch());
+        // System.out.println("Timer B state: " + timerB.state);
+        // System.out.println("Timer B next trigger: " + timerB.nextZero);
+        // System.out.println("CIA CRB: " + Hex.hex2(timerA.getCR()) + " => "
+        // + (((timerB.getCR() & 0x08) == 0) ? "cont" : "one-shot"));
+        // // System.out.println("Timer B Interrupt: " + timerBTrigg);
+        // System.out.println("Timer B Latch: " + timerB.getLatch());
+        // System.out.println("--------------------------");
     }
 }

@@ -10,8 +10,8 @@ import com.dreamfabric.c64utils.Debugger;
 import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.SELoader;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
-import com.dreamfabric.jac64.emu.cia.CCIA1;
 import com.dreamfabric.jac64.emu.cia.CIA1;
+import com.dreamfabric.jac64.emu.cia.CIA2;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.cpu.M6510Ops;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Ops;
@@ -41,7 +41,8 @@ public class C64Emulation {
     private static PLA pla = new PLA();
     private static IO io = new IO();
     private static SIDIf sid = new RESID(scheduler);
-    private static CIA1 cia1 = new CIA1();
+    private static CIA1 cia1 = new CIA1(scheduler, interruptManager);
+    private static CIA2 cia2 = new CIA2(scheduler, interruptManager);
 
     private static BasicROM basicROM = new BasicROM();
     private static KernalROM kernalROM = new KernalROM();
@@ -51,6 +52,7 @@ public class C64Emulation {
         // prepare IO
         io.setSid(sid);
         io.setCia1(cia1);
+//        io.setCia2(cia2);
 
         // prepare PLA
         pla.setIO(io);
