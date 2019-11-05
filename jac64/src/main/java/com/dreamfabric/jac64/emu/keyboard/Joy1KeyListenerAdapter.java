@@ -9,8 +9,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dreamfabric.jac64.emu.cia.Joy1Key;
-import com.dreamfabric.jac64.emu.cia.Joy1KeyListener;
+import com.dreamfabric.jac64.emu.cia.keyboard.Joy1Key;
+import com.dreamfabric.jac64.emu.cia.keyboard.Joy1KeyListener;
 
 public class Joy1KeyListenerAdapter implements java.awt.event.KeyListener {
     private static Logger LOGGER = LoggerFactory.getLogger(Joy1KeyListenerAdapter.class);

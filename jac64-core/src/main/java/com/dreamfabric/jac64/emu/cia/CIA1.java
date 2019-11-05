@@ -4,6 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
+import com.dreamfabric.jac64.emu.cia.keyboard.Joy1KeyListener;
+import com.dreamfabric.jac64.emu.cia.keyboard.Joy2KeyListener;
+import com.dreamfabric.jac64.emu.cia.keyboard.KeyListener;
+import com.dreamfabric.jac64.emu.cia.keyboard.Keyboard;
 
 public class CIA1 extends AddressableChip {
     private static Logger LOGGER = LoggerFactory.getLogger(CIA1.class);

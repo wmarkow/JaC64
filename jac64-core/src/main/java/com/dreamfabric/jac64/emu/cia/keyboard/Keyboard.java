@@ -1,4 +1,4 @@
-package com.dreamfabric.jac64.emu.cia;
+package com.dreamfabric.jac64.emu.cia.keyboard;
 
 import java.util.HashSet;
 import java.util.Iterator;

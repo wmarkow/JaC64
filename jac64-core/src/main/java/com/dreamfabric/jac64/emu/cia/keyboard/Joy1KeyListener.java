@@ -1,4 +1,4 @@
-package com.dreamfabric.jac64.emu.cia;
+package com.dreamfabric.jac64.emu.cia.keyboard;
 
 public interface Joy1KeyListener {
     public void joy1KeyPressed(Joy1Key key);

@@ -1,9 +1,14 @@
-package com.dreamfabric.jac64.emu.cia;
+package com.dreamfabric.jac64.emu.cia.keyboard;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.dreamfabric.jac64.emu.cia.keyboard.Joy1Key;
+import com.dreamfabric.jac64.emu.cia.keyboard.Joy2Key;
+import com.dreamfabric.jac64.emu.cia.keyboard.Key;
+import com.dreamfabric.jac64.emu.cia.keyboard.Keyboard;
 
 public class KeyboardTest {
 

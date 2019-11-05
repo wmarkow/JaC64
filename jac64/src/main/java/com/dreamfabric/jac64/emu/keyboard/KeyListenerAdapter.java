@@ -9,12 +9,12 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dreamfabric.jac64.emu.cia.Key;
-import com.dreamfabric.jac64.emu.cia.KeyListener;
+import com.dreamfabric.jac64.emu.cia.keyboard.Key;
+import com.dreamfabric.jac64.emu.cia.keyboard.KeyListener;
 
 /***
  * Provides a mapping from {@link java.awt.event.KeyListener} to
- * {@link com.dreamfabric.jac64.emu.cia.KeyListener}
+ * {@link com.dreamfabric.jac64.emu.cia.keyboard.KeyListener}
  * 
  * @author Witold Markowski
  *
