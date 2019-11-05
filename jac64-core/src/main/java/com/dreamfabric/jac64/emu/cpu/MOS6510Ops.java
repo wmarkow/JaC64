@@ -1,7 +1,5 @@
 package com.dreamfabric.jac64.emu.cpu;
 
-import com.dreamfabric.jac64.Hex;
-
 /**
  * Definitions for the MOS6510Core
  *
@@ -207,34 +205,34 @@ public class MOS6510Ops {
 
     public static String modeString(int mode) {
         switch (mode) {
-        case IMMEDIATE:
-            return "immediate";
-        case ZERO:
-            return "zero";
-        case ABSOLUTE:
-            return "absolute";
-        case ZERO_X:
-            return "zero,x";
-        case ZERO_Y:
-            return "zero,y";
-        case ABSOLUTE_X:
-            return "absolute,x";
-        case ABSOLUTE_Y:
-            return "absolute,y";
-        case RELATIVE:
-            return "relative";
-        case INDIRECT_X:
-            return "indirect,x";
-        case INDIRECT_Y:
-            return "indirect,y";
-        case ACCUMULATOR:
-            return "accumulator";
-        case INDIRECT:
-            return "indirect";
-        case 0:
-            return "implied";
-        default:
-            return "";
+            case IMMEDIATE:
+                return "immediate";
+            case ZERO:
+                return "zero";
+            case ABSOLUTE:
+                return "absolute";
+            case ZERO_X:
+                return "zero,x";
+            case ZERO_Y:
+                return "zero,y";
+            case ABSOLUTE_X:
+                return "absolute,x";
+            case ABSOLUTE_Y:
+                return "absolute,y";
+            case RELATIVE:
+                return "relative";
+            case INDIRECT_X:
+                return "indirect,x";
+            case INDIRECT_Y:
+                return "indirect,y";
+            case ACCUMULATOR:
+                return "accumulator";
+            case INDIRECT:
+                return "indirect";
+            case 0:
+                return "implied";
+            default:
+                return "";
         }
     }
 
@@ -265,57 +263,57 @@ public class MOS6510Ops {
 
     private static int getAdrMode(int pos, int m) {
         switch (m) {
-        case 0:
-        case 2:
-            if (pos > 4)
+            case 0:
+            case 2:
+                if (pos > 4)
+                    return IMMEDIATE;
+                return 0;
+            case 1:
+            case 3:
+                return INDIRECT_X;
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+                return ZERO;
+            case 9:
+            case 0xb:
                 return IMMEDIATE;
-            return 0;
-        case 1:
-        case 3:
-            return INDIRECT_X;
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-            return ZERO;
-        case 9:
-        case 0xb:
-            return IMMEDIATE;
-        case 0xa:
-            if (pos < 4)
-                return ACCUMULATOR;
-            return 0;
-        case 0xc:
-        case 0xd:
-        case 0xe:
-        case 0xf:
-            if (m == 0x0c && pos == 3)
-                return INDIRECT;// Only instruction for this
-            return ABSOLUTE;
-        case 0x10:
-            return RELATIVE;
-        case 0x11:
-        case 0x13:
-            return INDIRECT_Y;
-        case 0x14:
-        case 0x15:
-            return ZERO_X;
-        case 0x16:
-        case 0x17:
-            if (pos == 4 || pos == 5)
-                return ZERO_Y;
-            return ZERO_X;
-        case 0x19:
-        case 0x1b:
-            return ABSOLUTE_Y;
-        case 0x1c:
-        case 0x1d:
-            return ABSOLUTE_X;
-        case 0x1e:
-        case 0x1f:
-            if (pos == 4 || pos == 5)
+            case 0xa:
+                if (pos < 4)
+                    return ACCUMULATOR;
+                return 0;
+            case 0xc:
+            case 0xd:
+            case 0xe:
+            case 0xf:
+                if (m == 0x0c && pos == 3)
+                    return INDIRECT;// Only instruction for this
+                return ABSOLUTE;
+            case 0x10:
+                return RELATIVE;
+            case 0x11:
+            case 0x13:
+                return INDIRECT_Y;
+            case 0x14:
+            case 0x15:
+                return ZERO_X;
+            case 0x16:
+            case 0x17:
+                if (pos == 4 || pos == 5)
+                    return ZERO_Y;
+                return ZERO_X;
+            case 0x19:
+            case 0x1b:
                 return ABSOLUTE_Y;
-            return ABSOLUTE_X;
+            case 0x1c:
+            case 0x1d:
+                return ABSOLUTE_X;
+            case 0x1e:
+            case 0x1f:
+                if (pos == 4 || pos == 5)
+                    return ABSOLUTE_Y;
+                return ABSOLUTE_X;
         }
         return 0;
     }
@@ -341,7 +339,8 @@ public class MOS6510Ops {
         init();
 
         for (int i = 0, n = 256 + 2; i < n; i++) {
-            System.out.println(Hex.hex2(i) + " => " + toString(i, true) + " IS:" + Hex.hex2(INSTRUCTION_SET[i]));
+            System.out.println(String.format("0x%08X", i) + " => " + toString(i, true) + " IS:"
+                    + String.format("0x%08X", INSTRUCTION_SET[i]));
         }
 
         int b = lookup(BEQ, RELATIVE);
