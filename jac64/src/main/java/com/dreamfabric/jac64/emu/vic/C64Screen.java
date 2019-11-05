@@ -44,16 +44,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
     public static final String version = "1.11";
 
-    public static final boolean IRQDEBUG = false;
-    public static final boolean SPRITEDEBUG = false;
-    public static final boolean IODEBUG = false;
-    public static final boolean VIC_MEM_DEBUG = false;
-    public static final boolean BAD_LINE_DEBUG = false;
-    public static final boolean STATE_DEBUG = false;
-    public static final boolean DEBUG_IEC = false;
-
-    public static final boolean DEBUG_CYCLES = false;
-
     public static final int IO_UPDATE = 37;
     // This is PAL speed! - will be called each scan line...
 
@@ -416,8 +406,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
             case 0xd018:
                 return vicMem;
             case 0xd019:
-                if (SPRITEDEBUG)
-                    monitor.info("Reading d019: " + getMemory(address + IO_OFFSET));
+                LOGGER.debug("Reading d019: " + getMemory(address + IO_OFFSET));
                 return irqFlags;
             case 0xd01a:
                 return irqMask;
@@ -429,14 +418,12 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 return sprXEX;
             case 0xd01e:
                 val = sprCol;
-                if (SPRITEDEBUG)
-                    monitor.info("Reading sprite collission: " + Integer.toString(address, 16) + " => " + val);
+                LOGGER.debug("Reading sprite collission: " + Integer.toString(address, 16) + " => " + val);
                 sprCol = 0;
                 return val;
             case 0xd01f:
                 val = sprBgCol;
-                if (SPRITEDEBUG)
-                    monitor.info("Reading sprite collission: " + Integer.toString(address, 16) + " => " + val);
+                LOGGER.debug("Reading sprite collission: " + Integer.toString(address, 16) + " => " + val);
 
                 sprBgCol = 0;
                 return val;
@@ -548,8 +535,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                     vScroll = data & 0x7;
                     boolean oldBadLine = badLine;
                     badLine = (displayEnabled && vbeam >= 0x30 && vbeam <= 0xf7) && (vbeam & 0x7) == vScroll;
-                    if (BAD_LINE_DEBUG && oldBadLine != badLine) {
-                        monitor.info("#### BadLC diff@" + vbeam + " => " + badLine + " vScroll: " + vScroll + " vmli: "
+                    if (oldBadLine != badLine) {
+                        LOGGER.debug("#### BadLC diff@" + vbeam + " => " + badLine + " vScroll: " + vScroll + " vmli: "
                                 + vmli + " vc: " + vc + " rc: " + rc + " cyc line: " + (cpu.currentCpuCycles - lastLine)
                                 + " cyc IRQ: " + (cpu.currentCpuCycles - lastIRQ));
                     }
@@ -567,21 +554,16 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 // System.out.println("Extended set to: " + extended + " at " +
                 // vbeam + " d011: " + Hex.hex2(data));
 
-                if (VIC_MEM_DEBUG || BAD_LINE_DEBUG) {
-                    monitor.info("d011 = " + data + " at " + vbeam + " => YScroll = " + (data & 0x7)
-                            + " cyc since line: " + (cpu.currentCpuCycles - lastLine) + " cyc since IRQ: "
-                            + (cpu.currentCpuCycles - lastIRQ));
-                }
-                if (IRQDEBUG)
-                    monitor.info("Setting raster position (hi) to: " + (data & 0x80));
+                LOGGER.debug("d011 = " + data + " at " + vbeam + " => YScroll = " + (data & 0x7) + " cyc since line: "
+                        + (cpu.currentCpuCycles - lastLine) + " cyc since IRQ: " + (cpu.currentCpuCycles - lastIRQ));
+                LOGGER.debug("Setting raster position (hi) to: " + (data & 0x80));
 
                 break;
 
             // d012 -> raster position
             case 0xd012:
                 raster = (raster & 0x100) | data;
-                if (IRQDEBUG)
-                    monitor.info("Setting Raster Position (low) to " + data);
+                LOGGER.debug("Setting Raster Position (low) to " + data);
                 break;
             case 0xd013:
             case 0xd014:
@@ -633,9 +615,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 if ((data & 0x80) != 0)
                     data = 0xff;
                 int latchval = 0xff ^ data;
-                if (IRQDEBUG)
-                    monitor.info("Latching VIC-II: " + Integer.toString(data, 16) + " on "
-                            + Integer.toString(irqFlags, 16) + " latch: " + Integer.toString(latchval, 16));
+                LOGGER.debug("Latching VIC-II: " + Integer.toString(data, 16) + " on " + Integer.toString(irqFlags, 16)
+                        + " latch: " + Integer.toString(latchval, 16));
 
                 irqFlags &= latchval;
 
@@ -656,9 +637,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                     clearIRQ(VIC_IRQ);
                 }
 
-                if (IRQDEBUG) {
-                    monitor.info("Changing IRQ mask to: " + Integer.toString(irqMask, 16) + " vbeam: " + vbeam);
-                }
+                LOGGER.debug("Changing IRQ mask to: " + Integer.toString(irqMask, 16) + " vbeam: " + vbeam);
                 break;
 
             case 0xd01b:
@@ -720,15 +699,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 // & 15));
                 break;
             case 0xdd00:
-                if (DEBUG_IEC)
-                    monitor.info("C64: IEC Write: " + Integer.toHexString(data));
-
-                // if (emulateDisk) {
-                // c1541.handleDisk(data, cpu.cycles);
-                // }
-
-                if (VIC_MEM_DEBUG)
-                    System.out.println("Set dd00 to " + Integer.toHexString(data));
+                LOGGER.debug("C64: IEC Write: " + Integer.toHexString(data));
+                LOGGER.debug("Set dd00 to " + Integer.toHexString(data));
 
                 cia2.write(address, data, cpu.currentCpuCycles);
                 cia2PRA = data;
@@ -739,8 +711,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                         | (data << 2) & 0x40 // CLK
                         | (data << 1) & 0x10; // ATN
 
-                if (DEBUG_IEC)
-                    printIECLines();
+                printIECLines();
                 setVideoMem();
                 break;
 
@@ -776,10 +747,9 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     }
 
     private void setVideoMem() {
-        if (VIC_MEM_DEBUG) {
-            monitor.info("setVideoMem() cycles since line: " + (cpu.currentCpuCycles - lastLine) + " cycles since IRQ: "
-                    + (cpu.currentCpuCycles - lastIRQ) + " at " + vbeam);
-        }
+        LOGGER.debug("setVideoMem() cycles since line: " + (cpu.currentCpuCycles - lastLine) + " cycles since IRQ: "
+                + (cpu.currentCpuCycles - lastIRQ) + " at " + vbeam);
+
         // Set-up vars for screen rendering
         vicBank = (~(~cia2DDRA | cia2PRA) & 3) << 14;
         charSet = vicBank | (vicMem & 0x0e) << 10;
@@ -838,14 +808,13 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     private long lastCycle = 0;
 
     public final void clock(long currentCpuCycles) {
-        if (DEBUG_CYCLES || true) {
-            if (lastCycle + 1 < currentCpuCycles) {
-                System.out.println("More than one cycle passed: " + (currentCpuCycles - lastCycle) + " at "
-                        + currentCpuCycles + " PC: " + Integer.toHexString(cpu.getPc()));
-            }
+
+        if (lastCycle + 1 < currentCpuCycles) {
+            LOGGER.debug("More than one cycle passed: " + (currentCpuCycles - lastCycle) + " at " + currentCpuCycles
+                    + " PC: " + Integer.toHexString(cpu.getPc()));
 
             if (lastCycle == currentCpuCycles) {
-                System.out.println("No diff since last update!!!: " + (currentCpuCycles - lastCycle) + " at "
+                LOGGER.debug("No diff since last update!!!: " + (currentCpuCycles - lastCycle) + " at "
                         + currentCpuCycles + " PC: " + Integer.toHexString(cpu.getPc()));
             }
             lastCycle = currentCpuCycles;
@@ -887,14 +856,12 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 // Check for interrupts, etc...
                 // Sprite collission interrupts - why only once a line?
                 if (((irqMask & 2) != 0) && (sprBgCol != 0) && (irqFlags & 2) == 0) {
-                    if (SPRITEDEBUG)
-                        monitor.info("*** Sprite collission IRQ (d01f): " + sprBgCol + " at " + vbeam);
+                    LOGGER.debug("*** Sprite collission IRQ (d01f): " + sprBgCol + " at " + vbeam);
                     irqFlags |= 82;
                     setIRQ(VIC_IRQ);
                 }
                 if (((irqMask & 4) != 0) && (sprCol != 0) && (irqFlags & 4) == 0) {
-                    if (SPRITEDEBUG)
-                        monitor.info("*** Sprite collission IRQ (d01e): " + sprCol + " at " + vbeam);
+                    LOGGER.debug("*** Sprite collission IRQ (d01e): " + sprCol + " at " + vbeam);
                     irqFlags |= 84;
                     setIRQ(VIC_IRQ);
                 }
@@ -912,10 +879,9 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                         irqTriggered = true;
                         setIRQ(VIC_IRQ);
                         lastIRQ = cpu.currentCpuCycles;
-                        if (IRQDEBUG)
-                            monitor.info("Generating IRQ at " + vbeam + " req:" + raster + " IRQs:"
-                                    + cpu.getInterruptInExec() + " flags: " + irqFlags + " delta: "
-                                    + (cpu.currentCpuCycles - lastLine));
+                        LOGGER.debug(
+                                "Generating IRQ at " + vbeam + " req:" + raster + " IRQs:" + cpu.getInterruptInExec()
+                                        + " flags: " + irqFlags + " delta: " + (cpu.currentCpuCycles - lastLine));
                     }
                 } else {
                     irqTriggered = false;
@@ -924,8 +890,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 if (vPos < 0 || vPos >= 284) {
                     cpu.baLowUntil = 0;
                     notVisible = true;
-                    if (STATE_DEBUG)
-                        monitor.info("FINISH next at " + vbeam);
+                    LOGGER.debug("FINISH next at " + vbeam);
                     // Jump directly to VS_FINISH and wait for end of line...
                     break;
                 }
@@ -1050,8 +1015,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 vmli = 0;
                 if (badLine) {
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
-                    if (BAD_LINE_DEBUG)
-                        System.out.println("#### RC = 0 (" + rc + ") at " + vbeam + " vc: " + vc);
+                    LOGGER.debug("#### RC = 0 (" + rc + ") at " + vbeam + " vc: " + vc);
                     rc = 0;
                 }
                 break;
@@ -1151,9 +1115,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                             sprite.nextByte = 0;
                             sprite.dma = true;
                             sprite.expFlipFlop = true;
-                            if (SPRITEDEBUG)
-                                System.out.println("Starting painting sprite " + i + " on " + vbeam
-                                        + " first visible at " + (ypos + 1));
+                            LOGGER.debug("Starting painting sprite " + i + " on " + vbeam + " first visible at "
+                                    + (ypos + 1));
                         }
                     }
                     mult = mult << 1;
@@ -1201,8 +1164,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                     Sprite sprite = sprites[i];
                     if (!sprite.dma) {
                         sprite.painting = false;
-                        if (SPRITEDEBUG)
-                            System.out.println("Stopped painting sprite " + i + " at (after): " + vbeam);
+                        LOGGER.debug("Stopped painting sprite " + i + " at (after): " + vbeam);
                     }
                 }
 
@@ -1229,11 +1191,9 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 if (rc == 7) {
                     vcBase = vc;
                     gfxVisible = false;
-                    if (BAD_LINE_DEBUG) {
-                        monitor.info("#### RC7 ==> vc = " + vc + " at " + vbeam + " vicCycle = " + vicCycle);
-                        if (vc == 1000) {
-                            monitor.info("--------------- last line ----------------");
-                        }
+                    LOGGER.debug("#### RC7 ==> vc = " + vc + " at " + vbeam + " vicCycle = " + vicCycle);
+                    if (vc == 1000) {
+                        LOGGER.debug("--------------- last line ----------------");
                     }
                 }
 
@@ -1396,11 +1356,11 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 }
             }
 
-            if (BAD_LINE_DEBUG && badLine) {
-                for (int pix = 0; pix < 8; pix += 4) {
-                    mem[mpos + 7 - pix] = (mem[mpos + 7 - pix] & 0xff7f7f7f) | 0x0fff;
-                }
-            }
+            // if (BAD_LINE_DEBUG && badLine) {
+            // for (int pix = 0; pix < 8; pix += 4) {
+            // mem[mpos + 7 - pix] = (mem[mpos + 7 - pix] & 0xff7f7f7f) | 0x0fff;
+            // }
+            // }
         } else {
             // -------------------------------------------------------------------
             // Bitmap mode!
@@ -1451,11 +1411,11 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 }
             }
 
-            if (BAD_LINE_DEBUG && badLine) {
-                for (int pix = 0; pix < 8; pix += 4) {
-                    mem[mpos + 7 - pix] = (mem[mpos + 7 - pix] & 0xff3f3f3f) | 0x0fff;
-                }
-            }
+            // if (BAD_LINE_DEBUG && badLine) {
+            // for (int pix = 0; pix < 8; pix += 4) {
+            // mem[mpos + 7 - pix] = (mem[mpos + 7 - pix] & 0xff3f3f3f) | 0x0fff;
+            // }
+            // }
         }
         vc++;
         vmli++;
@@ -1509,18 +1469,18 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                         }
                     }
 
-                    if (SPRITEDEBUG) {
-                        if ((sprite.nextByte == 3) && ((j & 4) == 0)) {
-                            mem[mpos + j] = 0xff00ff00;
-                        }
-                        if ((sprite.nextByte == 63) && ((j & 4) == 0)) {
-                            mem[mpos + j] = 0xffff0000;
-                        }
-
-                        if (j == x) {
-                            mem[mpos + j] = 0xff000000 + sprite.pointer;
-                        }
-                    }
+                    // if (SPRITEDEBUG) {
+                    // if ((sprite.nextByte == 3) && ((j & 4) == 0)) {
+                    // mem[mpos + j] = 0xff00ff00;
+                    // }
+                    // if ((sprite.nextByte == 63) && ((j & 4) == 0)) {
+                    // mem[mpos + j] = 0xffff0000;
+                    // }
+                    //
+                    // if (j == x) {
+                    // mem[mpos + j] = 0xff000000 + sprite.pointer;
+                    // }
+                    // }
                 }
             }
         }
