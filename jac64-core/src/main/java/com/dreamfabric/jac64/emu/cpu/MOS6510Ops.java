@@ -167,11 +167,7 @@ public class MOS6510Ops {
 
     public static final int[] RMW_INS = { ASL, LSR, ROL, ROR, INC, DEC, SLO, SRE, RLA, RRA, ISB, DCP };
 
-    static {
-        init();
-    }
-
-    public static void init() {
+    public void init() {
         for (int i = 0, n = INSTRUCTION_SET.length; i < n; i++) {
             int mode = i & 0x1f;
             int pos = i >> 5;
@@ -334,18 +330,4 @@ public class MOS6510Ops {
         // System.out.println("OP: " + i + " not found...");
         return 0;
     }
-
-    public static void main(String[] args) {
-        init();
-
-        for (int i = 0, n = 256 + 2; i < n; i++) {
-            System.out.println(String.format("0x%08X", i) + " => " + toString(i, true) + " IS:"
-                    + String.format("0x%08X", INSTRUCTION_SET[i]));
-        }
-
-        int b = lookup(BEQ, RELATIVE);
-        System.out.println("BEQ # => " + b);
-
-    }
-
 }

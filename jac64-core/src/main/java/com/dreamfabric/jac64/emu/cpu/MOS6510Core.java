@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.PatchListener;
-import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 
 /**
@@ -44,7 +43,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     // Needed by ...
     protected PatchListener list;
-    protected ExtChip chips = null;
 
     protected IMonitor monitor;
     public String codebase;
@@ -672,7 +670,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
             case CLI:
                 disableInterupt = false;
                 checkInterrupt = true;
-                log(getName() + " Enabled interrupts: IRQ: " + chips.getIRQFlags() + " IRQLow: " + IRQLow);
                 break;
             // Load / Store instructions
             case LDA:
@@ -835,10 +832,9 @@ public abstract class MOS6510Core extends MOS6510Ops {
         System.out.println("Unknown instruction: " + op);
     }
 
-    public void init(ExtChip scr) {
+    public void init() {
         super.init();
         installROMS();
-        chips = scr;
     }
 
     protected abstract void installROMS();
@@ -869,8 +865,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
         IRQLow = false;
         log("Set IRQLOW to false...");
         resetFlag = false;
-
-        chips.reset();
 
         pc = fetchByte(0xfffc) + (fetchByte(0xfffd) << 8);
 

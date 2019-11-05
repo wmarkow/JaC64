@@ -24,6 +24,7 @@ import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.SlowDownCalculator;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
+import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
 
@@ -69,10 +70,16 @@ public class CPU extends MOS6510Core {
 
     private PLA pla;
     private AddressableBus addressableBus;
+    protected ExtChip chips = null;
 
     public CPU(IMonitor m, String cb, Loader loader) {
         super(m, cb);
         this.loader = loader;
+    }
+
+    public void init(ExtChip scr) {
+        super.init();
+        this.chips = scr;
     }
 
     public void setPla(PLA pla) {
@@ -352,6 +359,7 @@ public class CPU extends MOS6510Core {
     public void reset() {
         writeByte(1, 0x7);
         super.reset();
+        chips.reset();
         scheduler.empty();
         C64Emulation.getSid().reset();
     }
@@ -418,15 +426,16 @@ public class CPU extends MOS6510Core {
                     next_print = currentCpuCycles + CYCLES_PER_DEBUG;
                 }
 
-//                long delay = slowDownCalculator.calculateWaitInNanos(System.nanoTime(), currentCpuCycles);
-//                if (delay == 0) {
-//                    continue;
-//                }
-//
-//                long sleepUntilNanos = System.nanoTime() + delay;
-//                while (System.nanoTime() <= sleepUntilNanos) {
-//                    // just empty loop to slow down the simulation
-//                }
+                // long delay = slowDownCalculator.calculateWaitInNanos(System.nanoTime(),
+                // currentCpuCycles);
+                // if (delay == 0) {
+                // continue;
+                // }
+                //
+                // long sleepUntilNanos = System.nanoTime() + delay;
+                // while (System.nanoTime() <= sleepUntilNanos) {
+                // // just empty loop to slow down the simulation
+                // }
             }
         } catch (Exception e) {
             monitor.error("Exception in loop " + pc + " : " + e);
