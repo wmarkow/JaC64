@@ -8,14 +8,12 @@
 
 package com.dreamfabric.jac64.emu.vic;
 
-import java.applet.AudioClip;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
@@ -29,8 +27,6 @@ import com.dreamfabric.jac64.C64Canvas;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Observer;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
-import com.dreamfabric.jac64.emu.cia.CIA;
-import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.cia.CIA2;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
@@ -43,16 +39,10 @@ import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
  * @version $Revision: 1.11 $, $Date: 2006/05/02 16:26:26 $
  */
 
-public class C64Screen extends ExtChip implements Observer, MouseListener, MouseMotionListener {
+public class C64Screen extends ExtChip implements Observer, MouseMotionListener {
     private static Logger LOGGER = LoggerFactory.getLogger(C64Screen.class);
 
     public static final String version = "1.11";
-
-    public static final int SERIAL_ATN = (1 << 3);
-    public static final int SERIAL_CLK_OUT = (1 << 4);
-    public static final int SERIAL_DATA_OUT = (1 << 5);
-    public static final int SERIAL_CLK_IN = (1 << 6);
-    public static final int SERIAL_DATA_IN = (1 << 7);
 
     public static final boolean IRQDEBUG = false;
     public static final boolean SPRITEDEBUG = false;
@@ -116,17 +106,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     // for disk emulation...
     int cia2PRA = 0;
     int cia2DDRA = 0;
-
-    AudioClip trackSound = null;
-    AudioClip motorSound = null;
-
-    private int lastTrack = 0;
-    private int lastSector = 0;
-    private boolean ledOn = false;
-    private boolean motorOn = false;
-
-    // This is an IEC emulation (non ROM based)
-    boolean emulateDisk = false; // true; //!CPU.EMULATE_1541; // false;
 
     private int[] cbmcolor = VICConstants.COLOR_SETS[0];
 
@@ -237,8 +216,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
     int potx = 0;
     int poty = 0;
-    boolean button1 = false;
-    boolean button2 = false;
 
     // This variable changes when Kernal has installed
     // a working ISR that is reading the keyboard
@@ -354,7 +331,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
 
         canvas = new C64Canvas(this, DOUBLE);
         canvas.addMouseMotionListener(this);
-        canvas.addMouseListener(this);
 
         charMemoryIndex = CPU.CHAR_ROM2;
 
@@ -1552,7 +1528,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     }
 
     public void stop() {
-        motorSound(false);
     }
 
     public void reset() {
@@ -1572,7 +1547,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         // c1541.reset();
         isrRunning = false;
 
-        motorSound(false);
         resetInterrupts();
     }
 
@@ -1630,11 +1604,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
             g2.setColor(lites[colIndex]);
             g2.drawString(msg, 0, 8);
 
-            if (ledOn) {
-                g2.setColor(LED_ON);
-            } else {
-                g2.setColor(LED_OFF);
-            }
             g2.fillRect(372, 3, 7, 1);
             g2.setColor(LED_BORDER);
             g2.drawRect(371, 2, 8, 2);
@@ -1748,26 +1717,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
         }
     }
 
-    private void trackSound() {
-        if (trackSound != null) {
-            trackSound.play();
-        }
-    }
-
-    public void motorSound(boolean on) {
-        if (motorSound != null) {
-            if (on)
-                motorSound.loop();
-            else
-                motorSound.stop();
-        }
-    }
-
-    public void setSounds(AudioClip track, AudioClip motor) {
-        trackSound = track;
-        motorSound = motor;
-    }
-
     // -------------------------------------------------------------------
     // MouseListener
     // -------------------------------------------------------------------
@@ -1779,35 +1728,6 @@ public class C64Screen extends ExtChip implements Observer, MouseListener, Mouse
     public void mouseMoved(MouseEvent e) {
         potx = e.getX() & 0xff;
         poty = 0xff - (e.getY() & 0xff);
-    }
-
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    public void mouseExited(MouseEvent e) {
-    }
-
-    public void mousePressed(MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON1) {
-            button1 = true;
-        } else {
-            button2 = true;
-        }
-        // Emulate stick button
-        // keyboard.setButtonval(0xff - (button1 ? 0x4 : 0) - (button2 ? 0x8 : 0));
-    }
-
-    public void mouseReleased(MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON1) {
-            button1 = false;
-        } else {
-            button2 = false;
-        }
-        // Emulate stick button
-        // keyboard.setButtonval(0xff - (button1 ? 0x4 : 0) - (button2 ? 0x8 : 0));
     }
 
     public int getIecLines() {

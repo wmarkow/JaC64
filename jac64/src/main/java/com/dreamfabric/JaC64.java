@@ -10,8 +10,6 @@
  */
 package com.dreamfabric;
 
-import java.applet.Applet;
-import java.applet.AudioClip;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FileDialog;
@@ -43,10 +41,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
 import com.dreamfabric.c64utils.C64Script;
-import com.dreamfabric.c64utils.Debugger;
 import com.dreamfabric.jac64.C64Reader;
 import com.dreamfabric.jac64.DirEntry;
-import com.dreamfabric.jac64.SELoader;
 import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.sid.RESID;
@@ -163,16 +159,6 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
 
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
 
-        // Setup disk sounds
-        AudioClip trackSound = null;
-        AudioClip motorSound = null;
-        URL url = getClass().getResource("sounds/track.wav");
-        if (url != null)
-            trackSound = Applet.newAudioClip(url);
-        url = getClass().getResource("sounds/motor.wav");
-        if (url != null)
-            motorSound = Applet.newAudioClip(url);
-        scr.setSounds(trackSound, motorSound);
         c64Canvas = (KeyListener) scr.getScreen();
     }
 
