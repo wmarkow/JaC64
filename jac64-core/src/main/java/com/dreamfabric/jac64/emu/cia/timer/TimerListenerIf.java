@@ -1,4 +1,4 @@
-package com.dreamfabric.jac64.emu.cia;
+package com.dreamfabric.jac64.emu.cia.timer;
 
 public interface TimerListenerIf {
 

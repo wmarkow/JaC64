@@ -1,4 +1,4 @@
-package com.dreamfabric.jac64.emu.cia;
+package com.dreamfabric.jac64.emu.cia.timer;
 
 import com.dreamfabric.jac64.emu.SimulableIf;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
