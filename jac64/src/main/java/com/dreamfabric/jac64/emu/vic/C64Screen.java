@@ -91,10 +91,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
     private CIA2 cia2;
 
-    // for disk emulation...
-    int cia2PRA = 0;
-    int cia2DDRA = 0;
-
     private int[] cbmcolor = VICConstants.COLOR_SETS[0];
 
     // -------------------------------------------------------------------
@@ -222,6 +218,10 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         canvas.setAutoscale(val);
     }
 
+    public void setCia2(CIA2 cia2) {
+        this.cia2 = cia2;
+    }
+
     private void makeColors(Color[] colors, Color c1, Color c2) {
         int a0 = c1.getAlpha();
         int r0 = c1.getRed();
@@ -313,9 +313,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
             sprites[i] = new Sprite();
             sprites[i].spriteNo = i;
         }
-
-        cia2 = new CIA2(cpu.getScheduler(), getInterruptManager());
-        cia2.setEnabled(true);
 
         canvas = new C64Canvas(this, DOUBLE);
         canvas.addMouseMotionListener(this);
@@ -449,17 +446,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 return potx;
             case 0xd41A:
                 return poty;
-            case 0xdd00:
-                // System.out.print("Read dd00 IEC1: ");
-                // Try the frodo way... again...
-                val = (cia2PRA | ~cia2DDRA) & 0x3f;
-
-                val &= 0xff;
-                return val;
             default:
-                if (pos == 0xd) {
-                    return cia2.read(address, currentCpuCycles);
-                } else if (pos >= 0x8) {
+                if (pos >= 0x8) {
                     return getMemory(IO_OFFSET + address) | 0xf0;
                 }
                 return 0xff;
@@ -696,30 +684,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 // System.out.println("Sprite " + (address - 0xd027) + " color set to: " + (data
                 // & 15));
                 break;
-            case 0xdd00:
-                LOGGER.debug("C64: IEC Write: " + Integer.toHexString(data));
-                LOGGER.debug("Set dd00 to " + Integer.toHexString(data));
-
-                cia2.write(address, data, cpu.currentCpuCycles);
-                cia2PRA = data;
-
-                data = ~cia2PRA & cia2DDRA;
-
-                setVideoMem();
-                break;
-
-            case 0xdd02:
-                cia2DDRA = data;
-                // System.out.println("C64: Wrote to DDRA (IEC): " +
-                // Integer.toHexString(data));
-                cia2.write(address, data, cpu.currentCpuCycles);
-                setVideoMem();
-                break;
-
             default:
-                if (pos == 0xd) {
-                    cia2.write(address, data, currentCpuCycles);
-                }
                 // handle color ram!
         }
     }
@@ -728,8 +693,10 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         LOGGER.debug("setVideoMem() cycles since line: " + (cpu.currentCpuCycles - lastLine) + " cycles since IRQ: "
                 + (cpu.currentCpuCycles - lastIRQ) + " at " + vbeam);
 
+        int cia2PRA = cia2.getPRA();
+
         // Set-up vars for screen rendering
-        vicBank = (~(~cia2DDRA | cia2PRA) & 3) << 14;
+        vicBank = (~(cia2PRA) & 3) << 14;
         charSet = vicBank | (vicMem & 0x0e) << 10;
         videoMatrix = vicBank | (vicMem & 0xf0) << 6;
         vicBase = vicBank | (vicMem & 0x08) << 10;
@@ -1671,11 +1638,15 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     protected int getMemory(int address) {
         validateAddress(address);
 
+        setVideoMem();
+
         return memory[address];
     };
 
     protected void setMemory(int address, int data) {
         validateAddress(address);
+
+        setVideoMem();
 
         memory[address] = data;
     }

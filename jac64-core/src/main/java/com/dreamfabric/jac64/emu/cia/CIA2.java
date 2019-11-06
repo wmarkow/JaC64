@@ -22,6 +22,10 @@ public class CIA2 extends CIA {
         return END_ADDRESS;
     }
 
+    public int getPRA() {
+        return read0(PRA + getStartAddress());
+    }
+
     @Override
     protected void updateInterrupts() {
         if ((ciaie & ciaicrRead & 0x1f) != 0) {

@@ -52,7 +52,7 @@ public class C64Emulation {
         // prepare IO
         io.setSid(sid);
         io.setCia1(cia1);
-//        io.setCia2(cia2);
+        io.setCia2(cia2);
 
         // prepare PLA
         pla.setIO(io);
@@ -98,6 +98,10 @@ public class C64Emulation {
 
     public static CIA1 getCia1() {
         return cia1;
+    }
+    
+    public static CIA2 getCia2() {
+        return cia2;
     }
 
     public static Debugger getMonitor() {

@@ -36,9 +36,9 @@ public class IO extends AddressableVoid {
             return true;
         }
 
-//        if (cia2.write(address, data, currentCpuCycles)) {
-//            return true;
-//        }
+        if (cia2.write(address, data, currentCpuCycles)) {
+            return true;
+        }
 
         return false;
     }
@@ -57,10 +57,10 @@ public class IO extends AddressableVoid {
             return result;
         }
 
-//        result = cia2.read(address, currentCpuCycles);
-//        if (result != null) {
-//            return result;
-//        }
+        result = cia2.read(address, currentCpuCycles);
+        if (result != null) {
+            return result;
+        }
 
         return null;
     }
@@ -71,6 +71,7 @@ public class IO extends AddressableVoid {
 
         sid.setEnabled(enabled);
         cia1.setEnabled(enabled);
+        cia2.setEnabled(enabled);
     }
 
     @Override
