@@ -91,8 +91,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
     private CIA2 cia2;
 
-    int iecLines = 0;
-
     // for disk emulation...
     int cia2PRA = 0;
     int cia2DDRA = 0;
@@ -706,12 +704,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 cia2PRA = data;
 
                 data = ~cia2PRA & cia2DDRA;
-                int oldLines = iecLines;
-                iecLines = (data << 2) & 0x80 // DATA
-                        | (data << 2) & 0x40 // CLK
-                        | (data << 1) & 0x10; // ATN
 
-                printIECLines();
                 setVideoMem();
                 break;
 
@@ -729,21 +722,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 }
                 // handle color ram!
         }
-    }
-
-    private void printIECLines() {
-        System.out.print("IEC/F: ");
-        if ((iecLines & 0x10) == 0) {
-            System.out.print("A1");
-        } else {
-            System.out.print("A0");
-        }
-
-        // The c64 has id = 1
-        int sdata = ((iecLines & 0x40) == 0) ? 1 : 0;
-        System.out.print(" C" + sdata);
-        sdata = ((iecLines & 0x80) == 0) ? 1 : 0;
-        System.out.print(" D" + sdata);
     }
 
     private void setVideoMem() {
@@ -1688,10 +1666,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     public void mouseMoved(MouseEvent e) {
         potx = e.getX() & 0xff;
         poty = 0xff - (e.getY() & 0xff);
-    }
-
-    public int getIecLines() {
-        return iecLines;
     }
 
     protected int getMemory(int address) {
