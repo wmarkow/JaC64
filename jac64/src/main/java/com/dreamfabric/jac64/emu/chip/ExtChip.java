@@ -25,11 +25,9 @@ import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
  */
 public abstract class ExtChip {
 
-    protected MOS6510Core cpu;
     private Observer observer;
 
-    public void init(MOS6510Core cpu) {
-        this.cpu = cpu;
+    public void init() {
     }
 
     public abstract void reset();
