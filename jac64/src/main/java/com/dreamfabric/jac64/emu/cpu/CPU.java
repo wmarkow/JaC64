@@ -19,14 +19,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.c64utils.AutoStore;
+import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Loader;
 import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.SlowDownCalculator;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
-import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
+import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 /**
  * CPU "implements" the C64s 6510 processor in java code. reimplemented from old
@@ -64,7 +65,7 @@ public class CPU extends MOS6510Core {
 
     private PLA pla;
     private AddressableBus addressableBus;
-    protected ExtChip chips = null;
+    protected C64Screen chips = null;
     private int memory[];
 
     public CPU(IMonitor m, String cb) {
@@ -72,7 +73,7 @@ public class CPU extends MOS6510Core {
         memory = new int[getMemorySize()];
     }
 
-    public void init(ExtChip scr) {
+    public void init(C64Screen scr) {
         super.init();
         this.chips = scr;
         C64Emulation.installROMs();
@@ -134,7 +135,7 @@ public class CPU extends MOS6510Core {
             throw new IllegalArgumentException("should never happen because Char ROM is handled by addressable bus");
         }
         if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
-            return chips.performRead(adr, currentCpuCycles);
+            throw new IllegalArgumentException("should never happen because VIC is handled by addressable bus");
         }
 
         return C64Emulation.getRAM().read(adr, currentCpuCycles);
@@ -177,13 +178,13 @@ public class CPU extends MOS6510Core {
         }
         // END: a new way of writing data.
 
-        adr &= 0xffff;
-        if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
-            // System.out.println("IO Write at: " + Integer.toString(adr, 16));
-            chips.performWrite(adr, data, currentCpuCycles);
-
-            return;
-        }
+        // adr &= 0xffff;
+        // if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
+        // // System.out.println("IO Write at: " + Integer.toString(adr, 16));
+        // chips.write(adr, data, currentCpuCycles);
+        //
+        // return;
+        // }
 
         // it should write to the underlying RAM:
         // https://www.c64-wiki.com/wiki/Memory_Map

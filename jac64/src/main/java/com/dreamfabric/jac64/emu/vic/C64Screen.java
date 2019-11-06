@@ -25,9 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.C64Canvas;
 import com.dreamfabric.jac64.IMonitor;
-import com.dreamfabric.jac64.Observer;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
-import com.dreamfabric.jac64.emu.chip.ExtChip;
+import com.dreamfabric.jac64.emu.bus.AddressableChip;
 import com.dreamfabric.jac64.emu.cia.CIA2;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
@@ -41,11 +40,12 @@ import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
  * @version $Revision: 1.11 $, $Date: 2006/05/02 16:26:26 $
  */
 
-public class C64Screen extends ExtChip implements Observer, MouseMotionListener {
+public class C64Screen extends AddressableChip implements VICIf, MouseMotionListener {
     private static Logger LOGGER = LoggerFactory.getLogger(C64Screen.class);
 
     private final static int START_ADDRESS = 0xD000;
     private final static int END_ADDRESS = 0xD3FF;
+
     public static final String version = "1.11";
 
     public static final int IO_UPDATE = 37;
@@ -219,6 +219,21 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         makeColors(lites, LIGHTER_0, LIGHTER_N);
     }
 
+    @Override
+    public int getStartAddress() {
+        return START_ADDRESS;
+    }
+
+    @Override
+    public int getEndAddress() {
+        return END_ADDRESS;
+    }
+
+    @Override
+    public void start(long currentCpuCycles) {
+
+    }
+
     public void setAutoscale(boolean val) {
         DOUBLE = val;
         canvas.setAutoscale(val);
@@ -360,16 +375,19 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
             0xdc0f, 0xdd0f, 0xdeff, 0xdfff, // CIA + Expansion...
     };
 
-    public int performRead(int address, long currentCpuCycles) {
-        if (address < START_ADDRESS || address > END_ADDRESS) {
-            throw new IllegalArgumentException(String.format("Read outside of VIC from address 0x%05X", address));
-        }
-
-        int originalAddress = address;
+    @Override
+    public Integer read(int address, long currentCpuCycles) {
 
         // dX00 => and address
         // d000 - d3ff => &d063
         int pos = (address >> 8) & 0xf;
+        int originalAddress = address;
+
+        Integer result = super.read(address, currentCpuCycles);
+        if (result == null) {
+            return null;
+        }
+
         // monitor.info("Address before: " + address);
         address = address & IO_ADDRAND[pos];
         int val = 0;
@@ -467,13 +485,15 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         }
     }
 
-    public void performWrite(int address, int data, long currentCpuCycles) {
-        if (address < START_ADDRESS || address > END_ADDRESS) {
-            throw new IllegalArgumentException(String.format("Write outside of VIC from address 0x%05X", address));
+    @Override
+    public boolean write(int address, int data, long currentCpuCycles) {
+        if (super.write(address, data, currentCpuCycles) == false) {
+
+            return false;
         }
 
-        int originalAddress = address;
         int pos = (address >> 8) & 0xf;
+        int originalAddress = address;
         address = address & IO_ADDRAND[pos];
 
         switch (address) {
@@ -695,6 +715,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 throw new IllegalArgumentException(String.format(
                         "Weired write to originalAddress = 0x%05X, changedAddress = 0x%05X", originalAddress, address));
         }
+
+        return true;
     }
 
     private void setVideoMem() {

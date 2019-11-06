@@ -27,6 +27,8 @@ import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 import com.dreamfabric.jac64.emu.sid.RESID;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
+import com.dreamfabric.jac64.emu.vic.C64Screen;
+import com.dreamfabric.jac64.emu.vic.VICIf;
 
 public class C64Emulation {
     private static Logger LOGGER = LoggerFactory.getLogger(C64Emulation.class);
@@ -43,6 +45,7 @@ public class C64Emulation {
     private static PLA pla = new PLA();
     private static IO io = new IO();
     private static SIDIf sid = new RESID(scheduler);
+    private static C64Screen vic = new C64Screen(monitor, true);
     private static CIA1 cia1 = new CIA1(scheduler, interruptManager);
     private static CIA2 cia2 = new CIA2(scheduler, interruptManager);
 
@@ -55,6 +58,7 @@ public class C64Emulation {
     static {
         // prepare IO
         io.setSid(sid);
+        io.setVic(vic);
         io.setCia1(cia1);
         io.setCia2(cia2);
         io.setColorRAM(colorRAM);
@@ -113,6 +117,10 @@ public class C64Emulation {
 
     public static RAM getRAM() {
         return ram;
+    }
+
+    public static C64Screen getVic() {
+        return vic;
     }
 
     public static Debugger getMonitor() {

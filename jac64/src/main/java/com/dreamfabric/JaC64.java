@@ -104,7 +104,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
 
     public JaC64() {
         cpu = C64Emulation.getCpu();
-        scr = new C64Screen(C64Emulation.getMonitor(), true);
+        scr = C64Emulation.getVic();
         scr.setCia2(C64Emulation.getCia2());
         scr.setAddressableBus(C64Emulation.getAddressableBus());
         cpu.init(scr);
