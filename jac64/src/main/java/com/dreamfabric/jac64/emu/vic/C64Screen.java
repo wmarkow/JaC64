@@ -205,6 +205,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     // a working ISR that is reading the keyboard
     private boolean isrRunning = false;
 
+    protected InterruptManager interruptManager;
+
     public C64Screen(IMonitor m, boolean dob) {
         monitor = m;
         DOUBLE = dob;
@@ -296,8 +298,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
             monitor.info("Sprite " + (i + 1) + " pos = " + sprites[i].x + ", " + sprites[i].y);
         }
 
-        monitor.info("IRQFlags: " + getIRQFlags());
-        monitor.info("NMIFlags: " + getNMIFlags());
+        monitor.info("IRQFlags: " + getInterruptManager().getIRQFlags());
+        monitor.info("NMIFlags: " + getInterruptManager().getNMIFlags());
         monitor.info("CPU IRQLow: " + cpu.getIRQLow());
         monitor.info("CPU NMILow: " + cpu.NMILow);
         monitor.info("Current CPU cycles: " + cpu.currentCpuCycles);
@@ -305,7 +307,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     }
 
     public void init(CPU cpu, InterruptManager interruptManager) {
-        super.init(cpu, interruptManager);
+        super.init(cpu);
+        this.interruptManager = interruptManager;
 
         this.memory = cpu.getMemory();
 
@@ -342,9 +345,9 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
     public void restoreKey(boolean down) {
         if (down)
-            setNMI(InterruptManager.KEYBOARD_NMI);
+            getInterruptManager().setNMI(InterruptManager.KEYBOARD_NMI);
         else
-            clearNMI(InterruptManager.KEYBOARD_NMI);
+            getInterruptManager().clearNMI(InterruptManager.KEYBOARD_NMI);
     }
 
     // Should be checked up!!!
@@ -608,7 +611,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
                 // Is this "flagged" off?
                 if ((irqMask & 0x0f & irqFlags) == 0) {
-                    clearIRQ(VIC_IRQ);
+                    getInterruptManager().clearIRQ(VIC_IRQ);
                 }
             }
                 break;
@@ -618,9 +621,9 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 // Check if IRQ should trigger or clear!
                 if ((irqMask & 0x0f & irqFlags) != 0) {
                     irqFlags |= 0x80;
-                    setIRQ(VIC_IRQ);
+                    getInterruptManager().setIRQ(VIC_IRQ);
                 } else {
-                    clearIRQ(VIC_IRQ);
+                    getInterruptManager().clearIRQ(VIC_IRQ);
                 }
 
                 LOGGER.debug("Changing IRQ mask to: " + Integer.toString(irqMask, 16) + " vbeam: " + vbeam);
@@ -803,12 +806,12 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 if (((irqMask & 2) != 0) && (sprBgCol != 0) && (irqFlags & 2) == 0) {
                     LOGGER.debug("*** Sprite collission IRQ (d01f): " + sprBgCol + " at " + vbeam);
                     irqFlags |= 82;
-                    setIRQ(VIC_IRQ);
+                    getInterruptManager().setIRQ(VIC_IRQ);
                 }
                 if (((irqMask & 4) != 0) && (sprCol != 0) && (irqFlags & 4) == 0) {
                     LOGGER.debug("*** Sprite collission IRQ (d01e): " + sprCol + " at " + vbeam);
                     irqFlags |= 84;
-                    setIRQ(VIC_IRQ);
+                    getInterruptManager().setIRQ(VIC_IRQ);
                 }
 
                 int irqComp = raster;
@@ -822,7 +825,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                     if ((irqMask & 1) != 0) {
                         irqFlags |= 0x80;
                         irqTriggered = true;
-                        setIRQ(VIC_IRQ);
+                        getInterruptManager().setIRQ(VIC_IRQ);
                         lastIRQ = cpu.currentCpuCycles;
                         LOGGER.debug(
                                 "Generating IRQ at " + vbeam + " req:" + raster + " IRQs:" + cpu.getInterruptInExec()
@@ -1452,7 +1455,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         // c1541.reset();
         isrRunning = false;
 
-        resetInterrupts();
+        getInterruptManager().reset();
     }
 
     public static final int IMG_TOTWIDTH = SC_WIDTH;
@@ -1657,5 +1660,9 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
             return;
         }
+    }
+
+    private InterruptManager getInterruptManager() {
+        return interruptManager;
     }
 }

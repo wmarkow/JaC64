@@ -27,39 +27,9 @@ public abstract class ExtChip {
 
     protected MOS6510Core cpu;
     private Observer observer;
-    private InterruptManager im;
 
-    public void init(MOS6510Core cpu, InterruptManager interruptManager) {
+    public void init(MOS6510Core cpu) {
         this.cpu = cpu;
-        this.im = interruptManager;
-    }
-
-    public int getNMIFlags() {
-        return im.getNmiFlags();
-    }
-
-    public int getIRQFlags() {
-        return im.getIrqFlags();
-    }
-
-    public boolean setIRQ(int irq) {
-        return im.setIRQ(irq);
-    }
-
-    public void clearIRQ(int irq) {
-        im.clearIRQ(irq);
-    }
-
-    public boolean setNMI(int nmi) {
-        return im.setNMI(nmi);
-    }
-
-    public void clearNMI(int nmi) {
-        im.clearNMI(nmi);
-    }
-
-    public void resetInterrupts() {
-        im.reset();
     }
 
     public abstract void reset();
@@ -80,9 +50,5 @@ public abstract class ExtChip {
         if (observer != null) {
             observer.update(source, data);
         }
-    }
-
-    protected InterruptManager getInterruptManager() {
-        return this.im;
     }
 }

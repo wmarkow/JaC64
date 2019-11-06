@@ -78,11 +78,11 @@ public class InterruptManager {
         }
     }
 
-    public int getNmiFlags() {
+    public int getNMIFlags() {
         return this.nmiFlags;
     }
 
-    public int getIrqFlags() {
+    public int getIRQFlags() {
         return this.irqFlags;
     }
 }
