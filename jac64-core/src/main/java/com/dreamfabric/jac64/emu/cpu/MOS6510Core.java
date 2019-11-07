@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.IMonitor;
-import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 
 /**
@@ -40,9 +39,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     public static final int NMI_INT = 1;
     public static final int IRQ_INT = 2;
-
-    // Needed by ...
-    protected PatchListener list;
 
     protected IMonitor monitor;
     public String codebase;
@@ -839,8 +835,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     protected abstract void installROMS();
 
-    protected abstract void patchROM(PatchListener list);
-
     public void hardReset() {
         for (int i = 0; i < 0x10000; i++) {
             memory[i] = 0;
@@ -869,9 +863,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
         pc = fetchByte(0xfffc) + (fetchByte(0xfffd) << 8);
 
         log("Reset to: " + pc);
-
-        if (list != null)
-            patchROM(list);
     }
 
     // Reset the MOS6510Core!!!

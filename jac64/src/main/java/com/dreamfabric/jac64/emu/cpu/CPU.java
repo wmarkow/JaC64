@@ -16,10 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.c64utils.AutoStore;
-import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Loader;
-import com.dreamfabric.jac64.PatchListener;
 import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.SlowDownCalculator;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
@@ -194,19 +192,6 @@ public class CPU extends MOS6510Core {
         writeByte(address & 0xffff, data & 0xff);
     }
 
-    public void patchROM(PatchListener list) {
-        this.list = list;
-
-        int pos = 0xf49e | 0x10000;
-        setMemory(pos++, M6510Ops.JSR);
-        setMemory(pos++, 0xd2);
-        setMemory(pos++, 0xf5);
-
-        System.out.println("Patched LOAD at: " + Hex.hex2(pos));
-        setMemory(pos++, LOAD_FILE);
-        setMemory(pos++, M6510Ops.RTS);
-    }
-
     public void runBasic() {
         setMemory(631, (int) 'R');
         setMemory(632, (int) 'U');
@@ -295,14 +280,7 @@ public class CPU extends MOS6510Core {
                 int sec = getMemory(0xb9);
                 monitor.info("name = " + name);
                 monitor.info("Sec Address: " + sec);
-                int loadAdr = -1;
-                if (sec == 0)
-                    loadAdr = getMemory(0x2b) + (getMemory(0x2c) << 8);
-                if (list != null) {
-                    if (list.readFile(name, loadAdr)) {
-                        acc = 0;
-                    }
-                }
+
                 pc--;
                 break;
         }
