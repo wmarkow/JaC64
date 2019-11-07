@@ -135,6 +135,8 @@ public class CPU extends MOS6510Core {
         if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
             return chips.performRead(adr, currentCpuCycles);
         }
+
+        // write to the underlying RAM
         return getMemory(adr);
     }
 

@@ -43,6 +43,9 @@ import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 public class C64Screen extends ExtChip implements Observer, MouseMotionListener {
     private static Logger LOGGER = LoggerFactory.getLogger(C64Screen.class);
 
+    private final static int START_ADDRESS = 0xD000;
+    private final static int END_ADDRESS = 0xD3FF;
+
     public static final String version = "1.11";
 
     public static final int IO_UPDATE = 37;
@@ -471,7 +474,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         // + " = " + Integer.toString(data, 16));
 
         // Store in the memory given by "CPU"
-        setMemory(address + IO_OFFSET, data);
+//        setMemory(address + IO_OFFSET, data);
 
         // if (address >= 0xd800 && address < 0xdc00) {
         // int p = address - 0xd800;
@@ -690,6 +693,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 // & 15));
                 break;
             default:
+                setMemory(address + IO_OFFSET, data);
                 // handle color ram!
         }
     }
@@ -1641,7 +1645,10 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     }
 
     protected int getMemory(int address) {
-        validateAddress(address);
+//        if (address >= START_ADDRESS && address <= END_ADDRESS) {
+//            throw new IllegalArgumentException(String.format("Address 0x%05X (from 0x%05X to 0x%05X) is invalid here",
+//                    address, START_ADDRESS, END_ADDRESS));
+//        }
 
         setVideoMem();
 
@@ -1649,7 +1656,11 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     };
 
     protected void setMemory(int address, int data) {
-        validateAddress(address);
+//        if (address >= START_ADDRESS && address <= END_ADDRESS) {
+//            throw new IllegalArgumentException(String.format("Address 0x%05X (from 0x%05X to 0x%05X) is invalid here",
+//                    address, START_ADDRESS, END_ADDRESS));
+//        }
+        LOGGER.info(String.format("Writing %s to main memory 0x%05X", data, address));
 
         setVideoMem();
 
