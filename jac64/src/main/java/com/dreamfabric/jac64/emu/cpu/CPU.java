@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.c64utils.AutoStore;
-import com.dreamfabric.jac64.DefaultIMon;
 import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Loader;
@@ -63,9 +62,7 @@ public class CPU extends MOS6510Core {
     public static final boolean DEBUG = false;
 
     private Loader loader;
-    private int windex = 0;
 
-    private int cheatMon[];
     private AutoStore[] autoStore;
 
     private PLA pla;
@@ -176,12 +173,6 @@ public class CPU extends MOS6510Core {
         }
 
         if (addressableBus.write(adr, data, currentCpuCycles)) {
-            adr &= 0xffff;
-            if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
-                // do nothing
-            } else {
-                windex = adr;
-            }
             return;
         }
         // END: a new way of writing data.
@@ -196,7 +187,7 @@ public class CPU extends MOS6510Core {
 
         // it should write to the underlying RAM:
         // https://www.c64-wiki.com/wiki/Memory_Map
-        setMemory(windex = adr, data);
+        setMemory(adr, data);
     }
 
     public void poke(int address, int data) {
@@ -381,10 +372,6 @@ public class CPU extends MOS6510Core {
      *            the emulator
      */
     public void loop() {
-        if (cheatMon != null) {
-            cheatLoop();
-            return;
-        }
         long next_print = currentCpuCycles + CYCLES_PER_DEBUG;
         // How much should this be???
         monitor.info("Starting CPU at: " + Integer.toHexString(pc));
@@ -459,53 +446,6 @@ public class CPU extends MOS6510Core {
 
     public AutoStore getAutoStore(int index) {
         return autoStore[index];
-    }
-
-    public void setCheatEnabled(int maxAutostores) {
-        cheatMon = new int[0x10000];
-        autoStore = new AutoStore[maxAutostores];
-    }
-
-    public void protect(int address, int value) {
-        cheatMon[address] = (cheatMon[address] & 0xff) | (value << 8) | CH_PROTECT;
-    }
-
-    public void monitorRead(int address) {
-        cheatMon[address] |= CH_MONITOR_READ;
-    }
-
-    public void monitorWrite(int address) {
-        cheatMon[address] |= CH_MONITOR_WRITE;
-    }
-
-    public void cheatLoop() {
-        int t;
-        try {
-            while (running) {
-
-                // Run one instruction!
-                emulateOp();
-
-                if (windex < 0x10000) {
-                    if ((t = cheatMon[windex]) != 0) {
-                        if ((t & CH_PROTECT) != 0) {
-                            // Write back value from then protected...
-                            setMemory(windex, (cheatMon[windex] >> 16) & 0xff);
-                        }
-                        if ((t & CH_MONITOR_WRITE) != 0) {
-                            for (int i = 0, n = autoStore.length; i < n; i++) {
-                                if (autoStore[i] != null)
-                                    autoStore[i].checkRules(getMemory());
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            monitor.error("Exception in loop " + pc + " : " + e);
-            e.printStackTrace();
-            monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(), interruptInExec, lastInterrupt);
-        }
     }
 
     @Override
