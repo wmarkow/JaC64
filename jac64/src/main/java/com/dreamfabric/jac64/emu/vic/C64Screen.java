@@ -85,7 +85,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
     private IMonitor monitor;
 
-    private long nextIOUpdate = 0;
     private boolean DOUBLE = false;
     private int reset = 100;
     private C64Canvas canvas;
@@ -307,7 +306,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         monitor.info("CPU IRQLow: " + cpu.getIRQLow());
         monitor.info("CPU NMILow: " + cpu.NMILow);
         monitor.info("Current CPU cycles: " + cpu.currentCpuCycles);
-        monitor.info("Next IO update: " + nextIOUpdate);
     }
 
     public void init(CPU cpu, InterruptManager interruptManager) {
@@ -1455,7 +1453,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         // Clear a lot of stuff...???
         initUpdate();
         lastLine = cpu.currentCpuCycles;
-        nextIOUpdate = cpu.currentCpuCycles + 47;
 
         for (int i = 0; i < mem.length; i++)
             mem[i] = 0;
