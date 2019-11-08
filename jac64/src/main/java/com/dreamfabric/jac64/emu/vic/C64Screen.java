@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import com.dreamfabric.jac64.C64Canvas;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.Observer;
+import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.chip.ExtChip;
 import com.dreamfabric.jac64.emu.cia.CIA2;
 import com.dreamfabric.jac64.emu.cpu.CPU;
@@ -209,6 +210,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
     private MOS6510Core cpu;
     private InterruptManager interruptManager;
+    private AddressableBus addressableBus;
 
     public C64Screen(IMonitor m, boolean dob) {
         monitor = m;
@@ -225,6 +227,10 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
     public void setCia2(CIA2 cia2) {
         this.cia2 = cia2;
+    }
+
+    public void setAddressableBus(AddressableBus addressableBus) {
+        this.addressableBus = addressableBus;
     }
 
     private void makeColors(Color[] colors, Color c1, Color c2) {
@@ -1657,6 +1663,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
         setVideoMem();
 
+        addressableBus.readVicExclusive(cia2.getPRA(), address);
+        
         return memory[address];
     };
 

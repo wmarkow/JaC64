@@ -1,11 +1,16 @@
 package com.dreamfabric.jac64.emu.bus;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
 import com.dreamfabric.jac64.emu.memory.CharROM;
 import com.dreamfabric.jac64.emu.memory.KernalROM;
+import com.dreamfabric.jac64.emu.pla.PLA;
 
 public class AddressableBus implements AddressableIf {
+    private static Logger LOGGER = LoggerFactory.getLogger(AddressableBus.class);
 
     private final static int START_ADDRESS = 0x0000;
     private final static int END_ADDRESS = 0xFFFF;
@@ -69,6 +74,17 @@ public class AddressableBus implements AddressableIf {
         }
 
         return null;
+    }
+
+    public int readVicExclusive(int cia2PRA, int addressSeenByVic) {
+        int vicBankBaseAddress = (~(cia2PRA) & 3) << 14;
+
+        int addressSeenByCPU = vicBankBaseAddress | addressSeenByVic;
+
+        LOGGER.info(String.format("VIC exclusive read: vic address = 0x%05X ---> CPU address = 0x%05X",
+                addressSeenByVic, addressSeenByCPU));
+
+        return -1;
     }
 
     @Override
