@@ -12,6 +12,9 @@
  */
 package com.dreamfabric.jac64.emu.cpu;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,15 +69,18 @@ public class CPU extends MOS6510Core {
     private PLA pla;
     private AddressableBus addressableBus;
     protected ExtChip chips = null;
+    private int memory[];
 
     public CPU(IMonitor m, String cb, Loader loader) {
         super(m, cb);
         this.loader = loader;
+        memory = new int[getMemorySize()];
     }
 
     public void init(ExtChip scr) {
         super.init();
         this.chips = scr;
+        installROMS();
     }
 
     public void setPla(PLA pla) {
@@ -245,7 +251,7 @@ public class CPU extends MOS6510Core {
         }
     }
 
-    protected void installROMS() {
+    private void installROMS() {
         loadROM(loader.getResourceStream("/roms/chargen.c64"), CHAR_ROM2, 0x1000);
 
         C64Emulation.installROMs();
@@ -428,8 +434,68 @@ public class CPU extends MOS6510Core {
         return autoStore[index];
     }
 
-    @Override
+    public int[] getMemory() {
+        return memory;
+    }
+
+    public void hardReset() {
+        for (int i = 0; i < 0x10000; i++) {
+            memory[i] = 0;
+        }
+        reset();
+    }
+
     protected int getMemorySize() {
         return 0x20000;
+    }
+
+    protected void loadROM(InputStream ins, int startMem, int len) {
+        try {
+            BufferedInputStream stream = new BufferedInputStream(ins);
+            if (stream != null) {
+                byte[] charBuf = new byte[len];
+                int pos = 0;
+                int t;
+                try {
+                    while ((t = stream.read(charBuf, pos, len - pos)) > 0) {
+                        pos += t;
+                    }
+                    monitor.info("Installing rom at :" + Integer.toString(startMem, 16) + " size:" + pos);
+                    for (int i = 0; i < charBuf.length; i++) {
+                        memory[i + startMem] = ((int) charBuf[i]) & 0xff;
+                    }
+                } catch (Exception e) {
+                    monitor.error("Problem reading rom file ");
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        stream.close();
+                    } catch (Exception e2) {
+                    }
+                }
+            }
+        } catch (Exception e) {
+            monitor.error("Error loading resource" + e);
+        }
+    }
+
+    protected int getMemory(int address) {
+        validateAddress(address);
+
+        return memory[address];
+    }
+
+    protected void setMemory(int address, int data) {
+        validateAddress(address);
+
+        memory[address] = data;
+    }
+
+    private void validateAddress(int address) {
+        if (address >= 0x1D000 && address < 0x1DFFF) {
+            LOGGER.warn(String.format("Invalid address 0x%05X", address));
+
+            return;
+        }
     }
 }

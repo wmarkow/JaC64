@@ -10,9 +10,6 @@
 
 package com.dreamfabric.jac64.emu.cpu;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +28,6 @@ import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 public abstract class MOS6510Core extends MOS6510Ops {
     private static Logger LOGGER = LoggerFactory.getLogger(MOS6510Core.class);
 
-    private int memory[];
     protected boolean debug = false;
 
     public static final int NMI_DELAY = 2;
@@ -79,14 +75,9 @@ public abstract class MOS6510Core extends MOS6510Ops {
     public MOS6510Core(IMonitor m, String cb) {
         monitor = m;
         codebase = cb;
-        memory = new int[getMemorySize()];
     }
 
     public abstract String getName();
-
-    public int[] getMemory() {
-        return memory;
-    }
 
     public void jump(int pc) {
         jumpTo = pc;
@@ -830,16 +821,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     public void init() {
         super.init();
-        installROMS();
-    }
-
-    protected abstract void installROMS();
-
-    public void hardReset() {
-        for (int i = 0; i < 0x10000; i++) {
-            memory[i] = 0;
-        }
-        reset();
     }
 
     private void doReset() {
@@ -891,36 +872,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
         return null;
     }
 
-    protected void loadROM(InputStream ins, int startMem, int len) {
-        try {
-            BufferedInputStream stream = new BufferedInputStream(ins);
-            if (stream != null) {
-                byte[] charBuf = new byte[len];
-                int pos = 0;
-                int t;
-                try {
-                    while ((t = stream.read(charBuf, pos, len - pos)) > 0) {
-                        pos += t;
-                    }
-                    monitor.info("Installing rom at :" + Integer.toString(startMem, 16) + " size:" + pos);
-                    for (int i = 0; i < charBuf.length; i++) {
-                        memory[i + startMem] = ((int) charBuf[i]) & 0xff;
-                    }
-                } catch (Exception e) {
-                    monitor.error("Problem reading rom file ");
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        stream.close();
-                    } catch (Exception e2) {
-                    }
-                }
-            }
-        } catch (Exception e) {
-            monitor.error("Error loading resource" + e);
-        }
-    }
-
     public void log(String s) {
         if (debug)
             monitor.info(getName() + " : " + s);
@@ -952,27 +903,5 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     public boolean isDebug() {
         return debug;
-    }
-
-    protected int getMemory(int address) {
-        validateAddress(address);
-
-        return memory[address];
-    }
-
-    protected void setMemory(int address, int data) {
-        validateAddress(address);
-
-        memory[address] = data;
-    }
-
-    abstract protected int getMemorySize();
-
-    private void validateAddress(int address) {
-        if (address >= 0x1D000 && address < 0x1DFFF) {
-            LOGGER.warn(String.format("Invalid address 0x%05X", address));
-
-            return;
-        }
     }
 }
