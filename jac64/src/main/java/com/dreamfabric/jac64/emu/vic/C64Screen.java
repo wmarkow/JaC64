@@ -99,9 +99,9 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     // -------------------------------------------------------------------
     // VIC-II variables
     // -------------------------------------------------------------------
-    public int vicBank;
-    public int charSet;
-    public int videoMatrix;
+    public int vicBankBaseAddress;
+    public int charSetBaseAddress;
+    public int videoMatrixBaseAddress;
     public int videoMode;
 
     // VIC Registers
@@ -119,7 +119,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     int sprBgCol = 0;
     int sprMC0 = 0;
     int sprMC1 = 0;
-    int vicMem = 0;
+    int vicMemoryPointers = 0;
     int vicMemDDRA = 0;
     int vicMemDATA = 0;
     // Read for debugging on other places...
@@ -128,7 +128,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     int bCol = 0;
     int bgCol[] = new int[4];
 
-    private int vicBase = 0;
+    private int vicBaseAddress = 0;
     private boolean badLine = false;
     private int spr0BlockSel;
 
@@ -282,10 +282,10 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
     public void dumpGfxStat() {
         monitor.info("Char MemoryIndex: 0x" + Integer.toString(charMemoryIndex, 16));
-        monitor.info("CharSet adr: 0x" + Integer.toString(charSet, 16));
+        monitor.info("CharSet adr: 0x" + Integer.toString(charSetBaseAddress, 16));
         monitor.info("VideoMode: " + videoMode);
-        monitor.info("Vic Bank: 0x" + Integer.toString(vicBank, 16));
-        monitor.info("Video Matrix: 0x" + Integer.toString(videoMatrix, 16));
+        monitor.info("Vic Bank: 0x" + Integer.toString(vicBankBaseAddress, 16));
+        monitor.info("Video Matrix: 0x" + Integer.toString(videoMatrixBaseAddress, 16));
 
         monitor.info("Text: extended = " + extended + " multicol = " + multiCol);
 
@@ -406,7 +406,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
             case 0xd017:
                 return sprYEX;
             case 0xd018:
-                return vicMem;
+                return vicMemoryPointers;
             case 0xd019:
                 return irqFlags;
             case 0xd01a:
@@ -599,7 +599,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 break;
 
             case 0xd018:
-                vicMem = data;
+                vicMemoryPointers = data;
                 setVideoMem();
                 break;
 
@@ -712,11 +712,11 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         int cia2PRA = cia2.getPRA();
 
         // Set-up vars for screen rendering
-        vicBank = (~(cia2PRA) & 3) << 14;
-        charSet = vicBank | (vicMem & 0x0e) << 10;
-        videoMatrix = vicBank | (vicMem & 0xf0) << 6;
-        vicBase = vicBank | (vicMem & 0x08) << 10;
-        spr0BlockSel = 0x03f8 + videoMatrix;
+        vicBankBaseAddress = (~(cia2PRA) & 3) << 14;
+        charSetBaseAddress = vicBankBaseAddress | ((vicMemoryPointers & 0x0e) << 10);
+        videoMatrixBaseAddress = vicBankBaseAddress | ((vicMemoryPointers & 0xf0) << 6);
+        vicBaseAddress = vicBankBaseAddress | ((vicMemoryPointers & 0x08) << 10);
+        spr0BlockSel = 0x03f8 + videoMatrixBaseAddress;
 
         // monitor.info("--------------------");
         // monitor.info("0xdd00: 0x"+Integer.toHexString(memory[IO_OFFSET + 0xdd00]));
@@ -727,10 +727,10 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
         // check if vic not looking at char rom 1, 2, 4, 8
         // This is not correct! Char Rom is not everywhere!!!! - find out!
-        if ((vicMem & 0x0c) != 4 || (vicBank & 0x4000) == 0x4000) {
-            charMemoryIndex = charSet;
+        if ((vicMemoryPointers & 0x0c) != 4 || (vicBankBaseAddress & 0x4000) == 0x4000) {
+            charMemoryIndex = charSetBaseAddress;
         } else {
-            charMemoryIndex = (((vicMem & 0x02) == 0) ? 0 : 0x0800) + CPU.CHAR_ROM2;
+            charMemoryIndex = (((vicMemoryPointers & 0x02) == 0) ? 0 : 0x0800) + CPU.CHAR_ROM2;
         }
     }
 
@@ -1012,7 +1012,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 if (badLine) {
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch first char into cache! (for the below draw...)
-                    vicCharCache[vmli] = getMemory(videoMatrix + (vcBase & 0x3ff));
+                    vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + (vcBase & 0x3ff));
                     vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + (vcBase & 0x3ff));
                 }
 
@@ -1033,7 +1033,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 if (badLine) {
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
-                    vicCharCache[vmli] = getMemory(videoMatrix + ((vcBase + vmli) & 0x3ff));
+                    vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
                     vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
                 }
                 // draw the graphics. (should probably handle sprites also??)
@@ -1046,7 +1046,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 if (badLine) {
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
-                    vicCharCache[vmli] = getMemory(videoMatrix + ((vcBase + vmli) & 0x3ff));
+                    vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
                     vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
                 }
                 // draw the graphics. (should probably handle sprites also??)
@@ -1062,7 +1062,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 if (badLine) {
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
-                    vicCharCache[vmli] = getMemory(videoMatrix + ((vcBase + vmli) & 0x3ff));
+                    vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
                     vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
                 }
                 int mult = 1;
@@ -1100,7 +1100,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 if (badLine) {
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
-                    vicCharCache[vmli] = getMemory(videoMatrix + ((vcBase + vmli) & 0x3ff));
+                    vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
                     vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
                 }
                 drawGraphics(mpos + horizScroll);
@@ -1326,7 +1326,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
             // -------------------------------------------------------------------
             // Bitmap mode!
             // -------------------------------------------------------------------
-            position = vicBase + (vc & 0x3ff) * 8 + rc;
+            position = vicBaseAddress + (vc & 0x3ff) * 8 + rc;
             if (multiCol) {
                 multiColor[0] = bgColor;
             }
@@ -1617,7 +1617,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
         void readSpriteData() {
             // Read pointer + the three sprite data pointers...
-            pointer = vicBank + getMemory(spr0BlockSel + spriteNo) * 0x40;
+            pointer = vicBankBaseAddress + getMemory(spr0BlockSel + spriteNo) * 0x40;
             spriteReg = ((getMemory(pointer + nextByte++) & 0xff) << 16)
                     | ((getMemory(pointer + nextByte++) & 0xff) << 8) | getMemory(pointer + nextByte++);
 
