@@ -756,7 +756,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 colors[i] = new Color(cbmcolor[i]);
             }
         }
-        canvas.setBackground(colors[getMemory(IO_OFFSET + 0xd020) & 15]);
+        canvas.setBackground(colors[bCol & 15]);
     }
 
     // -------------------------------------------------------------------
