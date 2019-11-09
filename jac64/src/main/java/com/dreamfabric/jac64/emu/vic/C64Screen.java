@@ -365,7 +365,9 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     };
 
     public int performRead(int address, long currentCpuCycles) {
-        validateAddress(address);
+        if (address < START_ADDRESS && address > END_ADDRESS) {
+            throw new IllegalArgumentException("Read outside of VIC");
+        }
 
         // dX00 => and address
         // d000 - d3ff => &d063
@@ -465,7 +467,9 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     }
 
     public void performWrite(int address, int data, long currentCpuCycles) {
-        validateAddress(address);
+        if (address < START_ADDRESS && address > END_ADDRESS) {
+            throw new IllegalArgumentException("Read outside of VIC");
+        }
 
         int pos = (address >> 8) & 0xf;
         address = address & IO_ADDRAND[pos];
@@ -1665,7 +1669,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         setVideoMem();
 
         addressableBus.readVicExclusive(cia2.getPRA(), address);
-        
+
         return memory[address];
     };
 
