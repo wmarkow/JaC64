@@ -1675,6 +1675,10 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     }
 
     protected int getMemory(int address) {
+        if (address > 16384) {
+            throw new IllegalArgumentException(
+                    String.format("VIC wants to read out of its range; from address 0x%05X", address));
+        }
         if (address >= START_ADDRESS && address <= END_ADDRESS) {
             // throw new IllegalArgumentException(String.format("Address 0x%05X (from 0x%05X
             // to 0x%05X) is invalid here",
@@ -1683,17 +1687,11 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
         setVideoMem();
 
-        addressableBus.readVicExclusive(cia2.getPRA(), address);
-
-        return memory[address];
+        return addressableBus.readVicExclusive(cia2.getPRA(), address);
     };
 
     protected void setMemory(int address, int data) {
-        // if (address >= START_ADDRESS && address <= END_ADDRESS) {
-        // throw new IllegalArgumentException(String.format("Address 0x%05X (from 0x%05X
-        // to 0x%05X) is invalid here",
-        // address, START_ADDRESS, END_ADDRESS));
-        // }
+        // does VIC any writes?
         LOGGER.info(String.format("Writing %s to main memory 0x%05X", data, address));
 
         setVideoMem();

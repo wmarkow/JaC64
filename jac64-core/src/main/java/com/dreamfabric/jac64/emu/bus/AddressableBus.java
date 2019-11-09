@@ -90,10 +90,16 @@ public class AddressableBus implements AddressableIf {
 
         int addressSeenByCPU = vicBankBaseAddress | addressSeenByVic;
 
-//        LOGGER.info(String.format("VIC exclusive read: vic address = 0x%05X ---> CPU address = 0x%05X",
-//                addressSeenByVic, addressSeenByCPU));
+        LOGGER.info(String.format("VIC exclusive read: vic address = 0x%05X ---> CPU address = 0x%05X",
+                addressSeenByVic, addressSeenByCPU));
 
-        return -1;
+        Integer result = vicReadFromCharacterROM(vicBankBaseAddress, addressSeenByVic);
+        if (result != null) {
+            return result;
+        }
+
+        // read from RAM
+        return ram.read(addressSeenByCPU, 0);
     }
 
     @Override
@@ -115,5 +121,44 @@ public class AddressableBus implements AddressableIf {
     public boolean isEnabled() {
         // always true
         return true;
+    }
+
+    /***
+     * <p>
+     * p6 <= n_va14 and not va13 and va12 and n_aec and n_game ; if true then
+     * address 0x1000
+     * </p>
+     * <p>
+     * p7 <= n_va14 and not va13 and va12 and n_aec and not n_exrom and not n_game
+     * ;if true then address 0x9000
+     * </p>
+     * 
+     * @param vicBankBaseAddress
+     * @param addressSeenByVic
+     * @return
+     */
+    private Integer vicReadFromCharacterROM(int vicBankBaseAddress, int addressSeenByVic) {
+        int charROMAddress = -1;
+
+        if ((addressSeenByVic & 0x1000) == 0x1000) {
+            // read from Character ROM
+            charROMAddress = vicBankBaseAddress | (addressSeenByVic - 0x1000);
+        }
+
+        if ((addressSeenByVic & 0x9000) == 0x9000) {
+            // read from Character ROM
+            charROMAddress = vicBankBaseAddress | (addressSeenByVic - 0x9000);
+        }
+
+        if (charROMAddress == -1) {
+            return null;
+        }
+
+        boolean enabled = charRom.isEnabled();
+        charRom.setEnabled(true);
+        Integer result = charRom.read(charROMAddress, 0);
+        charRom.setEnabled(enabled);
+
+        return result;
     }
 }
