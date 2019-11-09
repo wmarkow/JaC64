@@ -366,7 +366,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
     public int performRead(int address, long currentCpuCycles) {
         if (address < START_ADDRESS || address > END_ADDRESS) {
-            throw new IllegalArgumentException("Read outside of VIC");
+            throw new IllegalArgumentException(String.format("Read outside of VIC from address 0x%05X", address));
         }
 
         int originalAddress = address;
@@ -475,7 +475,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
     public void performWrite(int address, int data, long currentCpuCycles) {
         if (address < START_ADDRESS || address > END_ADDRESS) {
-            throw new IllegalArgumentException("Read outside of VIC");
+            throw new IllegalArgumentException(String.format("Write outside of VIC from address 0x%05X", address));
         }
 
         int originalAddress = address;
