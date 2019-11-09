@@ -99,7 +99,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     // -------------------------------------------------------------------
     // VIC-II variables
     // -------------------------------------------------------------------
-    public int vicBankBaseAddress;
     public int charSetBaseAddress;
     public int videoMatrixBaseAddress;
     public int videoMode;
@@ -289,7 +288,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         monitor.info("Char MemoryIndex: 0x" + Integer.toString(charMemoryIndex, 16));
         monitor.info("CharSet adr: 0x" + Integer.toString(charSetBaseAddress, 16));
         monitor.info("VideoMode: " + videoMode);
-        monitor.info("Vic Bank: 0x" + Integer.toString(vicBankBaseAddress, 16));
         monitor.info("Video Matrix: 0x" + Integer.toString(videoMatrixBaseAddress, 16));
 
         monitor.info("Text: extended = " + extended + " multicol = " + multiCol);
@@ -736,10 +734,9 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         int cia2PRA = cia2.getPRA();
 
         // Set-up vars for screen rendering
-        vicBankBaseAddress = (~(cia2PRA) & 3) << 14;
-        charSetBaseAddress = vicBankBaseAddress | ((vicMemoryPointers & 0x0e) << 10);
-        videoMatrixBaseAddress = vicBankBaseAddress | ((vicMemoryPointers & 0xf0) << 6);
-        vicBaseAddress = vicBankBaseAddress | ((vicMemoryPointers & 0x08) << 10);
+        charSetBaseAddress = ((vicMemoryPointers & 0x0e) << 10);
+        videoMatrixBaseAddress = ((vicMemoryPointers & 0xf0) << 6);
+        vicBaseAddress = ((vicMemoryPointers & 0x08) << 10);
         spr0BlockSel = 0x03f8 + videoMatrixBaseAddress;
 
         // monitor.info("--------------------");
@@ -750,12 +747,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         // monitor.info("charSet: 0x"+Integer.toHexString(charSet-vicBank));
 
         // check if vic not looking at char rom 1, 2, 4, 8
-        // This is not correct! Char Rom is not everywhere!!!! - find out!
-        if ((vicMemoryPointers & 0x0c) != 4 || (vicBankBaseAddress & 0x4000) == 0x4000) {
-            charMemoryIndex = charSetBaseAddress;
-        } else {
-            charMemoryIndex = (((vicMemoryPointers & 0x02) == 0) ? 0 : 0x0800) + CPU.CHAR_ROM2;
-        }
+        charMemoryIndex = charSetBaseAddress;
     }
 
     private void initUpdate() {
@@ -1645,7 +1637,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
         void readSpriteData() {
             // Read pointer + the three sprite data pointers...
-            pointer = vicBankBaseAddress + getMemory(spr0BlockSel + spriteNo) * 0x40;
+            pointer = getMemory(spr0BlockSel + spriteNo) * 0x40;
             spriteReg = ((getMemory(pointer + nextByte++) & 0xff) << 16)
                     | ((getMemory(pointer + nextByte++) & 0xff) << 8) | getMemory(pointer + nextByte++);
 
