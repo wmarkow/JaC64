@@ -666,6 +666,12 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                     sprites[i].expandX = (data & m) != 0;
                 }
                 break;
+            case 0xd01e:
+                sprCol = data;
+                break;
+            case 0xd01f:
+                sprBgCol = data;
+                break;
             case 0xd020:
                 borderColor = cbmcolor[bCol = data & 15];
                 break;
