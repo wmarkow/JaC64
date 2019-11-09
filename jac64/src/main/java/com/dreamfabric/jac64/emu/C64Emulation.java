@@ -19,6 +19,7 @@ import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
 import com.dreamfabric.jac64.emu.memory.CharROM;
+import com.dreamfabric.jac64.emu.memory.ColorRAM;
 import com.dreamfabric.jac64.emu.memory.KernalROM;
 import com.dreamfabric.jac64.emu.memory.RAM;
 import com.dreamfabric.jac64.emu.memory.ROM;
@@ -49,12 +50,14 @@ public class C64Emulation {
     private static KernalROM kernalROM = new KernalROM();
     private static CharROM charROM = new CharROM();
     private static RAM ram = new RAM();
+    private static ColorRAM colorRAM = new ColorRAM();
 
     static {
         // prepare IO
         io.setSid(sid);
         io.setCia1(cia1);
         io.setCia2(cia2);
+        io.setColorRAM(colorRAM);
 
         // prepare PLA
         pla.setIO(io);
@@ -107,7 +110,7 @@ public class C64Emulation {
     public static CIA2 getCia2() {
         return cia2;
     }
-    
+
     public static RAM getRAM() {
         return ram;
     }

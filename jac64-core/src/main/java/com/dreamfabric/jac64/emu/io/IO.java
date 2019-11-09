@@ -3,6 +3,7 @@ package com.dreamfabric.jac64.emu.io;
 import com.dreamfabric.jac64.emu.bus.AddressableVoid;
 import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.cia.CIA2;
+import com.dreamfabric.jac64.emu.memory.ColorRAM;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
 
 public class IO extends AddressableVoid {
@@ -13,6 +14,7 @@ public class IO extends AddressableVoid {
     private SIDIf sid;
     private CIA1 cia1;
     private CIA2 cia2;
+    private ColorRAM colorRAM;
 
     public void setSid(SIDIf sid) {
         this.sid = sid;
@@ -26,6 +28,10 @@ public class IO extends AddressableVoid {
         this.cia2 = cia2;
     }
 
+    public void setColorRAM(ColorRAM colorRAM) {
+        this.colorRAM = colorRAM;
+    }
+
     @Override
     public boolean write(int address, int data, long currentCpuCycles) {
         if (sid.write(address, data, currentCpuCycles)) {
@@ -37,6 +43,10 @@ public class IO extends AddressableVoid {
         }
 
         if (cia2.write(address, data, currentCpuCycles)) {
+            return true;
+        }
+
+        if (colorRAM.write(address, data, currentCpuCycles)) {
             return true;
         }
 
@@ -62,6 +72,11 @@ public class IO extends AddressableVoid {
             return result;
         }
 
+        result = colorRAM.read(address, currentCpuCycles);
+        if (result != null) {
+            return result;
+        }
+
         return null;
     }
 
@@ -72,6 +87,7 @@ public class IO extends AddressableVoid {
         sid.setEnabled(enabled);
         cia1.setEnabled(enabled);
         cia2.setEnabled(enabled);
+        colorRAM.setEnabled(enabled);
     }
 
     @Override
