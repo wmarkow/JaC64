@@ -705,6 +705,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 // VIC");
                 // }
                 setMemory(address + IO_OFFSET, data);
+                LOGGER.info(String.format("VIC write address 0x%05X", address));
                 // handle color ram!
         }
     }

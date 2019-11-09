@@ -20,6 +20,7 @@ import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
 import com.dreamfabric.jac64.emu.memory.CharROM;
 import com.dreamfabric.jac64.emu.memory.KernalROM;
+import com.dreamfabric.jac64.emu.memory.RAM;
 import com.dreamfabric.jac64.emu.memory.ROM;
 import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
@@ -47,6 +48,7 @@ public class C64Emulation {
     private static BasicROM basicROM = new BasicROM();
     private static KernalROM kernalROM = new KernalROM();
     private static CharROM charROM = new CharROM();
+    private static RAM ram = new RAM();
 
     static {
         // prepare IO
@@ -65,6 +67,8 @@ public class C64Emulation {
         addressableBus.setBasicRom(basicROM);
         addressableBus.setKernalRom(kernalROM);
         addressableBus.setCharRom(charROM);
+        ram.setEnabled(true);
+        addressableBus.setRAM(ram);
 
         // prepare CPU
         cpu.setScheduler(scheduler);
@@ -99,9 +103,13 @@ public class C64Emulation {
     public static CIA1 getCia1() {
         return cia1;
     }
-    
+
     public static CIA2 getCia2() {
         return cia2;
+    }
+    
+    public static RAM getRAM() {
+        return ram;
     }
 
     public static Debugger getMonitor() {

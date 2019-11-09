@@ -194,6 +194,7 @@ public class CPU extends MOS6510Core {
         // it should write to the underlying RAM:
         // https://www.c64-wiki.com/wiki/Memory_Map
         setMemory(adr, data);
+        C64Emulation.getRAM().write(adr, data, currentCpuCycles);
     }
 
     public void poke(int address, int data) {

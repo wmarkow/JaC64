@@ -7,7 +7,7 @@ import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
 import com.dreamfabric.jac64.emu.memory.CharROM;
 import com.dreamfabric.jac64.emu.memory.KernalROM;
-import com.dreamfabric.jac64.emu.pla.PLA;
+import com.dreamfabric.jac64.emu.memory.RAM;
 
 public class AddressableBus implements AddressableIf {
     private static Logger LOGGER = LoggerFactory.getLogger(AddressableBus.class);
@@ -19,6 +19,7 @@ public class AddressableBus implements AddressableIf {
     private KernalROM kernalRom;
     private CharROM charRom;
     private IO io;
+    private RAM ram;
 
     public void setBasicRom(BasicROM basicRom) {
         this.basicRom = basicRom;
@@ -34,6 +35,14 @@ public class AddressableBus implements AddressableIf {
 
     public void setIO(IO io) {
         this.io = io;
+    }
+
+    public void setRAM(RAM ram) {
+        this.ram = ram;
+    }
+
+    public RAM getRAM() {
+        return ram;
     }
 
     @Override
@@ -81,8 +90,8 @@ public class AddressableBus implements AddressableIf {
 
         int addressSeenByCPU = vicBankBaseAddress | addressSeenByVic;
 
-        LOGGER.info(String.format("VIC exclusive read: vic address = 0x%05X ---> CPU address = 0x%05X",
-                addressSeenByVic, addressSeenByCPU));
+//        LOGGER.info(String.format("VIC exclusive read: vic address = 0x%05X ---> CPU address = 0x%05X",
+//                addressSeenByVic, addressSeenByCPU));
 
         return -1;
     }
