@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
 import com.dreamfabric.jac64.emu.memory.CharROM;
+import com.dreamfabric.jac64.emu.memory.ColorRAM;
 import com.dreamfabric.jac64.emu.memory.KernalROM;
 import com.dreamfabric.jac64.emu.memory.RAM;
 
@@ -100,6 +101,19 @@ public class AddressableBus implements AddressableIf {
 
         // read from RAM
         return ram.read(addressSeenByCPU, 0);
+    }
+
+    public Integer readVicExclusiveFromColorRAM(int addressSeenByVic) {
+        ColorRAM colorRam = io.getColorRAM();
+
+        int address = colorRam.getStartAddress() + addressSeenByVic;
+
+        boolean enabled = colorRam.isEnabled();
+        colorRam.setEnabled(true);
+        Integer result = colorRam.read(address, 0);
+        colorRam.setEnabled(enabled);
+
+        return result;
     }
 
     @Override

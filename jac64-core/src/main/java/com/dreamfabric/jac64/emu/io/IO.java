@@ -32,6 +32,10 @@ public class IO extends AddressableVoid {
         this.colorRAM = colorRAM;
     }
 
+    public ColorRAM getColorRAM() {
+        return colorRAM;
+    }
+
     @Override
     public boolean write(int address, int data, long currentCpuCycles) {
         if (sid.write(address, data, currentCpuCycles)) {

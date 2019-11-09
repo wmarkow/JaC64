@@ -1037,7 +1037,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch first char into cache! (for the below draw...)
                     vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + (vcBase & 0x3ff));
-                    vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + (vcBase & 0x3ff));
+                    vicColCache[vmli] = getFromColorRAM(vcBase & 0x3ff);// getMemory(IO_OFFSET + 0xd800 + (vcBase &
+                                                                        // 0x3ff)); // read from color RAM?
                 }
 
                 // Draw one character here!
@@ -1058,7 +1059,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
                     vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
-                    vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
+                    vicColCache[vmli] = getFromColorRAM((vcBase + vmli) & 0x3ff);// getMemory(IO_OFFSET + 0xd800 +
+                                                                                 // ((vcBase + vmli) & 0x3ff));
                 }
                 // draw the graphics. (should probably handle sprites also??)
                 drawGraphics(mpos + horizScroll);
@@ -1071,7 +1073,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
                     vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
-                    vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
+                    vicColCache[vmli] = getFromColorRAM((vcBase + vmli) & 0x3ff);// getMemory(IO_OFFSET + 0xd800 +
+                                                                                 // ((vcBase + vmli) & 0x3ff));
                 }
                 // draw the graphics. (should probably handle sprites also??)
                 drawGraphics(mpos + horizScroll);
@@ -1087,7 +1090,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
                     vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
-                    vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
+                    vicColCache[vmli] = getFromColorRAM((vcBase + vmli) & 0x3ff);// getMemory(IO_OFFSET + 0xd800 +
+                                                                                 // ((vcBase + vmli) & 0x3ff));
                 }
                 int mult = 1;
                 int ypos = vPos + SC_SPYOFFS;
@@ -1125,7 +1129,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                     cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
                     // Fetch a some chars into cache! (for the below draw...)
                     vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
-                    vicColCache[vmli] = getMemory(IO_OFFSET + 0xd800 + ((vcBase + vmli) & 0x3ff));
+                    vicColCache[vmli] = getFromColorRAM((vcBase + vmli) & 0x3ff);// getMemory(IO_OFFSET + 0xd800 +
+                                                                                 // ((vcBase + vmli) & 0x3ff));
                 }
                 drawGraphics(mpos + horizScroll);
                 drawSprites();
@@ -1689,6 +1694,12 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
 
         return addressableBus.readVicExclusive(cia2.getPRA(), address);
     };
+
+    protected int getFromColorRAM(int localColorRAMAddress) {
+        setVideoMem();
+
+        return addressableBus.readVicExclusiveFromColorRAM(localColorRAMAddress);
+    }
 
     protected void setMemory(int address, int data) {
         // does VIC any writes?
