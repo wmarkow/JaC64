@@ -369,6 +369,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
             throw new IllegalArgumentException("Read outside of VIC");
         }
 
+        int originalAddress = address;
+
         // dX00 => and address
         // d000 - d3ff => &d063
         int pos = (address >> 8) & 0xf;
@@ -460,7 +462,12 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 return poty;
             default:
                 if (pos >= 0x8) {
-                    return getMemory(IO_OFFSET + address) | 0xf0;
+                    // this looks weired
+                    throw new IllegalArgumentException(
+                            String.format("Weired write to originalAddress = 0x%05X, changedAddress = 0x%05X",
+                                    originalAddress, address));
+
+                    // return getMemory(IO_OFFSET + address) | 0xf0;
                 }
                 return 0xff;
         }
@@ -471,6 +478,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
             throw new IllegalArgumentException("Read outside of VIC");
         }
 
+        int originalAddress = address;
         int pos = (address >> 8) & 0xf;
         address = address & IO_ADDRAND[pos];
 
@@ -709,7 +717,9 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 // VIC");
                 // }
                 setMemory(address + IO_OFFSET, data);
-                LOGGER.info(String.format("VIC write address 0x%05X", address));
+                throw new IllegalArgumentException(String.format(
+                        "Weired write to originalAddress = 0x%05X, changedAddress = 0x%05X", originalAddress, address));
+                // LOGGER.info(String.format("VIC write address 0x%05X", address));
                 // handle color ram!
         }
     }
