@@ -721,7 +721,7 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 // throw new IllegalArgumentException("Trying to write duplicate registers in
                 // VIC");
                 // }
-                setMemory(address + IO_OFFSET, data);
+                // setMemory(address + IO_OFFSET, data);
                 throw new IllegalArgumentException(String.format(
                         "Weired write to originalAddress = 0x%05X, changedAddress = 0x%05X", originalAddress, address));
                 // LOGGER.info(String.format("VIC write address 0x%05X", address));
