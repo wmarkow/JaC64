@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import com.dreamfabric.jac64.emu.memory.RAM;
+
 /**
  *
  *
@@ -36,8 +38,10 @@ public class C64Reader {
     public final static int TAPE = 1;
     public final static int DISK = 2;
 
-    private int[] memory;
     private String label = "";
+
+    private RAM ram;
+    private int[] memory;
 
     private ArrayList dirNames = new ArrayList();
     private Hashtable dirEntries = new Hashtable();
@@ -52,7 +56,8 @@ public class C64Reader {
     // sector array!!
     private int noBytes;
 
-    public void setMemory(int[] memory) {
+    public void setRam(RAM ram, int[] memory) {
+        this.ram = ram;
         this.memory = memory;
     }
 
@@ -735,10 +740,11 @@ public class C64Reader {
     }
 
     private int getMemory(int address) {
-        return memory[address];
+        return ram.read0(address);
     }
 
     private void setMemory(int address, int data) {
         memory[address] = data;
+        ram.write0(address, data);
     }
 }

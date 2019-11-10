@@ -16,4 +16,19 @@ public class RAM extends AddressableChip {
         return END_ADDRESS;
     }
 
+    /***
+     * An entry point to fill up the RAM with initial data. The methods
+     * {@link isWritable} and {@link isEnabled} are not taken into account here.
+     * 
+     * @param address
+     * @param data
+     * @return
+     */
+    public void write0(int address, int data) {
+        super.write0(address, data);
+    }
+    
+    public Integer read0(int address) {
+        return super.read0(address);
+    }
 }

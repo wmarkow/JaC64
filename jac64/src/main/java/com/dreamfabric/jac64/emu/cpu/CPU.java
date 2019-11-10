@@ -142,10 +142,7 @@ public class CPU extends MOS6510Core {
             return chips.performRead(adr, currentCpuCycles);
         }
 
-        // write to the underlying RAM
-        // return C64Emulation.getRAM().read(adr, currentCpuCycles);// it will not work
-        // because the game is not loaded to RAM yet
-        return getMemory(adr);
+        return C64Emulation.getRAM().read(adr, currentCpuCycles);
     }
 
     // A byte is written directly to memory or to ioChips
