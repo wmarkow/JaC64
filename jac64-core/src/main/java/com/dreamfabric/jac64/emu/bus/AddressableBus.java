@@ -155,12 +155,12 @@ public class AddressableBus implements AddressableIf {
     private Integer vicReadFromCharacterROM(int vicBankBaseAddress, int addressSeenByVic) {
         int charROMAddress = -1;
 
-        if ((addressSeenByVic & 0x1000) == 0x1000) {
+        if (addressSeenByVic >= 0x1000 && addressSeenByVic <= 0x1FFF) {
             // read from Character ROM
             charROMAddress = addressSeenByVic - 0x1000 + charRom.getStartAddress();
         }
 
-        if ((addressSeenByVic & 0x9000) == 0x9000) {
+        if (addressSeenByVic >= 0x9000 && addressSeenByVic <= 0x9FFF) {
             // read from Character ROM
             charROMAddress = addressSeenByVic - 0x9000 + charRom.getStartAddress();
         }
