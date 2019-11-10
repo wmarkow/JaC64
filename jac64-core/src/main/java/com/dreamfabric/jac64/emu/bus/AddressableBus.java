@@ -91,8 +91,9 @@ public class AddressableBus implements AddressableIf {
 
         int addressSeenByCPU = vicBankBaseAddress | addressSeenByVic;
 
-//        LOGGER.info(String.format("VIC exclusive read: vic address = 0x%05X ---> CPU address = 0x%05X",
-//                addressSeenByVic, addressSeenByCPU));
+        // LOGGER.info(String.format("VIC exclusive read: vic address = 0x%05X ---> CPU
+        // address = 0x%05X",
+        // addressSeenByVic, addressSeenByCPU));
 
         Integer result = vicReadFromCharacterROM(vicBankBaseAddress, addressSeenByVic);
         if (result != null) {
@@ -156,12 +157,12 @@ public class AddressableBus implements AddressableIf {
 
         if ((addressSeenByVic & 0x1000) == 0x1000) {
             // read from Character ROM
-            charROMAddress = vicBankBaseAddress | (addressSeenByVic - 0x1000);
+            charROMAddress = addressSeenByVic - 0x1000 + charRom.getStartAddress();
         }
 
         if ((addressSeenByVic & 0x9000) == 0x9000) {
             // read from Character ROM
-            charROMAddress = vicBankBaseAddress | (addressSeenByVic - 0x9000);
+            charROMAddress = addressSeenByVic - 0x9000 + charRom.getStartAddress();
         }
 
         if (charROMAddress == -1) {

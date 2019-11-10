@@ -99,8 +99,10 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     // -------------------------------------------------------------------
     // VIC-II variables
     // -------------------------------------------------------------------
-    public int charSetBaseAddress;
-    public int videoMatrixBaseAddress;
+    public int charSetBaseAddress; // address of character's glyphs definitions. It can be read from $1000 of
+                                   // Character ROM
+    public int videoMatrixBaseAddress; // address of the screen matrix 25x40 (rows x cols): range 1024-2023
+                                       // ($0400-$07E7)
     public int videoMode;
 
     // VIC Registers
@@ -178,8 +180,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     private int charMemoryIndex = 0;
 
     // Caching all 40 chars (or whatever) each "bad-line"
-    private int[] vicCharCache = new int[40];
-    private int[] vicColCache = new int[40];
+    private int[] vicCharCache = new int[40];// this is the whole current row with 40 characters (columns) inside
+    private int[] vicColCache = new int[40];// this is the whole current row with 40 characters colors (columns) inside
 
     public Image screen = null;
     private MemoryImageSource mis = null;
@@ -1282,9 +1284,14 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
             }
         }
 
-        int position = 0, data = 0, penColor = 0, bgcol = bgColor;
+        // position is an starting address (i.e. in Character ROM) of the character
+        // glyphs data. Each character has 8 bytes data.
+        // https://www.c64-wiki.com/wiki/Character_set#Character_sequence
+        int position = 0;
+        int data = 0, penColor = 0, bgcol = bgColor;
 
         if ((control1 & 0x20) == 0) {
+            // here we have a text mode
             int tmp;
             int pcol;
 
@@ -1303,7 +1310,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 position = charMemoryIndex + (vicCharCache[vmli] << 3);
             }
 
-            data = getMemory(position + rc);
+            // rc is the row offset for the character that is drawn. RC = 0...7
+            data = getMemory(position + rc); // data should contain the specific value for a specific character
 
             if (multiCol && pcol > 7) {
                 multiColor[3] = cbmcolor[pcol & 7];
