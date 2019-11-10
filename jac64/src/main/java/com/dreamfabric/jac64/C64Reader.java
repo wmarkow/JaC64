@@ -362,10 +362,11 @@ public class C64Reader {
 
         try {
             for (int i = 0; i < 252; i++) {
-                if (out != null)
+                if (out != null) {
                     out.write(sec[i + 4] & 0xff);
-                else
-                    memory[i + address] = sec[i + 4] & 0xff;
+                } else {
+                    setMemory(i + address, sec[i + 4] & 0xff);
+                }
             }
         } catch (Exception e) {
             System.out.println("Could not write to output stream");
@@ -387,7 +388,7 @@ public class C64Reader {
                     if (out != null)
                         out.write(sec[i + 2] & 0xff);
                     else
-                        memory[i + address] = sec[i + 2] & 0xff;
+                        setMemory(i + address, sec[i + 2] & 0xff);
                 }
             } catch (Exception e) {
                 System.out.println("Could not write to output stream");
@@ -410,8 +411,8 @@ public class C64Reader {
     // Will return a string of hexadecimally encoded .prg file!
     // Just de-hex and make a .prg file is such a file is desired...
     public String saveFile() {
-        int startAdr = memory[43] + (memory[44] << 8);
-        int lastAdr = memory[45] + (memory[46] << 8);
+        int startAdr = getMemory(43) + (getMemory(44) << 8);
+        int lastAdr = getMemory(45) + (getMemory(46) << 8);
 
         System.out.println("Dumping mem from: " + startAdr + " to " + lastAdr);
 
@@ -424,10 +425,10 @@ public class C64Reader {
             sb.append('0');
         sb.append(Integer.toString(startAdr >> 8));
         for (int i = startAdr; i < lastAdr; i++) {
-            int m = memory[i];
+            int m = getMemory(i);
             if (m < 16)
                 sb.append('0');
-            sb.append(Integer.toString(memory[i], 16));
+            sb.append(Integer.toString(getMemory(i), 16));
         }
 
         return sb.toString();
@@ -435,14 +436,15 @@ public class C64Reader {
 
     private void setAddress(int address) {
         // Set the right upper memory !!!
-        if (address > 0x9f00)
+        if (address > 0x9f00) {
             address = 0x9f00;
-        memory[45] = address & 0xff;
-        memory[46] = (address & 0xff00) >> 8;
-        memory[47] = address & 0xff;
-        memory[48] = (address & 0xff00) >> 8;
-        memory[49] = address & 0xff;
-        memory[50] = (address & 0xff00) >> 8;
+        }
+        setMemory(45, address & 0xff);
+        setMemory(46, (address & 0xff00) >> 8);
+        setMemory(47, address & 0xff);
+        setMemory(48, (address & 0xff00) >> 8);
+        setMemory(49, address & 0xff);
+        setMemory(50, (address & 0xff00) >> 8);
     }
 
     private String readTapeFile(DirEntry dire) {
@@ -456,7 +458,7 @@ public class C64Reader {
         System.out.println("Size: " + dire.size);
 
         for (int i = 0; i < dire.size; i++) {
-            memory[address++] = sectors[(i + offset) >> 8][(i + offset) & 0xff] & 0xff;
+            setMemory(address++, sectors[(i + offset) >> 8][(i + offset) & 0xff] & 0xff);
         }
         setAddress(address);
         return dire.name;
@@ -482,7 +484,7 @@ public class C64Reader {
 
             System.out.println("Storing at: " + address);
             for (int i = 0; i < noBytes; i++)
-                memory[address++] = sectors[(i) >> 8][i & 0xff] & 0xff;
+                setMemory(address++, sectors[(i) >> 8][i & 0xff] & 0xff);
 
             // Fixa set address and then it is finished???
             setAddress(address);
@@ -732,4 +734,11 @@ public class C64Reader {
         }
     }
 
+    private int getMemory(int address) {
+        return memory[address];
+    }
+
+    private void setMemory(int address, int data) {
+        memory[address] = data;
+    }
 }
