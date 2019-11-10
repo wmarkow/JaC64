@@ -139,6 +139,7 @@ public class AddressableBus implements AddressableIf {
     }
 
     /***
+     * if (p6 || p7) == true then CharROM is enabled.
      * <p>
      * p6 <= n_va14 and not va13 and va12 and n_aec and n_game ; if true then
      * address 0x1000
@@ -154,6 +155,14 @@ public class AddressableBus implements AddressableIf {
      */
     private Integer vicReadFromCharacterROM(int vicBankBaseAddress, int addressSeenByVic) {
         int charROMAddress = -1;
+
+        boolean va14 = ((vicBankBaseAddress >> 14) & 0x1) == 1 ? true : false;
+        boolean n_va14 = !va14;
+
+        if (n_va14 == false) {
+            // n_va14 is 0 => p6 = false and p7 = false. CharROM is not enabled.
+            return null;
+        }
 
         if (addressSeenByVic >= 0x1000 && addressSeenByVic <= 0x1FFF) {
             // read from Character ROM
