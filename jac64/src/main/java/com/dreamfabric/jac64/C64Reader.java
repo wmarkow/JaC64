@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import com.dreamfabric.jac64.emu.cpu.CPU;
-
 /**
  *
  *
@@ -54,9 +52,8 @@ public class C64Reader {
     // sector array!!
     private int noBytes;
 
-    public void setCPU(CPU cpu) {
-        /* CPU argument is ignored for now */
-        this.memory = cpu.getMemory();
+    public void setMemory(int[] memory) {
+        this.memory = memory;
     }
 
     public int getLoadedType() {
