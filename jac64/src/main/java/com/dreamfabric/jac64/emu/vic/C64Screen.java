@@ -90,8 +90,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
     private int reset = 100;
     private C64Canvas canvas;
 
-    private int[] memory;
-
     private CIA2 cia2;
 
     private int[] cbmcolor = VICConstants.COLOR_SETS[0];
@@ -318,8 +316,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         this.cpu = cpu;
         this.interruptManager = interruptManager;
 
-        this.memory = cpu.getMemory();
-
         for (int i = 0, n = sprites.length; i < n; i++) {
             sprites[i] = new Sprite();
             sprites[i].spriteNo = i;
@@ -466,8 +462,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                     throw new IllegalArgumentException(
                             String.format("Weired read from originalAddress = 0x%05X, changedAddress = 0x%05X",
                                     originalAddress, address));
-
-                    // return getMemory(IO_OFFSET + address) | 0xf0;
                 }
                 return 0xff;
         }
@@ -481,20 +475,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         int originalAddress = address;
         int pos = (address >> 8) & 0xf;
         address = address & IO_ADDRAND[pos];
-
-        validateAddress(address);
-
-        // monitor.info("Wrote to Chips at " + Integer.toString(address, 16)
-        // + " = " + Integer.toString(data, 16));
-
-        // Store in the memory given by "CPU"
-        // setMemory(address + IO_OFFSET, data);
-
-        // if (address >= 0xd800 && address < 0xdc00) {
-        // int p = address - 0xd800;
-        // System.out.println("### Write to color ram: " + (p % 40) + "," + p/40 +
-        // " = " + data);
-        // }
 
         switch (address) {
             // -------------------------------------------------------------------
@@ -712,20 +692,8 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
                 // & 15));
                 break;
             default:
-                // if(address < START_ADDRESS || address > END_ADDRESS)
-                // {
-                // throw new IllegalArgumentException("Trying to write out of VIC");
-                // }
-                // if(address > 0xd03f)
-                // {
-                // throw new IllegalArgumentException("Trying to write duplicate registers in
-                // VIC");
-                // }
-                // setMemory(address + IO_OFFSET, data);
                 throw new IllegalArgumentException(String.format(
                         "Weired write to originalAddress = 0x%05X, changedAddress = 0x%05X", originalAddress, address));
-                // LOGGER.info(String.format("VIC write address 0x%05X", address));
-                // handle color ram!
         }
     }
 
@@ -733,22 +701,12 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         LOGGER.debug("setVideoMem() cycles since line: " + (cpu.currentCpuCycles - lastLine) + " cycles since IRQ: "
                 + (cpu.currentCpuCycles - lastIRQ) + " at " + vbeam);
 
-        int cia2PRA = cia2.getPRA();
-
         // Set-up vars for screen rendering
         charSetBaseAddress = ((vicMemoryPointers & 0x0e) << 10);
         videoMatrixBaseAddress = ((vicMemoryPointers & 0xf0) << 6);
         vicBaseAddress = ((vicMemoryPointers & 0x08) << 10);
         spr0BlockSel = 0x03f8 + videoMatrixBaseAddress;
 
-        // monitor.info("--------------------");
-        // monitor.info("0xdd00: 0x"+Integer.toHexString(memory[IO_OFFSET + 0xdd00]));
-        // monitor.info("0xd018: 0x"+Integer.toHexString(memory[IO_OFFSET + 0xd018]));
-        // monitor.info("vicBank: 0x"+Integer.toHexString(vicBank));
-        // monitor.info("videoMatrix: 0x"+Integer.toHexString(videoMatrix-vicBank));
-        // monitor.info("charSet: 0x"+Integer.toHexString(charSet-vicBank));
-
-        // check if vic not looking at char rom 1, 2, 4, 8
         charMemoryIndex = charSetBaseAddress;
     }
 
@@ -1679,15 +1637,10 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         poty = 0xff - (e.getY() & 0xff);
     }
 
-    protected int getMemory(int address) {
+    private int getMemory(int address) {
         if (address > 16384) {
             throw new IllegalArgumentException(
                     String.format("VIC wants to read out of its range; from address 0x%05X", address));
-        }
-        if (address >= START_ADDRESS && address <= END_ADDRESS) {
-            // throw new IllegalArgumentException(String.format("Address 0x%05X (from 0x%05X
-            // to 0x%05X) is invalid here",
-            // address, START_ADDRESS, END_ADDRESS));
         }
 
         setVideoMem();
@@ -1699,23 +1652,6 @@ public class C64Screen extends ExtChip implements Observer, MouseMotionListener 
         setVideoMem();
 
         return addressableBus.readVicExclusiveFromColorRAM(localColorRAMAddress);
-    }
-
-    protected void setMemory(int address, int data) {
-        // does VIC any writes?
-        LOGGER.info(String.format("Writing %s to main memory 0x%05X", data, address));
-
-        setVideoMem();
-
-        memory[address] = data;
-    }
-
-    private void validateAddress(int address) {
-        if (address >= 0x1D000 && address < 0x1DFFF) {
-            // LOGGER.warn(String.format("Invalid address 0x%05X", address));
-
-            return;
-        }
     }
 
     private InterruptManager getInterruptManager() {
