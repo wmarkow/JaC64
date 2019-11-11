@@ -62,25 +62,20 @@ public class CPU extends MOS6510Core {
     private static final long CYCLES_PER_DEBUG = 10000000;
     public static final boolean DEBUG = false;
 
-    private Loader loader;
-
-    private AutoStore[] autoStore;
-
     private PLA pla;
     private AddressableBus addressableBus;
     protected ExtChip chips = null;
     private int memory[];
 
-    public CPU(IMonitor m, String cb, Loader loader) {
+    public CPU(IMonitor m, String cb) {
         super(m, cb);
-        this.loader = loader;
         memory = new int[getMemorySize()];
     }
 
     public void init(ExtChip scr) {
         super.init();
         this.chips = scr;
-        installROMS();
+        C64Emulation.installROMs();
     }
 
     public void setPla(PLA pla) {
@@ -251,12 +246,6 @@ public class CPU extends MOS6510Core {
         }
     }
 
-    private void installROMS() {
-        loadROM(loader.getResourceStream("/roms/chargen.c64"), CHAR_ROM2, 0x1000);
-
-        C64Emulation.installROMs();
-    }
-
     public void run(int address) {
         reset();
         running = true;
@@ -417,23 +406,6 @@ public class CPU extends MOS6510Core {
         }
     }
 
-    // -------------------------------------------------------------------
-    // Cheat loop!
-    // Protection
-    // + rule triggered auto get/store
-    // Rule: xpr & xpr & xpr ...
-    // rule: int[] adr, cmptype, cmpval ...
-    // autostore: int[] adr, len => result in hex! from adr and on!
-    // -------------------------------------------------------------------
-
-    public void setAutoStore(int index, AutoStore au) {
-        autoStore[index] = au;
-    }
-
-    public AutoStore getAutoStore(int index) {
-        return autoStore[index];
-    }
-
     public int[] getMemory() {
         return memory;
     }
@@ -447,36 +419,6 @@ public class CPU extends MOS6510Core {
 
     protected int getMemorySize() {
         return 0x20000;
-    }
-
-    protected void loadROM(InputStream ins, int startMem, int len) {
-        try {
-            BufferedInputStream stream = new BufferedInputStream(ins);
-            if (stream != null) {
-                byte[] charBuf = new byte[len];
-                int pos = 0;
-                int t;
-                try {
-                    while ((t = stream.read(charBuf, pos, len - pos)) > 0) {
-                        pos += t;
-                    }
-                    monitor.info("Installing rom at :" + Integer.toString(startMem, 16) + " size:" + pos);
-                    for (int i = 0; i < charBuf.length; i++) {
-                        memory[i + startMem] = ((int) charBuf[i]) & 0xff;
-                    }
-                } catch (Exception e) {
-                    monitor.error("Problem reading rom file ");
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        stream.close();
-                    } catch (Exception e2) {
-                    }
-                }
-            }
-        } catch (Exception e) {
-            monitor.error("Error loading resource" + e);
-        }
     }
 
     protected int getMemory(int address) {
