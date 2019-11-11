@@ -89,18 +89,15 @@ public class AddressableBus implements AddressableIf {
     public int readVicExclusive(int cia2PRA, int addressSeenByVic) {
         int vicBankBaseAddress = (~(cia2PRA) & 3) << 14;
 
-        int addressSeenByCPU = vicBankBaseAddress | addressSeenByVic;
+        boolean va14 = ((vicBankBaseAddress >> 14) & 0x1) == 1 ? true : false;
 
-        // LOGGER.info(String.format("VIC exclusive read: vic address = 0x%05X ---> CPU
-        // address = 0x%05X",
-        // addressSeenByVic, addressSeenByCPU));
-
-        Integer result = vicReadFromCharacterROM(vicBankBaseAddress, addressSeenByVic);
+        Integer result = vicReadFromCharacterROM(va14, addressSeenByVic);
         if (result != null) {
             return result;
         }
 
         // read from RAM
+        int addressSeenByCPU = vicBankBaseAddress | addressSeenByVic;
         return ram.read(addressSeenByCPU, 0);
     }
 
@@ -153,10 +150,9 @@ public class AddressableBus implements AddressableIf {
      * @param addressSeenByVic
      * @return
      */
-    private Integer vicReadFromCharacterROM(int vicBankBaseAddress, int addressSeenByVic) {
+    private Integer vicReadFromCharacterROM(boolean va14, int addressSeenByVic) {
         int charROMAddress = -1;
 
-        boolean va14 = ((vicBankBaseAddress >> 14) & 0x1) == 1 ? true : false;
         boolean n_va14 = !va14;
 
         if (n_va14 == false) {
