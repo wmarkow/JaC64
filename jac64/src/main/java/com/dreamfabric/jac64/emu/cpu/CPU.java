@@ -12,16 +12,10 @@
  */
 package com.dreamfabric.jac64.emu.cpu;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dreamfabric.c64utils.AutoStore;
-import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.IMonitor;
-import com.dreamfabric.jac64.Loader;
 import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.SlowDownCalculator;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
@@ -41,20 +35,11 @@ public class CPU extends MOS6510Core {
 
     public static final boolean DEBUG_EVENT = false;
     // The IO RAM memory at 0x10000 (just since there is RAM there...)
-    public static final int IO_OFFSET = 0x10000 - 0xd000;
-    public static final int BASIC_ROM2 = 0x1a000;
-    public static final int KERNAL_ROM2 = 0x1e000;
     public static final int CHAR_ROM2 = 0x1d000;
 
     public static final int CH_PROTECT = 1;
     public static final int CH_MONITOR_WRITE = 2;
     public static final int CH_MONITOR_READ = 4;
-
-    // Defaults for the ROMs
-    public boolean basicROM = true;
-    public boolean kernalROM = true;
-    public boolean charROM = false;
-    public boolean ioON = true;
 
     // The state of the program (runs if running = true)
     public boolean running = true;
@@ -117,25 +102,9 @@ public class CPU extends MOS6510Core {
             schedule(currentCpuCycles);
         }
 
-        // START: a new way of reading data from SID.
         Integer result = addressableBus.read(adr, currentCpuCycles);
         if (result != null) {
             return (int) result;
-        }
-        // END: a new way of reading data from SID.
-
-        if (basicROM && adr >= 0xA000 && adr <= 0xBFFF) {
-            // should never happen because Basic ROM is handled by addressable bus
-            throw new IllegalArgumentException("should never happen because Basic ROM is handled by addressable bus");
-        }
-        if (kernalROM && adr >= 0xE000 && adr <= 0xFFFF) {
-            throw new IllegalArgumentException("should never happen because Kernal ROM is handled by addressable bus");
-        }
-        if (charROM && adr >= 0xD000 && adr <= 0xDFFF) {
-            throw new IllegalArgumentException("should never happen because Char ROM is handled by addressable bus");
-        }
-        if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
-            throw new IllegalArgumentException("should never happen because VIC is handled by addressable bus");
         }
 
         return C64Emulation.getRAM().read(adr, currentCpuCycles);
@@ -146,26 +115,6 @@ public class CPU extends MOS6510Core {
         currentCpuCycles++;
 
         schedule(currentCpuCycles);
-        // Locking only on fetch byte...
-        // System.out.println("Writing byte at: " + Integer.toString(adr, 16)
-        // + " = " + data);
-        if (adr <= 1) {
-            setMemory(adr, data);
-            int p = (getMemory(0) ^ 0xff) | getMemory(1);
-
-            // pla.setCharenHiramLoram(p);
-
-            kernalROM = ((p & 2) == 2); // Kernal on
-            basicROM = ((p & 3) == 3); // Basic on
-
-            charROM = ((p & 3) != 0) && ((p & 4) == 0);
-            // ioON is probably not correct!!! Check against table...
-            ioON = ((p & 3) != 0) && ((p & 4) != 0);
-
-            // LOGGER.info(String.format("Setting basicROM = %s, kernalROM = %s, charROM =
-            // %s, ioON = %s", basicROM,
-            // kernalROM, charROM, ioON));
-        }
 
         // START: a new way of writing data.
         if (adr == 0x01) {
@@ -177,14 +126,6 @@ public class CPU extends MOS6510Core {
             return;
         }
         // END: a new way of writing data.
-
-        // adr &= 0xffff;
-        // if (ioON && adr >= 0xD000 && adr <= 0xDFFF) {
-        // // System.out.println("IO Write at: " + Integer.toString(adr, 16));
-        // chips.write(adr, data, currentCpuCycles);
-        //
-        // return;
-        // }
 
         // it should write to the underlying RAM:
         // https://www.c64-wiki.com/wiki/Memory_Map

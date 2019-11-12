@@ -57,7 +57,6 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     public static final int CYCLES_PER_LINE = VICConstants.SCAN_RATE;
 
     // ALoow the IO to write in same as RAM
-    public static final int IO_OFFSET = CPU.IO_OFFSET;
     public static final boolean SOUND_AVAIABLE = true;
 
     public static final Color TRANSPARENT_BLACK = new Color(0, 0, 0x40, 0x40);
