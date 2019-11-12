@@ -56,7 +56,7 @@ public class AddressableBus implements AddressableIf {
             return result;
         }
 
-        return result;
+        return ram.write(address, data, currentCpuCycles);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class AddressableBus implements AddressableIf {
             return result;
         }
 
-        return null;
+        return ram.read(address, currentCpuCycles);
     }
 
     public int readVicExclusive(int cia2PRA, int addressSeenByVic) {

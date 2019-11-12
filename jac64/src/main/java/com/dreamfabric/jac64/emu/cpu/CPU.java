@@ -107,7 +107,7 @@ public class CPU extends MOS6510Core {
             return (int) result;
         }
 
-        return C64Emulation.getRAM().read(adr, currentCpuCycles);
+        throw new IllegalArgumentException("Read operation should be handled by addressable bus!");
     }
 
     // A byte is written directly to memory or to ioChips
@@ -116,7 +116,6 @@ public class CPU extends MOS6510Core {
 
         schedule(currentCpuCycles);
 
-        // START: a new way of writing data.
         if (adr == 0x01) {
             // setting CHAREN, HIRAM and LORAM of PLA
             pla.setCharenHiramLoram(data);
@@ -125,12 +124,8 @@ public class CPU extends MOS6510Core {
         if (addressableBus.write(adr, data, currentCpuCycles)) {
             return;
         }
-        // END: a new way of writing data.
 
-        // it should write to the underlying RAM:
-        // https://www.c64-wiki.com/wiki/Memory_Map
-        setMemory(adr, data);
-        C64Emulation.getRAM().write(adr, data, currentCpuCycles);
+        throw new IllegalArgumentException("Write operation should be handled by addressable bus!");
     }
 
     public void poke(int address, int data) {
