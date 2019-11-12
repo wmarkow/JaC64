@@ -305,10 +305,10 @@ public class CPU extends MOS6510Core {
     }
 
     private int getMemory(int address) {
-        return C64Emulation.getRAM().read0(address);
+        return addressableBus.getRAM().read0(address);
     }
 
     private void setMemory(int address, int data) {
-        C64Emulation.getRAM().write0(address, data);
+        addressableBus.getRAM().write0(address, data);
     }
 }
