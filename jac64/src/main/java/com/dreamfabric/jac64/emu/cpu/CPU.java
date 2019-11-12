@@ -74,7 +74,7 @@ public class CPU extends MOS6510Core {
         this.scheduler = eventQueue;
     }
 
-    private final void schedule(long currentCpuCycles) {
+    private final void executeFromEventQueue(long currentCpuCycles) {
         chips.clock(currentCpuCycles);
         while (currentCpuCycles >= scheduler.nextTime) {
             TimeEvent t = scheduler.popFirst();
@@ -99,10 +99,10 @@ public class CPU extends MOS6510Core {
         currentCpuCycles++;
 
         /* Chips work first, then CPU */
-        schedule(currentCpuCycles);
+        executeFromEventQueue(currentCpuCycles);
         while (baLowUntil > currentCpuCycles) {
             currentCpuCycles++;
-            schedule(currentCpuCycles);
+            executeFromEventQueue(currentCpuCycles);
         }
 
         Integer result = addressableBus.read(adr, currentCpuCycles);
@@ -118,7 +118,7 @@ public class CPU extends MOS6510Core {
     protected final void writeByte(int adr, int data) {
         currentCpuCycles++;
 
-        schedule(currentCpuCycles);
+        executeFromEventQueue(currentCpuCycles);
 
         if (adr == 0x01) {
             // setting CHAREN, HIRAM and LORAM of PLA
