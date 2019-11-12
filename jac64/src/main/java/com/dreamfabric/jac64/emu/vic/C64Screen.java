@@ -173,9 +173,6 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     private Image image;
     private Graphics g2;
 
-    // The font is in a copy in "ROM"...
-    private int charMemoryIndex = 0;
-
     // Caching all 40 chars (or whatever) each "bad-line"
     private int[] vicCharCache = new int[40];// this is the whole current row with 40 characters (columns) inside
     private int[] vicColCache = new int[40];// this is the whole current row with 40 characters colors (columns) inside
@@ -299,7 +296,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     }
 
     public void dumpGfxStat() {
-        monitor.info("Char MemoryIndex: 0x" + Integer.toString(charMemoryIndex, 16));
+        monitor.info("Char CharSetBaseAddress: 0x" + Integer.toString(charSetBaseAddress, 16));
         monitor.info("CharSet adr: 0x" + Integer.toString(charSetBaseAddress, 16));
         monitor.info("VideoMode: " + videoMode);
         monitor.info("Video Matrix: 0x" + Integer.toString(videoMatrixBaseAddress, 16));
@@ -337,8 +334,6 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
 
         canvas = new C64Canvas(this, DOUBLE);
         canvas.addMouseMotionListener(this);
-
-        charMemoryIndex = CPU.CHAR_ROM2;
 
         for (int i = 0; i < SC_WIDTH * SC_HEIGHT; i++) {
             mem[i] = cbmcolor[6];
@@ -727,8 +722,6 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
         videoMatrixBaseAddress = ((vicMemoryPointers & 0xf0) << 6);
         vicBaseAddress = ((vicMemoryPointers & 0x08) << 10);
         spr0BlockSel = 0x03f8 + videoMatrixBaseAddress;
-
-        charMemoryIndex = charSetBaseAddress;
     }
 
     private void initUpdate() {
@@ -1283,10 +1276,10 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
 
             penColor = cbmcolor[pcol = vicColCache[vmli] & 15];
             if (extended) {
-                position = charMemoryIndex + (((data = vicCharCache[vmli]) & 0x3f) << 3);
+                position = charSetBaseAddress + (((data = vicCharCache[vmli]) & 0x3f) << 3);
                 bgcol = cbmcolor[bgCol[(data >> 6)]];
             } else {
-                position = charMemoryIndex + (vicCharCache[vmli] << 3);
+                position = charSetBaseAddress + (vicCharCache[vmli] << 3);
             }
 
             // rc is the row offset for the character that is drawn. RC = 0...7

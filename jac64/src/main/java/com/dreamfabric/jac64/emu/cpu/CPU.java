@@ -34,8 +34,6 @@ public class CPU extends MOS6510Core {
     private static Logger LOGGER = LoggerFactory.getLogger(CPU.class);
 
     public static final boolean DEBUG_EVENT = false;
-    // The IO RAM memory at 0x10000 (just since there is RAM there...)
-    public static final int CHAR_ROM2 = 0x1d000;
 
     public static final int CH_PROTECT = 1;
     public static final int CH_MONITOR_WRITE = 2;
