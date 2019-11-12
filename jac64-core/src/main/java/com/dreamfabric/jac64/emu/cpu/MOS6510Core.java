@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.IMonitor;
-import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 
 /**
  * MOS6510Core "implements" the 6510 processor in java code. Other classes are
@@ -67,8 +66,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     protected long nmiCycleStart = 0;
     protected long irqCycleStart = 0;
-
-    protected EventQueue scheduler;
 
     private String[] debugInfo;
 
@@ -883,14 +880,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     public int getPc() {
         return pc;
-    }
-
-    public EventQueue getScheduler() {
-        return scheduler;
-    }
-
-    public void setScheduler(EventQueue scheduler) {
-        this.scheduler = scheduler;
     }
 
     public int getY() {

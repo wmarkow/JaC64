@@ -78,8 +78,8 @@ public class C64Emulation {
         addressableBus.setRAM(ram);
 
         // prepare CPU
-        cpu.setScheduler(scheduler);
         cpu.setPla(pla);
+        cpu.setScheduler(scheduler);
         cpu.setAddressableBus(addressableBus);
     }
 

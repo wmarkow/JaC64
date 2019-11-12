@@ -20,6 +20,7 @@ import com.dreamfabric.jac64.emu.C64Emulation;
 import com.dreamfabric.jac64.emu.SlowDownCalculator;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.pla.PLA;
+import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 
@@ -49,6 +50,7 @@ public class CPU extends MOS6510Core {
     private PLA pla;
     private AddressableBus addressableBus;
     protected C64Screen chips = null;
+    private EventQueue scheduler;
 
     public CPU(IMonitor m, String cb) {
         super(m, cb);
@@ -66,6 +68,10 @@ public class CPU extends MOS6510Core {
 
     public void setAddressableBus(AddressableBus addressableBus) {
         this.addressableBus = addressableBus;
+    }
+
+    public void setScheduler(EventQueue eventQueue) {
+        this.scheduler = eventQueue;
     }
 
     private final void schedule(long currentCpuCycles) {
@@ -87,6 +93,7 @@ public class CPU extends MOS6510Core {
     }
 
     // Reads the memory with all respect to all flags...
+    @Override
     protected final int fetchByte(int adr) {
         /* a cycles passes for this read */
         currentCpuCycles++;
@@ -107,6 +114,7 @@ public class CPU extends MOS6510Core {
     }
 
     // A byte is written directly to memory or to ioChips
+    @Override
     protected final void writeByte(int adr, int data) {
         currentCpuCycles++;
 
