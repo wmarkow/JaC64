@@ -128,59 +128,12 @@ public class CPU extends MOS6510Core {
         throw new IllegalArgumentException("Write operation should be handled by addressable bus!");
     }
 
-    public void poke(int address, int data) {
-        writeByte(address & 0xffff, data & 0xff);
-    }
-
     public void runBasic() {
         setMemory(631, (int) 'R');
         setMemory(632, (int) 'U');
         setMemory(633, (int) 'N');
         setMemory(634, 13);// enter
         setMemory(198, 4); // length
-    }
-
-    public void enterText(String txt) {
-        System.out.println("Entering text into textbuffer: " + txt);
-        txt = txt.toUpperCase();
-        int len = txt.length();
-        int pos = 0;
-        for (int i = 0, n = len; i < n; i++) {
-            char c = txt.charAt(i);
-            if (c == '~')
-                c = 13;
-            setMemory(631 + pos, c);
-            pos++;
-            if (pos == 5) {
-                setMemory(198, pos);
-                pos = 0;
-                int tries = 5;
-                while (tries > 0 && getMemory(198) > 0) {
-                    try {
-                        Thread.sleep(50);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    tries--;
-                    if (tries == 0) {
-                        System.out.println("Buffer still full: " + getMemory(198));
-                    }
-                }
-            }
-        }
-        setMemory(198, pos);
-        int tries = 5;
-        while (tries > 0 && getMemory(198) > 0) {
-            try {
-                Thread.sleep(50);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            tries--;
-            if (tries == 0) {
-                System.out.println("Buffer still full: " + getMemory(198));
-            }
-        }
     }
 
     public void run(int address) {
