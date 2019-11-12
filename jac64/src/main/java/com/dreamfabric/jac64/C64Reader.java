@@ -41,7 +41,6 @@ public class C64Reader {
     private String label = "";
 
     private RAM ram;
-    private int[] memory;
 
     private ArrayList dirNames = new ArrayList();
     private Hashtable dirEntries = new Hashtable();
@@ -56,9 +55,8 @@ public class C64Reader {
     // sector array!!
     private int noBytes;
 
-    public void setRam(RAM ram, int[] memory) {
+    public void setRam(RAM ram) {
         this.ram = ram;
-        this.memory = memory;
     }
 
     public int getLoadedType() {
@@ -744,7 +742,6 @@ public class C64Reader {
     }
 
     private void setMemory(int address, int data) {
-        memory[address] = data;
         ram.write0(address, data);
     }
 }

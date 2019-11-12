@@ -116,7 +116,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
         registerHotKey(KeyEvent.VK_F12, KeyEvent.CTRL_DOWN_MASK, "toggleFullScreen()", this);
 
         reader = new C64Reader(); // scr.getDiskDrive().getReader();
-        reader.setRam(C64Emulation.getRAM(), cpu.getMemory());
+        reader.setRam(C64Emulation.getRAM());
 
         C64Win = new JFrame("JaC64 - A Java C64 Emulator");
         C64Win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
