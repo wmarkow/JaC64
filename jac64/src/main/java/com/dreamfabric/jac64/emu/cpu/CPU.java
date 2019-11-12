@@ -51,11 +51,9 @@ public class CPU extends MOS6510Core {
     private PLA pla;
     private AddressableBus addressableBus;
     protected C64Screen chips = null;
-    private int memory[];
 
     public CPU(IMonitor m, String cb) {
         super(m, cb);
-        memory = new int[getMemorySize()];
     }
 
     public void init(C64Screen scr) {
@@ -249,8 +247,10 @@ public class CPU extends MOS6510Core {
                 // Debugging?
                 if (monitor.isEnabled()) { // || interruptInExec > 0) {
                     if (baLowUntil <= currentCpuCycles) {
-                        monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(), interruptInExec,
-                                lastInterrupt);
+                        // TODO: wmarkow fix disassemble
+                        // monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(),
+                        // interruptInExec,
+                        // lastInterrupt);
                     }
                 }
 
@@ -267,9 +267,11 @@ public class CPU extends MOS6510Core {
                         monitor.info("Nr ins:" + nr_ins + " sec:" + (sec) + " -> " + ((nr_ins * 1000) / sec) + " ins/s"
                                 + "  " + " clk: " + currentCpuCycles + " clk/s: " + ((CYCLES_PER_DEBUG * 1000) / sec)
                                 + "\n" + ((nr_irq * 1000) / sec));
-                        if (level > 2)
-                            monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(), interruptInExec,
-                                    lastInterrupt);
+                        // TODO: wmarkow fix disassemble
+                        // if (level > 2)
+                        // monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(),
+                        // interruptInExec,
+                        // lastInterrupt);
                         monitor.info("--------------------------");
                     }
                     nr_irq = 0;
@@ -291,43 +293,22 @@ public class CPU extends MOS6510Core {
             }
         } catch (Exception e) {
             monitor.error("Exception in loop " + pc + " : " + e);
-            e.printStackTrace();
-            monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(), interruptInExec, lastInterrupt);
+            LOGGER.error(e.getMessage(), e);
+            // TODO: wmarkow fix disassemble
+            // monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(),
+            // interruptInExec, lastInterrupt);
         }
-    }
-
-    public int[] getMemory() {
-        return memory;
     }
 
     public void hardReset() {
-        for (int i = 0; i < 0x10000; i++) {
-            memory[i] = 0;
-        }
         reset();
     }
 
-    protected int getMemorySize() {
-        return 0x20000;
+    private int getMemory(int address) {
+        return C64Emulation.getRAM().read0(address);
     }
 
-    protected int getMemory(int address) {
-        validateAddress(address);
-
-        return memory[address];
-    }
-
-    protected void setMemory(int address, int data) {
-        validateAddress(address);
-
-        memory[address] = data;
-    }
-
-    private void validateAddress(int address) {
-        if (address >= 0x1D000 && address < 0x1DFFF) {
-            LOGGER.warn(String.format("Invalid address 0x%05X", address));
-
-            return;
-        }
+    private void setMemory(int address, int data) {
+        C64Emulation.getRAM().write0(address, data);
     }
 }
