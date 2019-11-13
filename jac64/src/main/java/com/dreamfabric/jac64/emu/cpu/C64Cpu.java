@@ -13,7 +13,7 @@ public class C64Cpu extends MOS6510Core {
 
     private PLA pla;
     private AddressableBus addressableBus;
-    private C64Screen chips = null;
+    private C64Screen c64screen = null;
     private EventQueue scheduler;
 
     public C64Cpu(IMonitor m, String cb) {
@@ -33,7 +33,7 @@ public class C64Cpu extends MOS6510Core {
     }
 
     public void setC64Screen(C64Screen c64screen) {
-        this.chips = c64screen;
+        this.c64screen = c64screen;
     }
 
     @Override
@@ -42,7 +42,7 @@ public class C64Cpu extends MOS6510Core {
     }
 
     public void reset() {
-        chips.reset();
+        c64screen.reset();
         scheduler.empty();
         // this will ensure the correct PLA state
         writeByte(1, 0x7);
@@ -124,7 +124,7 @@ public class C64Cpu extends MOS6510Core {
     }
 
     private void executeFromEventQueue(long currentCpuCycles) {
-        chips.clock(currentCpuCycles);
+        c64screen.clock(currentCpuCycles);
         while (currentCpuCycles >= scheduler.nextTime) {
             TimeEvent t = scheduler.popFirst();
             if (t != null) {
