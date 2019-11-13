@@ -16,8 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.IMonitor;
-import com.dreamfabric.jac64.emu.C64Emulation;
-import com.dreamfabric.jac64.emu.SlowDownCalculator;
+import com.dreamfabric.jac64.emu.EmulationContext;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 /**
@@ -34,9 +33,6 @@ public class CPU extends C64Cpu {
     public boolean running = true;
     public boolean pause = false;
 
-    private static final long CYCLES_PER_DEBUG = 10000000;
-    public static final boolean DEBUG = false;
-
     public CPU(IMonitor m, String cb) {
         super(m, cb);
     }
@@ -44,7 +40,7 @@ public class CPU extends C64Cpu {
     public void init(C64Screen scr) {
         super.init();
         this.setC64Screen(scr);
-        C64Emulation.installROMs();
+        EmulationContext.installROMs();
     }
 
     // Takes the thread and loops!!!
@@ -70,7 +66,7 @@ public class CPU extends C64Cpu {
         // stop completely
         running = false;
         pause = false;
-        C64Emulation.getSid().stop();
+        EmulationContext.getSid().stop();
         notify();
     }
 
@@ -89,7 +85,7 @@ public class CPU extends C64Cpu {
     public void reset() {
         writeByte(1, 0x7);
         super.reset();
-        C64Emulation.getSid().reset();
+        EmulationContext.getSid().reset();
     }
 
     public void runBasic() {
@@ -101,7 +97,7 @@ public class CPU extends C64Cpu {
         running = true;
         setPc(address);
 
-        C64Emulation.getSid().start(getCycles());
+        EmulationContext.getSid().start(getCycles());
 
         loop();
     }

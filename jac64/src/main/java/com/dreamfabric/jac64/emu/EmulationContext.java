@@ -30,8 +30,8 @@ import com.dreamfabric.jac64.emu.sid.SIDIf;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 import com.dreamfabric.jac64.emu.vic.VICIf;
 
-public class C64Emulation {
-    private static Logger LOGGER = LoggerFactory.getLogger(C64Emulation.class);
+public class EmulationContext {
+    private static Logger LOGGER = LoggerFactory.getLogger(EmulationContext.class);
 
     public final static int CPUFrq = 985248;
 
@@ -104,7 +104,7 @@ public class C64Emulation {
     }
 
     public static void setSid(SIDIf sid) {
-        C64Emulation.sid = sid;
+        EmulationContext.sid = sid;
     }
 
     public static CIA1 getCia1() {

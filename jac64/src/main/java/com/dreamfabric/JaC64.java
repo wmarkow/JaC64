@@ -43,7 +43,7 @@ import javax.swing.table.TableModel;
 import com.dreamfabric.c64utils.C64Script;
 import com.dreamfabric.jac64.C64Reader;
 import com.dreamfabric.jac64.DirEntry;
-import com.dreamfabric.jac64.emu.C64Emulation;
+import com.dreamfabric.jac64.emu.EmulationContext;
 import com.dreamfabric.jac64.emu.cpu.CPU;
 import com.dreamfabric.jac64.emu.sid.RESID;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
@@ -103,20 +103,20 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     };
 
     public JaC64() {
-        cpu = C64Emulation.getCpu();
-        scr = C64Emulation.getVic();
-        scr.setCia2(C64Emulation.getCia2());
-        scr.setAddressableBus(C64Emulation.getAddressableBus());
+        cpu = EmulationContext.getCpu();
+        scr = EmulationContext.getVic();
+        scr.setCia2(EmulationContext.getCia2());
+        scr.setAddressableBus(EmulationContext.getAddressableBus());
         cpu.init(scr);
 
         // Reader available after init!
-        scr.init(cpu, C64Emulation.getInterruptManager());
+        scr.init(cpu, EmulationContext.getInterruptManager());
 
         registerHotKey(KeyEvent.VK_BACK_SPACE, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK, "reset()", cpu);
         registerHotKey(KeyEvent.VK_F12, KeyEvent.CTRL_DOWN_MASK, "toggleFullScreen()", this);
 
         reader = new C64Reader(); // scr.getDiskDrive().getReader();
-        reader.setRam(C64Emulation.getRAM());
+        reader.setRam(EmulationContext.getRAM());
 
         C64Win = new JFrame("JaC64 - A Java C64 Emulator");
         C64Win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -395,11 +395,11 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
                     ((RESID) getSid()).setChipVersion(sid);
                 } else {
                     getSid().stop();
-                    RESID newSid = new RESID(C64Emulation.getScheduler());
+                    RESID newSid = new RESID(EmulationContext.getScheduler());
                     newSid.setChipVersion(sid);
-                    newSid.start(C64Emulation.getCpu().getCycles());
+                    newSid.start(EmulationContext.getCpu().getCycles());
 
-                    C64Emulation.setSid(newSid);
+                    EmulationContext.setSid(newSid);
                 }
                 break;
             default:
@@ -408,7 +408,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     }
 
     private SIDIf getSid() {
-        return C64Emulation.getSid();
+        return EmulationContext.getSid();
     }
 
     public static void main(String[] args) {
