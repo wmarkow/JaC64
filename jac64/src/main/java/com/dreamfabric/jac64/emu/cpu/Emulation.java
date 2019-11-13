@@ -37,9 +37,10 @@ public class Emulation extends C64Cpu {
         super(m, cb);
     }
 
-    public void init(C64Screen scr) {
-        super.init();
-        this.setC64Screen(scr);
+    public void init0(C64Screen scr) {
+        getCpu().init();
+
+        getCpu().setC64Screen(scr);
         EmulationContext.installROMs();
     }
 
@@ -82,35 +83,42 @@ public class Emulation extends C64Cpu {
         notify();
     }
 
-    public void reset() {
-        writeByte(1, 0x7);
-        super.reset();
+    public void reset0() {
+        getCpu().writeByte(1, 0x7);
+        getCpu().reset();
         EmulationContext.getSid().reset();
     }
 
-    public void runBasic() {
-        super.runBasic();
+    public void runBasic0() {
+        getCpu().runBasic();
+    }
+
+    public long getCycles0() {
+        return getCpu().getCycles();
     }
 
     private void run(int address) {
-        reset();
+        reset0();
         running = true;
-        setPc(address);
+        getCpu().setPc(address);
 
-        EmulationContext.getSid().start(getCycles());
+        EmulationContext.getSid().start(getCpu().getCycles());
 
         loop();
     }
 
     protected void loop() {
-        monitor.info("Starting CPU at: " + Integer.toHexString(pc));
         try {
             while (running) {
                 // Run one instruction!
-                emulateOp();
+                getCpu().emulateOp();
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
+    }
+
+    public C64Cpu getCpu() {
+        return this;
     }
 }

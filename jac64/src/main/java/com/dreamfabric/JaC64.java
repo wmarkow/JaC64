@@ -107,7 +107,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
         scr = EmulationContext.getVic();
         scr.setCia2(EmulationContext.getCia2());
         scr.setAddressableBus(EmulationContext.getAddressableBus());
-        cpu.init(scr);
+        cpu.init0(scr);
 
         // Reader available after init!
         scr.init(cpu, EmulationContext.getInterruptManager());
@@ -207,9 +207,9 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
             }
             readDisk();
         } else if ("Reset".equals(cmd)) {
-            cpu.reset();
+            cpu.reset0();
         } else if ("Hard Reset".equals(cmd)) {
-            cpu.reset();
+            cpu.reset0();
         } else if ("About JaC64".equals(cmd)) {
             showAbout();
         } else if ("Load File".equals(cmd)) {
@@ -280,7 +280,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
         else if ((name.toLowerCase()).endsWith(".t64"))
             reader.readTapeFromFile(name);
         else if (name.toLowerCase().endsWith(".prg") || name.toLowerCase().endsWith(".p00")) {
-            cpu.reset();
+            cpu.reset0();
             try {
                 Thread.sleep(10);
             } catch (Exception e2) {
@@ -294,7 +294,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
                 }
             }
             reader.readPGM(name, -1);
-            cpu.runBasic();
+            cpu.runBasic0();
             return true;
         }
         return false;
@@ -310,7 +310,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
         else if ((name.toLowerCase()).endsWith(".t64"))
             reader.readTapeFromURL(url);
         else if (name.toLowerCase().endsWith(".prg") || name.toLowerCase().endsWith(".p00")) {
-            cpu.reset();
+            cpu.reset0();
             try {
                 Thread.sleep(10);
             } catch (Exception e2) {
@@ -324,7 +324,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
                 }
             }
             reader.readPGM(url, -1);
-            cpu.runBasic();
+            cpu.runBasic0();
             return true;
         }
         return false;
@@ -397,7 +397,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
                     getSid().stop();
                     RESID newSid = new RESID(EmulationContext.getScheduler());
                     newSid.setChipVersion(sid);
-                    newSid.start(EmulationContext.getCpu().getCycles());
+                    newSid.start(EmulationContext.getCpu().getCycles0());
 
                     EmulationContext.setSid(newSid);
                 }

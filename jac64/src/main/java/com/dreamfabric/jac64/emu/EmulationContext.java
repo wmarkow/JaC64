@@ -39,7 +39,7 @@ public class EmulationContext {
     private static EventQueue scheduler = new EventQueue();
     private static Emulation cpu = new Emulation(monitor, "");
     // One InterruptManager per named CPU. For now just one interrupt manager.
-    private static InterruptManager interruptManager = new InterruptManager(cpu);
+    private static InterruptManager interruptManager = new InterruptManager(cpu.getCpu());
     private static AddressableBus addressableBus = new AddressableBus();
 
     private static PLA pla = new PLA();
