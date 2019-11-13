@@ -57,6 +57,7 @@ public class EmulationContext {
 
     static {
         // prepare IO
+        vic.init(cpu, interruptManager);
         io.setSid(sid);
         io.setVic(vic);
         io.setCia1(cia1);
