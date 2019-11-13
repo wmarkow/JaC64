@@ -12,7 +12,7 @@ import com.dreamfabric.jac64.SELoader;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.cia.CIA2;
-import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.cpu.Emulation;
 import com.dreamfabric.jac64.emu.cpu.M6510Ops;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Ops;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
@@ -37,7 +37,7 @@ public class EmulationContext {
 
     private static Debugger monitor = new Debugger();
     private static EventQueue scheduler = new EventQueue();
-    private static CPU cpu = new CPU(monitor, "");
+    private static Emulation cpu = new Emulation(monitor, "");
     // One InterruptManager per named CPU. For now just one interrupt manager.
     private static InterruptManager interruptManager = new InterruptManager(cpu);
     private static AddressableBus addressableBus = new AddressableBus();
@@ -83,7 +83,7 @@ public class EmulationContext {
         cpu.setAddressableBus(addressableBus);
     }
 
-    public static CPU getCpu() {
+    public static Emulation getCpu() {
         return cpu;
     }
 

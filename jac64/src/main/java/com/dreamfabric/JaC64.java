@@ -44,7 +44,7 @@ import com.dreamfabric.c64utils.C64Script;
 import com.dreamfabric.jac64.C64Reader;
 import com.dreamfabric.jac64.DirEntry;
 import com.dreamfabric.jac64.emu.EmulationContext;
-import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.cpu.Emulation;
 import com.dreamfabric.jac64.emu.sid.RESID;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
@@ -60,7 +60,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     private C64Screen scr;
     private boolean fullscreen = false;
 
-    private CPU cpu;
+    private Emulation cpu;
     private JFrame C64Win;
     private KeyListener c64Canvas;
     private FileDialog fileDialog;

@@ -28,7 +28,7 @@ import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
 import com.dreamfabric.jac64.emu.cia.CIA2;
-import com.dreamfabric.jac64.emu.cpu.CPU;
+import com.dreamfabric.jac64.emu.cpu.Emulation;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 
@@ -323,7 +323,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
         monitor.info("Current CPU cycles: " + cpu.currentCpuCycles);
     }
 
-    public void init(CPU cpu, InterruptManager interruptManager) {
+    public void init(Emulation cpu, InterruptManager interruptManager) {
         this.cpu = cpu;
         this.interruptManager = interruptManager;
 

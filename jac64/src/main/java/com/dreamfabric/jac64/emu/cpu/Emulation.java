@@ -26,14 +26,14 @@ import com.dreamfabric.jac64.emu.vic.C64Screen;
  * @author Joakim Eriksson (joakime@sics.se)
  * @version $Revision:$, $Date:$
  */
-public class CPU extends C64Cpu {
-    private static Logger LOGGER = LoggerFactory.getLogger(CPU.class);
+public class Emulation extends C64Cpu {
+    private static Logger LOGGER = LoggerFactory.getLogger(Emulation.class);
 
     // The state of the program (runs if running = true)
     public boolean running = true;
     public boolean pause = false;
 
-    public CPU(IMonitor m, String cb) {
+    public Emulation(IMonitor m, String cb) {
         super(m, cb);
     }
 
