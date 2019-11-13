@@ -57,6 +57,8 @@ public class EmulationContext {
     static {
         // prepare IO
         vic.init(cpu, interruptManager);
+        vic.setCia2(EmulationContext.getCia2());
+        vic.setAddressableBus(EmulationContext.getAddressableBus());
         io.setSid(sid);
         io.setVic(vic);
         io.setCia1(cia1);
@@ -78,9 +80,13 @@ public class EmulationContext {
         addressableBus.setRAM(ram);
 
         // prepare CPU
+        cpu.init();
+        cpu.setC64Screen(vic);
         cpu.setPla(pla);
         cpu.setScheduler(scheduler);
         cpu.setAddressableBus(addressableBus);
+
+        installROMs();
     }
 
     public static C64Cpu getCpu() {

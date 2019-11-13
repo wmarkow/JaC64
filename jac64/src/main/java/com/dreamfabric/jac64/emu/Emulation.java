@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.emu.cpu.C64Cpu;
-import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 /**
  * CPU "implements" the C64s 6510 processor in java code. reimplemented from old
@@ -31,13 +30,6 @@ public class Emulation {
     // The state of the program (runs if running = true)
     public boolean running = true;
     public boolean pause = false;
-
-    public void init(C64Screen scr) {
-        getCpu().init();
-
-        getCpu().setC64Screen(scr);
-        EmulationContext.installROMs();
-    }
 
     // Takes the thread and loops!!!
     public void start() {

@@ -105,9 +105,6 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     public JaC64() {
         emulation = new Emulation();
         scr = EmulationContext.getVic();
-        scr.setCia2(EmulationContext.getCia2());
-        scr.setAddressableBus(EmulationContext.getAddressableBus());
-        emulation.init(scr);
 
         registerHotKey(KeyEvent.VK_BACK_SPACE, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK, "reset()", emulation);
         registerHotKey(KeyEvent.VK_F12, KeyEvent.CTRL_DOWN_MASK, "toggleFullScreen()", this);
