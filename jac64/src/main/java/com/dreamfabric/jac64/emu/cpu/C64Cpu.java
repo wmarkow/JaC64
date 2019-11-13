@@ -44,6 +44,8 @@ public class C64Cpu extends MOS6510Core {
     public void reset() {
         chips.reset();
         scheduler.empty();
+        // this will ensure the correct PLA state
+        writeByte(1, 0x7);
     }
 
     public void runBasic() {

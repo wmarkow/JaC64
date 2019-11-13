@@ -79,7 +79,6 @@ public class Emulation {
     }
 
     public void reset() {
-        getCpu().writeByte(1, 0x7);
         getCpu().reset();
         EmulationContext.getSid().reset();
     }
