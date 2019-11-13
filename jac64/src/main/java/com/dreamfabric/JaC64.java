@@ -209,7 +209,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
         } else if ("Reset".equals(cmd)) {
             cpu.reset();
         } else if ("Hard Reset".equals(cmd)) {
-            cpu.hardReset();
+            cpu.reset();
         } else if ("About JaC64".equals(cmd)) {
             showAbout();
         } else if ("Load File".equals(cmd)) {

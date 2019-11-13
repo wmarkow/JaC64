@@ -30,10 +30,6 @@ import com.dreamfabric.jac64.emu.vic.C64Screen;
 public class CPU extends C64Cpu {
     private static Logger LOGGER = LoggerFactory.getLogger(CPU.class);
 
-    public static final int CH_PROTECT = 1;
-    public static final int CH_MONITOR_WRITE = 2;
-    public static final int CH_MONITOR_READ = 4;
-
     // The state of the program (runs if running = true)
     public boolean running = true;
     public boolean pause = false;
@@ -49,20 +45,6 @@ public class CPU extends C64Cpu {
         super.init();
         this.setC64Screen(scr);
         C64Emulation.installROMs();
-    }
-
-    public void runBasic() {
-        super.runBasic();
-    }
-
-    public void run(int address) {
-        reset();
-        running = true;
-        setPC(address);
-
-        C64Emulation.getSid().start(getCycles());
-
-        loop();
     }
 
     // Takes the thread and loops!!!
@@ -84,6 +66,14 @@ public class CPU extends C64Cpu {
         }
     }
 
+    public synchronized void stop() {
+        // stop completely
+        running = false;
+        pause = false;
+        C64Emulation.getSid().stop();
+        notify();
+    }
+
     // Should pause the application!
     public synchronized void setPause(boolean p) {
         if (p) {
@@ -96,23 +86,24 @@ public class CPU extends C64Cpu {
         notify();
     }
 
-    public synchronized void stop() {
-        // stop completely
-        running = false;
-        pause = false;
-        C64Emulation.getSid().stop();
-        notify();
-    }
-
     public void reset() {
         writeByte(1, 0x7);
         super.reset();
         C64Emulation.getSid().reset();
     }
 
-    public void setPC(int startAdress) {
-        // The processor flags
-        pc = startAdress;
+    public void runBasic() {
+        super.runBasic();
+    }
+
+    private void run(int address) {
+        reset();
+        running = true;
+        setPc(address);
+
+        C64Emulation.getSid().start(getCycles());
+
+        loop();
     }
 
     /**
@@ -122,7 +113,7 @@ public class CPU extends C64Cpu {
      *            an <code>int</code> value that represent the starting address of
      *            the emulator
      */
-    public void loop() {
+    protected void loop() {
         long next_print = currentCpuCycles + CYCLES_PER_DEBUG;
         // How much should this be???
         monitor.info("Starting CPU at: " + Integer.toHexString(pc));
@@ -186,9 +177,5 @@ public class CPU extends C64Cpu {
             // monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(),
             // interruptInExec, lastInterrupt);
         }
-    }
-
-    public void hardReset() {
-        reset();
     }
 }

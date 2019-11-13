@@ -882,6 +882,10 @@ public abstract class MOS6510Core extends MOS6510Ops {
         return pc;
     }
 
+    public void setPc(int pc) {
+        this.pc = pc;
+    }
+
     public int getY() {
         return y;
     }
