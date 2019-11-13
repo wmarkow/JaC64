@@ -106,76 +106,15 @@ public class CPU extends C64Cpu {
         loop();
     }
 
-    /**
-     * The main emulation <code>loop</code>.
-     *
-     * @param startAdress
-     *            an <code>int</code> value that represent the starting address of
-     *            the emulator
-     */
     protected void loop() {
-        long next_print = currentCpuCycles + CYCLES_PER_DEBUG;
-        // How much should this be???
         monitor.info("Starting CPU at: " + Integer.toHexString(pc));
         try {
-            SlowDownCalculator slowDownCalculator = new SlowDownCalculator(C64Emulation.CPUFrq);
-
             while (running) {
-                slowDownCalculator.markLoopStart(System.nanoTime(), currentCpuCycles);
-
-                // Debugging?
-                if (monitor.isEnabled()) { // || interruptInExec > 0) {
-                    if (baLowUntil <= currentCpuCycles) {
-                        // TODO: wmarkow fix disassemble
-                        // monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(),
-                        // interruptInExec,
-                        // lastInterrupt);
-                    }
-                }
-
                 // Run one instruction!
                 emulateOp();
-
-                nr_ins++;
-                if (next_print < currentCpuCycles) {
-                    long sec = System.currentTimeMillis() - lastMillis;
-                    int level = monitor.getLevel();
-
-                    if (DEBUG && level > 1) {
-                        monitor.info("--------------------------");
-                        monitor.info("Nr ins:" + nr_ins + " sec:" + (sec) + " -> " + ((nr_ins * 1000) / sec) + " ins/s"
-                                + "  " + " clk: " + currentCpuCycles + " clk/s: " + ((CYCLES_PER_DEBUG * 1000) / sec)
-                                + "\n" + ((nr_irq * 1000) / sec));
-                        // TODO: wmarkow fix disassemble
-                        // if (level > 2)
-                        // monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(),
-                        // interruptInExec,
-                        // lastInterrupt);
-                        monitor.info("--------------------------");
-                    }
-                    nr_irq = 0;
-                    nr_ins = 0;
-                    lastMillis = System.currentTimeMillis();
-                    next_print = currentCpuCycles + CYCLES_PER_DEBUG;
-                }
-
-                // long delay = slowDownCalculator.calculateWaitInNanos(System.nanoTime(),
-                // currentCpuCycles);
-                // if (delay == 0) {
-                // continue;
-                // }
-                //
-                // long sleepUntilNanos = System.nanoTime() + delay;
-                // while (System.nanoTime() <= sleepUntilNanos) {
-                // // just empty loop to slow down the simulation
-                // }
             }
         } catch (Exception e) {
-            monitor.error("Exception in loop " + pc + " : " + e);
             LOGGER.error(e.getMessage(), e);
-            // TODO: wmarkow fix disassemble
-            // monitor.disAssemble(getMemory(), 0, acc, x, y, (byte) getStatusByte(),
-            // interruptInExec, lastInterrupt);
         }
     }
 }

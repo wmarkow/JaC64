@@ -114,8 +114,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
     protected long lastMillis = 0;
 
     // Some temporary and other variables...
-    protected long nr_ins = 0;
-    protected long nr_irq = 0;
     protected long start = System.currentTimeMillis();
     protected int pc;
     protected int interruptInExec = 0;
