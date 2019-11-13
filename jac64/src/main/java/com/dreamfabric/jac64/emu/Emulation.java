@@ -10,12 +10,12 @@
  * @(#)cpu.java	Created date: 99-5-17
  *
  */
-package com.dreamfabric.jac64.emu.cpu;
+package com.dreamfabric.jac64.emu;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dreamfabric.jac64.emu.EmulationContext;
+import com.dreamfabric.jac64.emu.cpu.C64Cpu;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 /**
