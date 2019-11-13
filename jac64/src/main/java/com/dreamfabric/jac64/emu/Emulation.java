@@ -30,6 +30,11 @@ public class Emulation {
     // The state of the program (runs if running = true)
     public boolean running = true;
     public boolean pause = false;
+    EmulationContext emulationContext;
+
+    public Emulation(EmulationContext emulationContext) {
+        this.emulationContext = emulationContext;
+    }
 
     // Takes the thread and loops!!!
     public void start() {
@@ -54,7 +59,7 @@ public class Emulation {
         // stop completely
         running = false;
         pause = false;
-        EmulationContext.getSid().stop();
+        emulationContext.getSid().stop();
         notify();
     }
 
@@ -72,7 +77,7 @@ public class Emulation {
 
     public void reset() {
         getCpu().reset();
-        EmulationContext.getSid().reset();
+        emulationContext.getSid().reset();
     }
 
     public void runBasic() {
@@ -84,7 +89,7 @@ public class Emulation {
         running = true;
         getCpu().setPc(address);
 
-        EmulationContext.getSid().start(getCpu().getCycles());
+        emulationContext.getSid().start(getCpu().getCycles());
 
         loop();
     }
@@ -101,6 +106,6 @@ public class Emulation {
     }
 
     public C64Cpu getCpu() {
-        return EmulationContext.getCpu();
+        return emulationContext.getCpu();
     }
 }

@@ -60,6 +60,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     private C64Screen scr;
     private boolean fullscreen = false;
 
+    private EmulationContext emulationContext;
     private Emulation emulation;
     private JFrame C64Win;
     private KeyListener c64Canvas;
@@ -103,14 +104,15 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     };
 
     public JaC64() {
-        emulation = new Emulation();
-        scr = EmulationContext.getVic();
+        emulationContext = new EmulationContext();
+        emulation = new Emulation(emulationContext);
+        scr = emulationContext.getVic();
 
         registerHotKey(KeyEvent.VK_BACK_SPACE, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK, "reset()", emulation);
         registerHotKey(KeyEvent.VK_F12, KeyEvent.CTRL_DOWN_MASK, "toggleFullScreen()", this);
 
         reader = new C64Reader(); // scr.getDiskDrive().getReader();
-        reader.setRam(EmulationContext.getRAM());
+        reader.setRam(emulationContext.getRAM());
 
         C64Win = new JFrame("JaC64 - A Java C64 Emulator");
         C64Win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -389,11 +391,11 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
                     ((RESID) getSid()).setChipVersion(sid);
                 } else {
                     getSid().stop();
-                    RESID newSid = new RESID(EmulationContext.getScheduler());
+                    RESID newSid = new RESID(emulationContext.getScheduler());
                     newSid.setChipVersion(sid);
-                    newSid.start(EmulationContext.getCpu().getCycles());
+                    newSid.start(emulationContext.getCpu().getCycles());
 
-                    EmulationContext.setSid(newSid);
+                    emulationContext.setSid(newSid);
                 }
                 break;
             default:
@@ -402,7 +404,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     }
 
     private SIDIf getSid() {
-        return EmulationContext.getSid();
+        return emulationContext.getSid();
     }
 
     public static void main(String[] args) {

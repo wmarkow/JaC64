@@ -27,6 +27,7 @@ import com.dreamfabric.jac64.C64Canvas;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
+import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.cia.CIA2;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
@@ -322,7 +323,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
         monitor.info("Current CPU cycles: " + cpu.currentCpuCycles);
     }
 
-    public void init(MOS6510Core cpu, InterruptManager interruptManager) {
+    public void init(MOS6510Core cpu, InterruptManager interruptManager, CIA1 cia1) {
         this.cpu = cpu;
         this.interruptManager = interruptManager;
 
@@ -331,7 +332,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
             sprites[i].spriteNo = i;
         }
 
-        canvas = new C64Canvas(this, DOUBLE);
+        canvas = new C64Canvas(this, DOUBLE, cia1);
         canvas.addMouseMotionListener(this);
 
         for (int i = 0; i < SC_WIDTH * SC_HEIGHT; i++) {

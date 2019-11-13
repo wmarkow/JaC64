@@ -34,31 +34,31 @@ public class EmulationContext {
 
     public final static int CPUFrq = 985248;
 
-    private static Debugger monitor = new Debugger();
-    private static EventQueue scheduler = new EventQueue();
-    private static C64Cpu cpu = new C64Cpu(monitor, "");
+    private Debugger monitor = new Debugger();
+    private EventQueue scheduler = new EventQueue();
+    private C64Cpu cpu = new C64Cpu(monitor, "");
     // One InterruptManager per named CPU. For now just one interrupt manager.
-    private static InterruptManager interruptManager = new InterruptManager(cpu);
-    private static AddressableBus addressableBus = new AddressableBus();
+    private InterruptManager interruptManager = new InterruptManager(cpu);
+    private AddressableBus addressableBus = new AddressableBus();
 
-    private static PLA pla = new PLA();
-    private static IO io = new IO();
-    private static SIDIf sid = new RESID(scheduler);
-    private static C64Screen vic = new C64Screen(monitor, true);
-    private static CIA1 cia1 = new CIA1(scheduler, interruptManager);
-    private static CIA2 cia2 = new CIA2(scheduler, interruptManager);
+    private PLA pla = new PLA();
+    private IO io = new IO();
+    private SIDIf sid = new RESID(scheduler);
+    private C64Screen vic = new C64Screen(monitor, true);
+    private CIA1 cia1 = new CIA1(scheduler, interruptManager);
+    private CIA2 cia2 = new CIA2(scheduler, interruptManager);
 
-    private static BasicROM basicROM = new BasicROM();
-    private static KernalROM kernalROM = new KernalROM();
-    private static CharROM charROM = new CharROM();
-    private static RAM ram = new RAM();
-    private static ColorRAM colorRAM = new ColorRAM();
+    private BasicROM basicROM = new BasicROM();
+    private KernalROM kernalROM = new KernalROM();
+    private CharROM charROM = new CharROM();
+    private RAM ram = new RAM();
+    private ColorRAM colorRAM = new ColorRAM();
 
-    static {
+    public EmulationContext() {
         // prepare IO
-        vic.init(cpu, interruptManager);
-        vic.setCia2(EmulationContext.getCia2());
-        vic.setAddressableBus(EmulationContext.getAddressableBus());
+        vic.init(cpu, interruptManager, cia1);
+        vic.setCia2(cia2);
+        vic.setAddressableBus(addressableBus);
         io.setSid(sid);
         io.setVic(vic);
         io.setCia1(cia1);
@@ -89,62 +89,62 @@ public class EmulationContext {
         installROMs();
     }
 
-    public static C64Cpu getCpu() {
+    public C64Cpu getCpu() {
         return cpu;
     }
 
-    public static InterruptManager getInterruptManager() {
+    public InterruptManager getInterruptManager() {
         return interruptManager;
     }
 
-    public static PLA getPla() {
+    public PLA getPla() {
         return pla;
     }
 
-    public static AddressableBus getAddressableBus() {
+    public AddressableBus getAddressableBus() {
         return addressableBus;
     }
 
-    public static SIDIf getSid() {
+    public SIDIf getSid() {
         return sid;
     }
 
-    public static void setSid(SIDIf sid) {
-        EmulationContext.sid = sid;
+    public void setSid(SIDIf sid) {
+        this.sid = sid;
     }
 
-    public static CIA1 getCia1() {
+    public CIA1 getCia1() {
         return cia1;
     }
 
-    public static CIA2 getCia2() {
+    public CIA2 getCia2() {
         return cia2;
     }
 
-    public static RAM getRAM() {
+    public RAM getRAM() {
         return ram;
     }
 
-    public static C64Screen getVic() {
+    public C64Screen getVic() {
         return vic;
     }
 
-    public static Debugger getMonitor() {
+    public Debugger getMonitor() {
         return monitor;
     }
 
-    public static EventQueue getScheduler() {
+    public EventQueue getScheduler() {
         return scheduler;
     }
 
-    public static void installROMs() {
+    public void installROMs() {
         loadROM("/roms/kernal.c64", kernalROM, 0x2000);
         patchKernalROM();
         loadROM("/roms/basic.c64", basicROM, 0x2000);
         loadROM("/roms/chargen.c64", charROM, 0x1000);
     }
 
-    private static void loadROM(String resource, ROM rom, int len) {
+    private void loadROM(String resource, ROM rom, int len) {
         try {
             SELoader loader = new SELoader();
             InputStream ins = loader.getResourceStream(resource);
@@ -183,7 +183,7 @@ public class EmulationContext {
         }
     }
 
-    private static void patchKernalROM() {
+    private void patchKernalROM() {
         int address = 0xf49e;
         kernalROM.load(address++, M6510Ops.JSR);
         kernalROM.load(address++, 0xd2);
