@@ -15,7 +15,6 @@ package com.dreamfabric.jac64.emu.cpu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.emu.EmulationContext;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 
@@ -26,16 +25,12 @@ import com.dreamfabric.jac64.emu.vic.C64Screen;
  * @author Joakim Eriksson (joakime@sics.se)
  * @version $Revision:$, $Date:$
  */
-public class Emulation extends C64Cpu {
+public class Emulation {
     private static Logger LOGGER = LoggerFactory.getLogger(Emulation.class);
 
     // The state of the program (runs if running = true)
     public boolean running = true;
     public boolean pause = false;
-
-    public Emulation(IMonitor m, String cb) {
-        super(m, cb);
-    }
 
     public void init0(C64Screen scr) {
         getCpu().init();
@@ -119,6 +114,6 @@ public class Emulation extends C64Cpu {
     }
 
     public C64Cpu getCpu() {
-        return this;
+        return EmulationContext.getCpu();
     }
 }

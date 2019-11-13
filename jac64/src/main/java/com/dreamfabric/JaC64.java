@@ -103,7 +103,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     };
 
     public JaC64() {
-        cpu = EmulationContext.getCpu();
+        cpu = new Emulation();
         scr = EmulationContext.getVic();
         scr.setCia2(EmulationContext.getCia2());
         scr.setAddressableBus(EmulationContext.getAddressableBus());
@@ -394,7 +394,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
                     getSid().stop();
                     RESID newSid = new RESID(EmulationContext.getScheduler());
                     newSid.setChipVersion(sid);
-                    newSid.start(EmulationContext.getCpu().getCycles0());
+                    newSid.start(EmulationContext.getCpu().getCycles());
 
                     EmulationContext.setSid(newSid);
                 }

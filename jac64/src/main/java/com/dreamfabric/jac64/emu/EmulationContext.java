@@ -12,7 +12,7 @@ import com.dreamfabric.jac64.SELoader;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.cia.CIA2;
-import com.dreamfabric.jac64.emu.cpu.Emulation;
+import com.dreamfabric.jac64.emu.cpu.C64Cpu;
 import com.dreamfabric.jac64.emu.cpu.M6510Ops;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Ops;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
@@ -28,7 +28,6 @@ import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 import com.dreamfabric.jac64.emu.sid.RESID;
 import com.dreamfabric.jac64.emu.sid.SIDIf;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
-import com.dreamfabric.jac64.emu.vic.VICIf;
 
 public class EmulationContext {
     private static Logger LOGGER = LoggerFactory.getLogger(EmulationContext.class);
@@ -37,9 +36,9 @@ public class EmulationContext {
 
     private static Debugger monitor = new Debugger();
     private static EventQueue scheduler = new EventQueue();
-    private static Emulation cpu = new Emulation(monitor, "");
+    private static C64Cpu cpu = new C64Cpu(monitor, "");
     // One InterruptManager per named CPU. For now just one interrupt manager.
-    private static InterruptManager interruptManager = new InterruptManager(cpu.getCpu());
+    private static InterruptManager interruptManager = new InterruptManager(cpu);
     private static AddressableBus addressableBus = new AddressableBus();
 
     private static PLA pla = new PLA();
@@ -84,7 +83,7 @@ public class EmulationContext {
         cpu.setAddressableBus(addressableBus);
     }
 
-    public static Emulation getCpu() {
+    public static C64Cpu getCpu() {
         return cpu;
     }
 
