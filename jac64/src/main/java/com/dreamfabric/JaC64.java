@@ -60,7 +60,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     private C64Screen scr;
     private boolean fullscreen = false;
 
-    private Emulation cpu;
+    private Emulation emulation;
     private JFrame C64Win;
     private KeyListener c64Canvas;
     private FileDialog fileDialog;
@@ -103,13 +103,13 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
     };
 
     public JaC64() {
-        cpu = new Emulation();
+        emulation = new Emulation();
         scr = EmulationContext.getVic();
         scr.setCia2(EmulationContext.getCia2());
         scr.setAddressableBus(EmulationContext.getAddressableBus());
-        cpu.init0(scr);
+        emulation.init(scr);
 
-        registerHotKey(KeyEvent.VK_BACK_SPACE, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK, "reset()", cpu);
+        registerHotKey(KeyEvent.VK_BACK_SPACE, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK, "reset()", emulation);
         registerHotKey(KeyEvent.VK_F12, KeyEvent.CTRL_DOWN_MASK, "toggleFullScreen()", this);
 
         reader = new C64Reader(); // scr.getDiskDrive().getReader();
@@ -204,9 +204,9 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
             }
             readDisk();
         } else if ("Reset".equals(cmd)) {
-            cpu.reset0();
+            emulation.reset();
         } else if ("Hard Reset".equals(cmd)) {
-            cpu.reset0();
+            emulation.reset();
         } else if ("About JaC64".equals(cmd)) {
             showAbout();
         } else if ("Load File".equals(cmd)) {
@@ -277,7 +277,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
         else if ((name.toLowerCase()).endsWith(".t64"))
             reader.readTapeFromFile(name);
         else if (name.toLowerCase().endsWith(".prg") || name.toLowerCase().endsWith(".p00")) {
-            cpu.reset0();
+            emulation.reset();
             try {
                 Thread.sleep(10);
             } catch (Exception e2) {
@@ -291,7 +291,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
                 }
             }
             reader.readPGM(name, -1);
-            cpu.runBasic0();
+            emulation.runBasic();
             return true;
         }
         return false;
@@ -307,7 +307,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
         else if ((name.toLowerCase()).endsWith(".t64"))
             reader.readTapeFromURL(url);
         else if (name.toLowerCase().endsWith(".prg") || name.toLowerCase().endsWith(".p00")) {
-            cpu.reset0();
+            emulation.reset();
             try {
                 Thread.sleep(10);
             } catch (Exception e2) {
@@ -321,7 +321,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
                 }
             }
             reader.readPGM(url, -1);
-            cpu.runBasic0();
+            emulation.runBasic();
             return true;
         }
         return false;
@@ -426,6 +426,6 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
             emu.autoStart(autostart);
         }
 
-        emu.cpu.start();
+        emu.emulation.start();
     }
 }

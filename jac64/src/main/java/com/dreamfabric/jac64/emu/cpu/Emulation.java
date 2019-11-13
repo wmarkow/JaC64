@@ -32,7 +32,7 @@ public class Emulation {
     public boolean running = true;
     public boolean pause = false;
 
-    public void init0(C64Screen scr) {
+    public void init(C64Screen scr) {
         getCpu().init();
 
         getCpu().setC64Screen(scr);
@@ -78,22 +78,18 @@ public class Emulation {
         notify();
     }
 
-    public void reset0() {
+    public void reset() {
         getCpu().writeByte(1, 0x7);
         getCpu().reset();
         EmulationContext.getSid().reset();
     }
 
-    public void runBasic0() {
+    public void runBasic() {
         getCpu().runBasic();
     }
 
-    public long getCycles0() {
-        return getCpu().getCycles();
-    }
-
     private void run(int address) {
-        reset0();
+        reset();
         running = true;
         getCpu().setPc(address);
 
