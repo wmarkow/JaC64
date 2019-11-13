@@ -812,7 +812,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
         }
     }
 
-    public void unknownInstruction(int pc, int op) {
+    protected void unknownInstruction(int pc, int op) {
         System.out.println("Unknown instruction: " + op);
     }
 
