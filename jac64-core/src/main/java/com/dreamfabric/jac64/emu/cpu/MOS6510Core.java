@@ -31,8 +31,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
     public static final int NMI_INT = 1;
     public static final int IRQ_INT = 2;
 
-    public String codebase;
-
     // -------------------------------------------------------------------
     // Interrup signals
     // -------------------------------------------------------------------
@@ -41,7 +39,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
     public boolean NMILastLow = false;
     private boolean IRQLow = false;
     public int lastInterrupt = 0;
-    public boolean busAvailable = true;
     public long baLowUntil = 0;
 
     // The processor flags
@@ -62,18 +59,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
     protected long nmiCycleStart = 0;
     protected long irqCycleStart = 0;
 
-    private String[] debugInfo;
-
-    public MOS6510Core(String cb) {
-        codebase = cb;
-    }
-
     public abstract String getName();
-
-    public void jump(int pc) {
-        jumpTo = pc;
-        checkInterrupt = true;
-    }
 
     public long getCycles() {
         return currentCpuCycles;
@@ -105,10 +91,8 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     protected int jumpTo = -1;
     public long currentCpuCycles = 0;
-    protected long lastMillis = 0;
 
     // Some temporary and other variables...
-    protected long start = System.currentTimeMillis();
     protected int pc;
     protected int interruptInExec = 0;
 
@@ -805,7 +789,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
     }
 
     protected void unknownInstruction(int pc, int op) {
-        System.out.println("Unknown instruction: " + op);
+        LOGGER.error("Unknown instruction: " + op);
     }
 
     public void init() {
@@ -848,19 +832,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
         checkInterrupt = true;
     }
 
-    public void setDebug(int adr, String msg) {
-        if (debugInfo == null) {
-            debugInfo = new String[0x10000];
-        }
-        debugInfo[adr & 0xffff] = msg;
-    }
-
-    public String getDebug(int adr) {
-        if (debugInfo != null)
-            return debugInfo[adr & 0xffff];
-        return null;
-    }
-
     public boolean getIRQLow() {
         return IRQLow;
     }
@@ -871,10 +842,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     public void setPc(int pc) {
         this.pc = pc;
-    }
-
-    public int getY() {
-        return y;
     }
 
     public int getInterruptInExec() {

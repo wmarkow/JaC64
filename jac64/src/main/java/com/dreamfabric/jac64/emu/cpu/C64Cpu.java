@@ -17,10 +17,6 @@ public class C64Cpu extends MOS6510Core {
     private C64Screen c64screen = null;
     private EventQueue scheduler;
 
-    public C64Cpu(String cb) {
-        super(cb);
-    }
-
     public void setPla(PLA pla) {
         this.pla = pla;
     }
