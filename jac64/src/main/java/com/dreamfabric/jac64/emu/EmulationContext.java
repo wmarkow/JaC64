@@ -36,7 +36,7 @@ public class EmulationContext {
 
     private Debugger monitor = new Debugger();
     private EventQueue scheduler = new EventQueue();
-    private C64Cpu cpu = new C64Cpu(monitor, "");
+    private C64Cpu cpu = new C64Cpu("");
     // One InterruptManager per named CPU. For now just one interrupt manager.
     private InterruptManager interruptManager = new InterruptManager(cpu);
     private AddressableBus addressableBus = new AddressableBus();

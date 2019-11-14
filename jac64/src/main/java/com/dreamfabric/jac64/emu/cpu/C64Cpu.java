@@ -1,6 +1,8 @@
 package com.dreamfabric.jac64.emu.cpu;
 
-import com.dreamfabric.jac64.IMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
@@ -8,16 +10,15 @@ import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 public class C64Cpu extends MOS6510Core {
-
-    private static final boolean DEBUG_EVENT = false;
+    private static Logger LOGGER = LoggerFactory.getLogger(C64Cpu.class);
 
     private PLA pla;
     private AddressableBus addressableBus;
     private C64Screen c64screen = null;
     private EventQueue scheduler;
 
-    public C64Cpu(IMonitor m, String cb) {
-        super(m, cb);
+    public C64Cpu(String cb) {
+        super(cb);
     }
 
     public void setPla(PLA pla) {
@@ -103,20 +104,20 @@ public class C64Cpu extends MOS6510Core {
                 break;
             case LOAD_FILE:
                 if (acc == 0)
-                    monitor.info(
+                    LOGGER.info(
                             "**** LOAD FILE! ***** PC = " + Integer.toString(pc, 16) + " => wmarkow unknown rindex");
                 else
-                    monitor.info("**** VERIFY!    ***** PC = " + pc + " => wmarkow unknown rindex");
+                    LOGGER.info("**** VERIFY!    ***** PC = " + pc + " => wmarkow unknown rindex");
                 int len;
                 int mptr = getMemory(0xbb) + (getMemory(0xbc) << 8);
-                monitor.info("Filename len:" + (len = getMemory(0xb7)));
+                LOGGER.info("Filename len:" + (len = getMemory(0xb7)));
                 String name = "";
                 for (int i = 0; i < len; i++)
                     name += (char) getMemory(mptr++);
                 name += '\n';
                 int sec = getMemory(0xb9);
-                monitor.info("name = " + name);
-                monitor.info("Sec Address: " + sec);
+                LOGGER.info("name = " + name);
+                LOGGER.info("Sec Address: " + sec);
 
                 pc--;
                 break;
@@ -128,14 +129,11 @@ public class C64Cpu extends MOS6510Core {
         while (currentCpuCycles >= scheduler.nextTime) {
             TimeEvent t = scheduler.popFirst();
             if (t != null) {
-                if (DEBUG_EVENT) {
-                    System.out.println("Executing event: " + t.getShort());
-                }
+                LOGGER.debug("Executing event: " + t.getShort());
                 // Give it the actual time also!!!
                 t.execute(currentCpuCycles);
             } else {
-                if (DEBUG_EVENT)
-                    System.out.println("Nothign to execute...");
+                LOGGER.debug("Nothign to execute...");
                 return;
             }
         }

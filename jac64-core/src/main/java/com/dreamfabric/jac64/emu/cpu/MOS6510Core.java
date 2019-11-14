@@ -13,8 +13,6 @@ package com.dreamfabric.jac64.emu.cpu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dreamfabric.jac64.IMonitor;
-
 /**
  * MOS6510Core "implements" the 6510 processor in java code. Other classes are
  * intended to implement the specific write/read from memory for correct
@@ -27,15 +25,12 @@ import com.dreamfabric.jac64.IMonitor;
 public abstract class MOS6510Core extends MOS6510Ops {
     private static Logger LOGGER = LoggerFactory.getLogger(MOS6510Core.class);
 
-    protected boolean debug = false;
-
     public static final int NMI_DELAY = 2;
     public static final int IRQ_DELAY = 2;
 
     public static final int NMI_INT = 1;
     public static final int IRQ_INT = 2;
 
-    protected IMonitor monitor;
     public String codebase;
 
     // -------------------------------------------------------------------
@@ -69,8 +64,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     private String[] debugInfo;
 
-    public MOS6510Core(IMonitor m, String cb) {
-        monitor = m;
+    public MOS6510Core(String cb) {
         codebase = cb;
     }
 
@@ -252,7 +246,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
         if (checkInterrupt) {
             // Trigger on negative edge!
             if ((NMILow && !NMILastLow) && (currentCpuCycles >= nmiCycleStart)) {
-                log("NMI interrupt at " + currentCpuCycles);
+                LOGGER.debug("NMI interrupt at " + currentCpuCycles);
                 lastInterrupt = NMI_INT;
                 doInterrupt(0xfffa, getStatusByte() & 0xef);
                 disableInterupt = true;
@@ -264,7 +258,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 return;
             } else if ((IRQLow && currentCpuCycles >= irqCycleStart) || brk) {
                 if (!disableInterupt) {
-                    log("IRQ interrupt > " + IRQLow + " BRK: " + brk);
+                    LOGGER.debug("IRQ interrupt > " + IRQLow + " BRK: " + brk);
                     lastInterrupt = IRQ_INT;
                     // checkInterrupt = false; //does not make sense to leave more
                     int status = getStatusByte();
@@ -557,7 +551,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 break;
 
             case TRP:
-                monitor.info("TRAP Instruction executed");
+                LOGGER.info("TRAP Instruction executed");
                 break;
             case NOP:
                 break;
@@ -833,12 +827,12 @@ public abstract class MOS6510Core extends MOS6510Ops {
         NMILow = false;
         NMILastLow = false;
         IRQLow = false;
-        log("Set IRQLOW to false...");
+        LOGGER.debug("Set IRQLOW to false...");
         resetFlag = false;
 
         pc = fetchByte(0xfffc) + (fetchByte(0xfffd) << 8);
 
-        log("Reset to: " + pc);
+        LOGGER.debug("Reset to: " + pc);
     }
 
     // Reset the MOS6510Core!!!
@@ -849,7 +843,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
         NMILow = false;
         brk = false;
         IRQLow = false;
-        log("Set IRQLOW to false...");
+        LOGGER.debug("Set IRQLOW to false...");
         resetFlag = true;
         checkInterrupt = true;
     }
@@ -865,11 +859,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
         if (debugInfo != null)
             return debugInfo[adr & 0xffff];
         return null;
-    }
-
-    public void log(String s) {
-        if (debug)
-            monitor.info(getName() + " : " + s);
     }
 
     public boolean getIRQLow() {
@@ -890,9 +879,5 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     public int getInterruptInExec() {
         return interruptInExec;
-    }
-
-    public boolean isDebug() {
-        return debug;
     }
 }

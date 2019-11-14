@@ -1,9 +1,12 @@
 package com.dreamfabric.jac64.emu.interrupt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
 
 public class InterruptManager {
-    public static final boolean DEBUG_INTERRUPS = false;
+    private static Logger LOGGER = LoggerFactory.getLogger(InterruptManager.class);
 
     // C64 specific names - but... basically just numbers
     public static final int VIC_IRQ = 1;
@@ -28,15 +31,15 @@ public class InterruptManager {
         oldNmiFlags = 0;
         cpu.setIRQLow(false);
         cpu.setNMILow(false);
-        cpu.log("ExtChip: Resetting IRQ flags!");
+        LOGGER.info("ExtChip: Resetting IRQ flags!");
     }
 
     public boolean setIRQ(int irq) {
         boolean val = (irqFlags & irq) == 0;
         irqFlags |= irq;
         if (irqFlags != oldIrqFlags) {
-            if (DEBUG_INTERRUPS && irqFlags != 0 && cpu.isDebug()) {
-                cpu.log("ExtChips: Setting IRQ! " + irq + " => " + irqFlags + " at " + cpu.currentCpuCycles);
+            if (irqFlags != 0) {
+                LOGGER.debug("ExtChips: Setting IRQ! " + irq + " => " + irqFlags + " at " + cpu.currentCpuCycles);
             }
             cpu.setIRQLow(irqFlags != 0);
             oldIrqFlags = irqFlags;
@@ -47,8 +50,8 @@ public class InterruptManager {
     public void clearIRQ(int irq) {
         irqFlags &= ~irq;
         if (irqFlags != oldIrqFlags) {
-            if (DEBUG_INTERRUPS && oldIrqFlags != 0 && cpu.isDebug()) {
-                System.out.println("Clearing IRQ! " + irq + " => " + irqFlags + " at " + cpu.currentCpuCycles);
+            if (oldIrqFlags != 0) {
+                LOGGER.debug("Clearing IRQ! " + irq + " => " + irqFlags + " at " + cpu.currentCpuCycles);
             }
             cpu.setIRQLow(irqFlags != 0);
             oldIrqFlags = irqFlags;
@@ -59,8 +62,7 @@ public class InterruptManager {
         boolean val = (nmiFlags & nmi) == 0;
         nmiFlags |= nmi;
         if (nmiFlags != oldNmiFlags) {
-            if (DEBUG_INTERRUPS && cpu.isDebug())
-                System.out.println("Setting NMI! " + nmi + " => " + nmiFlags + " at " + cpu.currentCpuCycles);
+            LOGGER.info("Setting NMI! " + nmi + " => " + nmiFlags + " at " + cpu.currentCpuCycles);
             cpu.setNMILow(nmiFlags != 0);
             oldNmiFlags = nmiFlags;
         }
@@ -70,8 +72,8 @@ public class InterruptManager {
     public void clearNMI(int nmi) {
         nmiFlags &= ~nmi;
         if (nmiFlags != oldNmiFlags) {
-            if (DEBUG_INTERRUPS && oldNmiFlags != 0 && cpu.isDebug()) {
-                System.out.println("Clearing NMI! " + nmi + " => " + nmiFlags + " at " + cpu.currentCpuCycles);
+            if (oldNmiFlags != 0) {
+                LOGGER.debug("Clearing NMI! " + nmi + " => " + nmiFlags + " at " + cpu.currentCpuCycles);
             }
             cpu.setNMILow(nmiFlags != 0);
             oldNmiFlags = nmiFlags;
