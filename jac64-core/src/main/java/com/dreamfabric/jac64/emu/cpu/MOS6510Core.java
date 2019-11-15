@@ -67,7 +67,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
     private boolean disableInterupt = false;
 
     public void init() {
-        super.init();
+        MOS6510Ops.init0();
     }
 
     public long getCycles() {

@@ -167,7 +167,7 @@ public class MOS6510Ops {
 
     public static final int[] RMW_INS = { ASL, LSR, ROL, ROR, INC, DEC, SLO, SRE, RLA, RRA, ISB, DCP };
 
-    public void init() {
+    public static void init0() {
         for (int i = 0, n = INSTRUCTION_SET.length; i < n; i++) {
             int mode = i & 0x1f;
             int pos = i >> 5;
