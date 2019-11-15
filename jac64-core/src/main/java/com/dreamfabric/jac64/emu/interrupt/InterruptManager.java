@@ -39,7 +39,7 @@ public class InterruptManager {
         irqFlags |= irq;
         if (irqFlags != oldIrqFlags) {
             if (irqFlags != 0) {
-                LOGGER.debug("ExtChips: Setting IRQ! " + irq + " => " + irqFlags + " at " + cpu.currentCpuCycles);
+                LOGGER.debug("ExtChips: Setting IRQ! " + irq + " => " + irqFlags + " at " + cpu.getCycles());
             }
             cpu.setIRQLow(irqFlags != 0);
             oldIrqFlags = irqFlags;
@@ -51,7 +51,7 @@ public class InterruptManager {
         irqFlags &= ~irq;
         if (irqFlags != oldIrqFlags) {
             if (oldIrqFlags != 0) {
-                LOGGER.debug("Clearing IRQ! " + irq + " => " + irqFlags + " at " + cpu.currentCpuCycles);
+                LOGGER.debug("Clearing IRQ! " + irq + " => " + irqFlags + " at " + cpu.getCycles());
             }
             cpu.setIRQLow(irqFlags != 0);
             oldIrqFlags = irqFlags;
@@ -62,7 +62,7 @@ public class InterruptManager {
         boolean val = (nmiFlags & nmi) == 0;
         nmiFlags |= nmi;
         if (nmiFlags != oldNmiFlags) {
-            LOGGER.info("Setting NMI! " + nmi + " => " + nmiFlags + " at " + cpu.currentCpuCycles);
+            LOGGER.info("Setting NMI! " + nmi + " => " + nmiFlags + " at " + cpu.getCycles());
             cpu.setNMILow(nmiFlags != 0);
             oldNmiFlags = nmiFlags;
         }
@@ -73,7 +73,7 @@ public class InterruptManager {
         nmiFlags &= ~nmi;
         if (nmiFlags != oldNmiFlags) {
             if (oldNmiFlags != 0) {
-                LOGGER.debug("Clearing NMI! " + nmi + " => " + nmiFlags + " at " + cpu.currentCpuCycles);
+                LOGGER.debug("Clearing NMI! " + nmi + " => " + nmiFlags + " at " + cpu.getCycles());
             }
             cpu.setNMILow(nmiFlags != 0);
             oldNmiFlags = nmiFlags;

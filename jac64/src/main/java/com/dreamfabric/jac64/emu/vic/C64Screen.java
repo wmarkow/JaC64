@@ -319,8 +319,8 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
         monitor.info("IRQFlags: " + getInterruptManager().getIRQFlags());
         monitor.info("NMIFlags: " + getInterruptManager().getNMIFlags());
         monitor.info("CPU IRQLow: " + cpu.getIRQLow());
-        monitor.info("CPU NMILow: " + cpu.NMILow);
-        monitor.info("Current CPU cycles: " + cpu.currentCpuCycles);
+        monitor.info("CPU NMILow: " + cpu.getNMILow());
+        monitor.info("Current CPU cycles: " + cpu.getCycles());
     }
 
     public void init(MOS6510Core cpu, InterruptManager interruptManager, CIA1 cia1) {
@@ -539,8 +539,8 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                     badLine = (displayEnabled && vbeam >= 0x30 && vbeam <= 0xf7) && (vbeam & 0x7) == vScroll;
                     if (oldBadLine != badLine) {
                         LOGGER.debug("#### BadLC diff@" + vbeam + " => " + badLine + " vScroll: " + vScroll + " vmli: "
-                                + vmli + " vc: " + vc + " rc: " + rc + " cyc line: " + (cpu.currentCpuCycles - lastLine)
-                                + " cyc IRQ: " + (cpu.currentCpuCycles - lastIRQ));
+                                + vmli + " vc: " + vc + " rc: " + rc + " cyc line: " + (cpu.getCycles() - lastLine)
+                                + " cyc IRQ: " + (cpu.getCycles() - lastIRQ));
                     }
                 }
 
@@ -557,7 +557,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 // vbeam + " d011: " + Hex.hex2(data));
 
                 LOGGER.debug("d011 = " + data + " at " + vbeam + " => YScroll = " + (data & 0x7) + " cyc since line: "
-                        + (cpu.currentCpuCycles - lastLine) + " cyc since IRQ: " + (cpu.currentCpuCycles - lastIRQ));
+                        + (cpu.getCycles() - lastLine) + " cyc since IRQ: " + (cpu.getCycles() - lastIRQ));
                 LOGGER.debug("Setting raster position (hi) to: " + (data & 0x80));
 
                 break;
@@ -714,8 +714,8 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     }
 
     private void setVideoMem() {
-        LOGGER.debug("setVideoMem() cycles since line: " + (cpu.currentCpuCycles - lastLine) + " cycles since IRQ: "
-                + (cpu.currentCpuCycles - lastIRQ) + " at " + vbeam);
+        LOGGER.debug("setVideoMem() cycles since line: " + (cpu.getCycles() - lastLine) + " cycles since IRQ: "
+                + (cpu.getCycles() - lastIRQ) + " at " + vbeam);
 
         // Set-up vars for screen rendering
         charSetBaseAddress = ((vicMemoryPointers & 0x0e) << 10);
@@ -829,10 +829,10 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                         irqFlags |= 0x80;
                         irqTriggered = true;
                         getInterruptManager().setIRQ(VIC_IRQ);
-                        lastIRQ = cpu.currentCpuCycles;
+                        lastIRQ = cpu.getCycles();
                         LOGGER.debug(
                                 "Generating IRQ at " + vbeam + " req:" + raster + " IRQs:" + cpu.getInterruptInExec()
-                                        + " flags: " + irqFlags + " delta: " + (cpu.currentCpuCycles - lastLine));
+                                        + " flags: " + irqFlags + " delta: " + (cpu.getCycles() - lastLine));
                     }
                 } else {
                     irqTriggered = false;
@@ -1455,7 +1455,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     public void reset() {
         // Clear a lot of stuff...???
         initUpdate();
-        lastLine = cpu.currentCpuCycles;
+        lastLine = cpu.getCycles();
 
         for (int i = 0; i < mem.length; i++)
             mem[i] = 0;

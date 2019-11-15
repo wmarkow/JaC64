@@ -34,32 +34,38 @@ public abstract class MOS6510Core extends MOS6510Ops {
     // -------------------------------------------------------------------
     // Interrup signals
     // -------------------------------------------------------------------
-    public boolean checkInterrupt = false;
-    public boolean NMILow = false;
-    public boolean NMILastLow = false;
+    private boolean checkInterrupt = false;
+    private boolean NMILow = false;
+    private boolean NMILastLow = false;
     private boolean IRQLow = false;
-    public int lastInterrupt = 0;
     public long baLowUntil = 0;
 
     // The processor flags
-    boolean sign = false;
-    boolean zero = false;
-    protected boolean overflow = false;
-    boolean carry = false;
-    boolean decimal = false;
-    boolean brk = false;
-    boolean resetFlag = false;
+    private boolean sign = false;
+    private boolean zero = false;
+    private boolean overflow = false;
+    private boolean carry = false;
+    private boolean decimal = false;
+    private boolean brk = false;
+    private boolean resetFlag = false;
 
     // registers
-    protected int acc = 0;
-    protected int x = 0;
-    protected int y = 0;
-    protected int s = 0xff; // The stackpointer ??? ff = top?
+    private int acc = 0;
+    private int x = 0;
+    private int y = 0;
+    private int s = 0xff; // The stackpointer ??? ff = top?
 
-    protected long nmiCycleStart = 0;
-    protected long irqCycleStart = 0;
+    private long nmiCycleStart = 0;
+    private long irqCycleStart = 0;
 
-    public abstract String getName();
+    private int jumpTo = -1;
+    protected long currentCpuCycles = 0;
+
+    // Some temporary and other variables...
+    private int pc;
+    private int interruptInExec = 0;
+
+    private boolean disableInterupt = false;
 
     public long getCycles() {
         return currentCpuCycles;
@@ -88,15 +94,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
             // System.out.println("*** NMI Goes hi!");
         }
     }
-
-    protected int jumpTo = -1;
-    public long currentCpuCycles = 0;
-
-    // Some temporary and other variables...
-    protected int pc;
-    protected int interruptInExec = 0;
-
-    protected boolean disableInterupt = false;
 
     public int getSP() {
         return s;
@@ -231,7 +228,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
             // Trigger on negative edge!
             if ((NMILow && !NMILastLow) && (currentCpuCycles >= nmiCycleStart)) {
                 LOGGER.debug("NMI interrupt at " + currentCpuCycles);
-                lastInterrupt = NMI_INT;
                 doInterrupt(0xfffa, getStatusByte() & 0xef);
                 disableInterupt = true;
                 // prevent irq during nmi,RTI will clear by poping status back
@@ -243,7 +239,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
             } else if ((IRQLow && currentCpuCycles >= irqCycleStart) || brk) {
                 if (!disableInterupt) {
                     LOGGER.debug("IRQ interrupt > " + IRQLow + " BRK: " + brk);
-                    lastInterrupt = IRQ_INT;
                     // checkInterrupt = false; //does not make sense to leave more
                     int status = getStatusByte();
                     if (brk) {
@@ -836,6 +831,10 @@ public abstract class MOS6510Core extends MOS6510Ops {
         return IRQLow;
     }
 
+    public boolean getNMILow() {
+        return NMILow;
+    }
+
     public int getPc() {
         return pc;
     }
@@ -846,5 +845,9 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     public int getInterruptInExec() {
         return interruptInExec;
+    }
+
+    protected int getACC() {
+        return acc;
     }
 }

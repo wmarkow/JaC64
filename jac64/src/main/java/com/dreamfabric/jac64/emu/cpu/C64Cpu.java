@@ -33,11 +33,6 @@ public class C64Cpu extends MOS6510Core {
         this.c64screen = c64screen;
     }
 
-    @Override
-    public String getName() {
-        return "C64 CPU";
-    }
-
     public void reset() {
         c64screen.reset();
         scheduler.empty();
@@ -99,7 +94,7 @@ public class C64Cpu extends MOS6510Core {
                 currentCpuCycles += 100;
                 break;
             case LOAD_FILE:
-                if (acc == 0)
+                if (getACC() == 0)
                     LOGGER.info(
                             "**** LOAD FILE! ***** PC = " + Integer.toString(pc, 16) + " => wmarkow unknown rindex");
                 else
