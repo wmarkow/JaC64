@@ -67,8 +67,16 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
     private boolean disableInterupt = false;
 
+    public void init() {
+        super.init();
+    }
+
     public long getCycles() {
         return currentCpuCycles;
+    }
+
+    public boolean getIRQLow() {
+        return IRQLow;
     }
 
     public void setIRQLow(boolean low) {
@@ -78,6 +86,10 @@ public abstract class MOS6510Core extends MOS6510Ops {
             irqCycleStart = currentCpuCycles + IRQ_DELAY;
         }
         IRQLow = low;
+    }
+
+    public boolean getNMILow() {
+        return NMILow;
     }
 
     public void setNMILow(boolean low) {
@@ -95,131 +107,20 @@ public abstract class MOS6510Core extends MOS6510Ops {
         }
     }
 
+    public int getPc() {
+        return pc;
+    }
+
+    public void setPc(int pc) {
+        this.pc = pc;
+    }
+
+    public int getInterruptInExec() {
+        return interruptInExec;
+    }
+
     public int getSP() {
         return s;
-    }
-
-    private final void doInterrupt(int adr, int status) {
-        // System.out.println("Doing Interrupt disableInterrupt before: " +
-        // disableInterupt);
-        fetchByte(pc);
-        fetchByte(pc + 1);
-        push((pc & 0xff00) >> 8); // HI ??
-        push(pc & 0x00ff); // LOW ??
-        push(status);
-        interruptInExec++;
-        pc = (fetchByte(adr + 1) << 8);
-        pc += fetchByte(adr);
-    }
-
-    private final int getStatusByte() {
-        return ((carry ? 0x01 : 0) + (zero ? 0x02 : 0) + (disableInterupt ? 0x04 : 0) + (decimal ? 0x08 : 0)
-                + (brk ? 0x10 : 0) + 0x20 + (overflow ? 0x40 : 0) + (sign ? 0x80 : 0));
-    }
-
-    private final void setStatusByte(int status) {
-        carry = (status & 0x01) != 0;
-        zero = (status & 0x02) != 0;
-        disableInterupt = (status & 0x04) != 0;
-        decimal = (status & 0x08) != 0;
-        brk = (status & 0x10) != 0;
-        overflow = (status & 0x40) != 0;
-        sign = (status & 0x80) != 0;
-    }
-
-    // Memory handling - both methods always add 1 to cycles!!!
-    protected abstract int fetchByte(int adr);
-
-    protected abstract void writeByte(int adr, int data);
-
-    private final void setZS(int data) {
-        zero = data == 0;
-        sign = data > 0x7f;
-    }
-
-    private final void setCarry(int data) {
-        carry = data > 0x7f;
-    }
-
-    // -------------------------------------------------------------------
-    // Old m4 macros as methods... should be replaced some day (with above)
-    // -------------------------------------------------------------------
-    // Stack operations...
-    // can access array directly 's' is filed with one byte
-    private final int pop() {
-        int r = fetchByte((s = (s + 1) & 0xff) | 0x100);
-        return r;
-    }
-
-    // can access array directly 's' is filed with one byte
-    private final void push(int data) {
-        writeByte((s & 0xff) | 0x100, data);
-        s = (s - 1) & 0xff;
-    }
-
-    private final void opADCimp(int data) {
-        int tmp = data + acc + (carry ? 1 : 0);
-        zero = (tmp & 0xff) == 0; // not valid in decimal mode
-
-        if (decimal) {
-            tmp = (acc & 0xf) + (data & 0xf) + (carry ? 1 : 0);
-            if (tmp > 0x9)
-                tmp += 0x6;
-            if (tmp <= 0x0f)
-                tmp = (tmp & 0xf) + (acc & 0xf0) + (data & 0xf0);
-            else
-                tmp = (tmp & 0xf) + (acc & 0xf0) + (data & 0xf0) + 0x10;
-
-            overflow = (((acc ^ data) & 0x80) == 0) && (((acc ^ tmp) & 0x80) != 0);
-
-            sign = (tmp & 0x80) > 0;
-
-            if ((tmp & 0x1f0) > 0x90)
-                tmp += 0x60;
-            carry = tmp > 0x99;
-        } else {
-            overflow = (((acc ^ data) & 0x80) == 0) && (((acc ^ tmp) & 0x80) != 0);
-            carry = tmp > 0xff;
-            sign = (tmp & 0x80) > 0;
-        }
-        acc = tmp & 0xff;
-    }
-
-    private final void branch(boolean branch, int adr, int cycDiff) {
-        if (branch) {
-            int oldPC = pc;
-            pc = adr;
-            /* correct branch */
-            if (cycDiff == 1) {
-                fetchByte(pc);
-            } else {
-                if (pc < oldPC)
-                    fetchByte(pc + 0x100);
-                else
-                    fetchByte(pc - 0x100);
-                fetchByte(pc); // Should be fwd or backwd...
-            }
-        }
-    }
-
-    private final void opSBCimp(int data) {
-        int tmp = acc - data - (carry ? 0 : 1);
-        boolean nxtcarry = (tmp >= 0);
-        tmp = tmp & 0x1ff; // Carry is set!
-        sign = (tmp & 0x80) == 0x80; // Invalid in decimal mode??
-        zero = ((tmp & 0xff) == 0);
-        overflow = (((acc ^ tmp) & 0x80) != 0) && (((acc ^ data) & 0x80) != 0);
-        if (decimal) {
-            tmp = (acc & 0xf) - (data & 0xf) - (carry ? 0 : 1);
-            if ((tmp & 0x10) > 0)
-                tmp = ((tmp - 6) & 0xf) | ((acc & 0xf0) - (data & 0xf0) - 0x10);
-            else
-                tmp = (tmp & 0xf) | ((acc & 0xf0) - (data & 0xf0));
-            if ((tmp & 0x100) > 0)
-                tmp -= 0x60;
-        }
-        acc = tmp & 0xff;
-        carry = nxtcarry;
     }
 
     public void emulateOp() {
@@ -783,12 +684,134 @@ public abstract class MOS6510Core extends MOS6510Ops {
         }
     }
 
+    protected abstract int fetchByte(int adr);
+
+    protected abstract void writeByte(int adr, int data);
+
     protected void unknownInstruction(int pc, int op) {
         LOGGER.error("Unknown instruction: " + op);
     }
 
-    public void init() {
-        super.init();
+    protected int getACC() {
+        return acc;
+    }
+
+    private final void doInterrupt(int adr, int status) {
+        // System.out.println("Doing Interrupt disableInterrupt before: " +
+        // disableInterupt);
+        fetchByte(pc);
+        fetchByte(pc + 1);
+        push((pc & 0xff00) >> 8); // HI ??
+        push(pc & 0x00ff); // LOW ??
+        push(status);
+        interruptInExec++;
+        pc = (fetchByte(adr + 1) << 8);
+        pc += fetchByte(adr);
+    }
+
+    private final int getStatusByte() {
+        return ((carry ? 0x01 : 0) + (zero ? 0x02 : 0) + (disableInterupt ? 0x04 : 0) + (decimal ? 0x08 : 0)
+                + (brk ? 0x10 : 0) + 0x20 + (overflow ? 0x40 : 0) + (sign ? 0x80 : 0));
+    }
+
+    private final void setStatusByte(int status) {
+        carry = (status & 0x01) != 0;
+        zero = (status & 0x02) != 0;
+        disableInterupt = (status & 0x04) != 0;
+        decimal = (status & 0x08) != 0;
+        brk = (status & 0x10) != 0;
+        overflow = (status & 0x40) != 0;
+        sign = (status & 0x80) != 0;
+    }
+
+    private final void setZS(int data) {
+        zero = data == 0;
+        sign = data > 0x7f;
+    }
+
+    private final void setCarry(int data) {
+        carry = data > 0x7f;
+    }
+
+    // -------------------------------------------------------------------
+    // Old m4 macros as methods... should be replaced some day (with above)
+    // -------------------------------------------------------------------
+    // Stack operations...
+    // can access array directly 's' is filed with one byte
+    private final int pop() {
+        int r = fetchByte((s = (s + 1) & 0xff) | 0x100);
+        return r;
+    }
+
+    // can access array directly 's' is filed with one byte
+    private final void push(int data) {
+        writeByte((s & 0xff) | 0x100, data);
+        s = (s - 1) & 0xff;
+    }
+
+    private final void opADCimp(int data) {
+        int tmp = data + acc + (carry ? 1 : 0);
+        zero = (tmp & 0xff) == 0; // not valid in decimal mode
+
+        if (decimal) {
+            tmp = (acc & 0xf) + (data & 0xf) + (carry ? 1 : 0);
+            if (tmp > 0x9)
+                tmp += 0x6;
+            if (tmp <= 0x0f)
+                tmp = (tmp & 0xf) + (acc & 0xf0) + (data & 0xf0);
+            else
+                tmp = (tmp & 0xf) + (acc & 0xf0) + (data & 0xf0) + 0x10;
+
+            overflow = (((acc ^ data) & 0x80) == 0) && (((acc ^ tmp) & 0x80) != 0);
+
+            sign = (tmp & 0x80) > 0;
+
+            if ((tmp & 0x1f0) > 0x90)
+                tmp += 0x60;
+            carry = tmp > 0x99;
+        } else {
+            overflow = (((acc ^ data) & 0x80) == 0) && (((acc ^ tmp) & 0x80) != 0);
+            carry = tmp > 0xff;
+            sign = (tmp & 0x80) > 0;
+        }
+        acc = tmp & 0xff;
+    }
+
+    private final void branch(boolean branch, int adr, int cycDiff) {
+        if (branch) {
+            int oldPC = pc;
+            pc = adr;
+            /* correct branch */
+            if (cycDiff == 1) {
+                fetchByte(pc);
+            } else {
+                if (pc < oldPC)
+                    fetchByte(pc + 0x100);
+                else
+                    fetchByte(pc - 0x100);
+                fetchByte(pc); // Should be fwd or backwd...
+            }
+        }
+    }
+
+    private final void opSBCimp(int data) {
+        int tmp = acc - data - (carry ? 0 : 1);
+        boolean nxtcarry = (tmp >= 0);
+        tmp = tmp & 0x1ff; // Carry is set!
+        sign = (tmp & 0x80) == 0x80; // Invalid in decimal mode??
+        zero = ((tmp & 0xff) == 0);
+        overflow = (((acc ^ tmp) & 0x80) != 0) && (((acc ^ data) & 0x80) != 0);
+        if (decimal) {
+            tmp = (acc & 0xf) - (data & 0xf) - (carry ? 0 : 1);
+            if ((tmp & 0x10) > 0)
+                tmp = ((tmp - 6) & 0xf) | ((acc & 0xf0) - (data & 0xf0) - 0x10);
+            else
+                tmp = (tmp & 0xf) | ((acc & 0xf0) - (data & 0xf0));
+            if ((tmp & 0x100) > 0)
+                tmp -= 0x60;
+        }
+        acc = tmp & 0xff;
+        carry = nxtcarry;
     }
 
     private void doReset() {
@@ -812,29 +835,5 @@ public abstract class MOS6510Core extends MOS6510Ops {
         pc = fetchByte(0xfffc) + (fetchByte(0xfffd) << 8);
 
         LOGGER.debug("Reset to: " + pc);
-    }
-
-    public boolean getIRQLow() {
-        return IRQLow;
-    }
-
-    public boolean getNMILow() {
-        return NMILow;
-    }
-
-    public int getPc() {
-        return pc;
-    }
-
-    public void setPc(int pc) {
-        this.pc = pc;
-    }
-
-    public int getInterruptInExec() {
-        return interruptInExec;
-    }
-
-    protected int getACC() {
-        return acc;
     }
 }
