@@ -10,6 +10,7 @@ import com.dreamfabric.c64utils.Debugger;
 import com.dreamfabric.jac64.Hex;
 import com.dreamfabric.jac64.SELoader;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
+import com.dreamfabric.jac64.emu.bus.ControlBus;
 import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.cia.CIA2;
 import com.dreamfabric.jac64.emu.cpu.C64Cpu;
@@ -39,7 +40,6 @@ public class EmulationContext {
     private C64Cpu cpu = new C64Cpu();
     // One InterruptManager per named CPU. For now just one interrupt manager.
     private InterruptManager interruptManager = new InterruptManager(cpu);
-    private AddressableBus addressableBus = new AddressableBus();
 
     private PLA pla = new PLA();
     private IO io = new IO();
@@ -47,6 +47,9 @@ public class EmulationContext {
     private C64Screen vic = new C64Screen(monitor, true);
     private CIA1 cia1 = new CIA1(scheduler, interruptManager);
     private CIA2 cia2 = new CIA2(scheduler, interruptManager);
+
+    private AddressableBus addressableBus = new AddressableBus();
+    private ControlBus controlBus = new ControlBus(pla);
 
     private BasicROM basicROM = new BasicROM();
     private KernalROM kernalROM = new KernalROM();
@@ -82,8 +85,8 @@ public class EmulationContext {
         // prepare CPU
         cpu.init();
         cpu.setC64Screen(vic);
-        cpu.setPla(pla);
         cpu.setScheduler(scheduler);
+        cpu.setControlBus(controlBus);
         cpu.setAddressableBus(addressableBus);
 
         installROMs();
@@ -95,10 +98,6 @@ public class EmulationContext {
 
     public InterruptManager getInterruptManager() {
         return interruptManager;
-    }
-
-    public PLA getPla() {
-        return pla;
     }
 
     public AddressableBus getAddressableBus() {

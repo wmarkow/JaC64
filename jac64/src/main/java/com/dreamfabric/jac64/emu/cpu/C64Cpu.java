@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
+import com.dreamfabric.jac64.emu.bus.ControlBus;
 import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
@@ -12,13 +13,13 @@ import com.dreamfabric.jac64.emu.vic.C64Screen;
 public class C64Cpu extends MOS6510Core {
     private static Logger LOGGER = LoggerFactory.getLogger(C64Cpu.class);
 
-    private PLA pla;
+    private ControlBus controlBus;
     private AddressableBus addressableBus;
     private C64Screen c64screen = null;
     private EventQueue scheduler;
 
-    public void setPla(PLA pla) {
-        this.pla = pla;
+    public void setControlBus(ControlBus controlBus) {
+        this.controlBus = controlBus;
     }
 
     public void setAddressableBus(AddressableBus addressableBus) {
@@ -78,7 +79,7 @@ public class C64Cpu extends MOS6510Core {
 
         if (adr == 0x01) {
             // setting CHAREN, HIRAM and LORAM of PLA
-            pla.setCharenHiramLoram(data);
+            controlBus.setCharenHiramLoram(data);
         }
 
         if (addressableBus.write(adr, data, currentCpuCycles)) {
