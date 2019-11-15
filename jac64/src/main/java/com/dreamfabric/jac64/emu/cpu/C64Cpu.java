@@ -90,10 +90,10 @@ public class C64Cpu extends MOS6510Core {
 
     protected void unknownInstruction(int pc, int op) {
         switch (op) {
-            case SLEEP:
+            case MOS6510Ops.SLEEP:
                 currentCpuCycles += 100;
                 break;
-            case LOAD_FILE:
+            case MOS6510Ops.LOAD_FILE:
                 if (getACC() == 0)
                     LOGGER.info(
                             "**** LOAD FILE! ***** PC = " + Integer.toString(pc, 16) + " => wmarkow unknown rindex");

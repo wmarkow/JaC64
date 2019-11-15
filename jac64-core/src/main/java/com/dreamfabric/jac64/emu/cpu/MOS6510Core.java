@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan Blok (jblok@profdata.nl)
  * @version $Revision: $ $Date: $
  */
-public abstract class MOS6510Core extends MOS6510Ops {
+public abstract class MOS6510Core {
     private static Logger LOGGER = LoggerFactory.getLogger(MOS6510Core.class);
 
     public static final int NMI_DELAY = 2;
@@ -168,11 +168,11 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
         // Ok no interrupts, execute instruction
         // fetch instruction!
-        int data = INSTRUCTION_SET[fetchByte(pc++)];
-        int op = data & OP_MASK;
-        int addrMode = data & ADDRESSING_MASK;
-        boolean read = (data & READ) != 0;
-        boolean write = (data & WRITE) != 0;
+        int data = MOS6510Ops.INSTRUCTION_SET[fetchByte(pc++)];
+        int op = data & MOS6510Ops.OP_MASK;
+        int addrMode = data & MOS6510Ops.ADDRESSING_MASK;
+        boolean read = (data & MOS6510Ops.READ) != 0;
+        boolean write = (data & MOS6510Ops.WRITE) != 0;
         int adr = 0;
         int tmp = 0;
         boolean nxtcarry = false;
@@ -187,31 +187,31 @@ public abstract class MOS6510Core extends MOS6510Ops {
         // Fetch addres, and read if it should be done!
         switch (addrMode) {
             // never any address when immediate
-            case IMMEDIATE:
+            case MOS6510Ops.IMMEDIATE:
                 pc++;
                 data = p1;
                 break;
-            case ABSOLUTE:
+            case MOS6510Ops.ABSOLUTE:
                 pc++;
                 adr = (fetchByte(pc++) << 8) + p1;
                 if (read) {
                     data = fetchByte(adr);
                 }
                 break;
-            case ZERO:
+            case MOS6510Ops.ZERO:
                 pc++;
                 adr = p1;
                 if (read) {
                     data = fetchByte(adr);
                 }
                 break;
-            case ZERO_X:
-            case ZERO_Y:
+            case MOS6510Ops.ZERO_X:
+            case MOS6510Ops.ZERO_Y:
                 pc++;
                 // Read from wrong address first...
                 fetchByte(p1);
 
-                if (addrMode == ZERO_X)
+                if (addrMode == MOS6510Ops.ZERO_X)
                     adr = (p1 + x) & 0xff;
                 else
                     adr = (p1 + y) & 0xff;
@@ -220,14 +220,14 @@ public abstract class MOS6510Core extends MOS6510Ops {
                     data = fetchByte(adr);
                 }
                 break;
-            case ABSOLUTE_X:
-            case ABSOLUTE_Y:
+            case MOS6510Ops.ABSOLUTE_X:
+            case MOS6510Ops.ABSOLUTE_Y:
                 pc++;
                 // Fetch hi byte!
                 adr = fetchByte(pc++) << 8;
 
                 // add x/y to low byte & possibly faulty fetch!
-                if (addrMode == ABSOLUTE_X)
+                if (addrMode == MOS6510Ops.ABSOLUTE_X)
                     p1 += x;
                 else
                     p1 += y;
@@ -241,7 +241,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
                     data = fetchByte(adr);
                 }
                 break;
-            case RELATIVE:
+            case MOS6510Ops.RELATIVE:
                 pc++;
                 adr = pc + (byte) p1;
                 if (((adr ^ pc) & 0xff00) > 0) {
@@ -251,11 +251,11 @@ public abstract class MOS6510Core extends MOS6510Ops {
                     tmp = 1;
                 }
                 break;
-            case ACCUMULATOR:
+            case MOS6510Ops.ACCUMULATOR:
                 data = acc;
                 write = false;
                 break;
-            case INDIRECT_X:
+            case MOS6510Ops.INDIRECT_X:
                 pc++;
                 // unneccesary read... fetchByte(p1);
                 fetchByte(p1);
@@ -268,7 +268,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
                     data = fetchByte(adr);
                 }
                 break;
-            case INDIRECT_Y:
+            case MOS6510Ops.INDIRECT_Y:
                 pc++;
                 // Fetch hi and lo
                 adr = (fetchByte(p1 + 1) << 8);
@@ -284,7 +284,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
                     data = fetchByte(adr);
                 }
                 break;
-            case INDIRECT:
+            case MOS6510Ops.INDIRECT:
                 pc++;
                 // Fetch pointer
                 adr = (fetchByte(pc) << 8) + p1;
@@ -307,100 +307,100 @@ public abstract class MOS6510Core extends MOS6510Ops {
         }
 
         switch (op) {
-            case BRK:
+            case MOS6510Ops.BRK:
                 brk = true;
                 checkInterrupt = true;
                 break;
-            case AND:
+            case MOS6510Ops.AND:
                 acc = acc & data;
                 setZS(acc);
                 break;
-            case ADC:
+            case MOS6510Ops.ADC:
                 opADCimp(data);
                 break;
-            case SBC:
+            case MOS6510Ops.SBC:
                 opSBCimp(data);
                 break;
-            case ORA:
+            case MOS6510Ops.ORA:
                 acc = acc | data;
                 setZS(acc);
                 break;
-            case EOR:
+            case MOS6510Ops.EOR:
                 acc = acc ^ data;
                 setZS(acc);
                 break;
-            case BIT:
+            case MOS6510Ops.BIT:
                 sign = data > 0x7f;
                 overflow = (data & 0x40) > 0;
                 zero = (acc & data) == 0;
                 break;
-            case LSR:
+            case MOS6510Ops.LSR:
                 carry = (data & 0x01) != 0;
                 data = data >> 1;
                 zero = (data == 0);
                 sign = false;
                 break;
-            case ROL:
+            case MOS6510Ops.ROL:
                 data = (data << 1) + (carry ? 1 : 0);
                 carry = (data & 0x100) != 0;
                 data = data & 0xff;
                 setZS(data);
                 break;
-            case ROR:
+            case MOS6510Ops.ROR:
                 nxtcarry = (data & 0x01) != 0;
                 data = (data >> 1) + (carry ? 0x80 : 0);
                 carry = nxtcarry;
                 setZS(data);
                 break;
-            case TXA:
+            case MOS6510Ops.TXA:
                 acc = x;
                 setZS(acc);
                 break;
-            case TAX:
+            case MOS6510Ops.TAX:
                 x = acc;
                 setZS(x);
                 break;
-            case TYA:
+            case MOS6510Ops.TYA:
                 acc = y;
                 setZS(acc);
                 break;
-            case TAY:
+            case MOS6510Ops.TAY:
                 y = acc;
                 setZS(y);
                 break;
-            case TSX:
+            case MOS6510Ops.TSX:
                 x = s;
                 setZS(x);
                 break;
-            case TXS:
+            case MOS6510Ops.TXS:
                 s = x & 0xff;
                 break;
-            case DEC:
+            case MOS6510Ops.DEC:
                 data = (data - 1) & 0xff;
                 setZS(data);
                 break;
-            case INC:
+            case MOS6510Ops.INC:
                 data = (data + 1) & 0xff;
                 setZS(data);
                 break;
-            case INX:
+            case MOS6510Ops.INX:
                 x = (x + 1) & 0xff;
                 setZS(x);
                 break;
-            case DEX:
+            case MOS6510Ops.DEX:
                 x = (x - 1) & 0xff;
                 setZS(x);
                 break;
-            case INY:
+            case MOS6510Ops.INY:
                 y = (y + 1) & 0xff;
                 setZS(y);
                 break;
-            case DEY:
+            case MOS6510Ops.DEY:
                 y = (y - 1) & 0xff;
                 setZS(y);
                 break;
             // Jumps
-            case JSR:
+            case MOS6510Ops.JSR:
                 pc++;
                 adr = (fetchByte(pc) << 8) + p1;
                 fetchByte(s | 0x100);
@@ -408,16 +408,16 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 push(pc & 0x00ff); // LOW
                 pc = adr;
                 break;
-            case JMP:
+            case MOS6510Ops.JMP:
                 pc = adr;
                 break;
-            case RTS:
+            case MOS6510Ops.RTS:
                 fetchByte(s | 0x100);
                 pc = pop() + (pop() << 8);
                 pc++;
                 fetchByte(pc);
                 break;
-            case RTI:
+            case MOS6510Ops.RTI:
                 fetchByte(s | 0x100);
                 tmp = pop();
                 setStatusByte(tmp);
@@ -428,134 +428,134 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 checkInterrupt = true;
                 break;
 
-            case TRP:
+            case MOS6510Ops.TRP:
                 LOGGER.info("TRAP Instruction executed");
                 break;
-            case NOP:
+            case MOS6510Ops.NOP:
                 break;
-            case ASL:
+            case MOS6510Ops.ASL:
                 setCarry(data);
                 data = (data << 1) & 0xff;
                 setZS(data);
                 break;
-            case PHA:
+            case MOS6510Ops.PHA:
                 push(acc);
                 break;
-            case PLA:
+            case MOS6510Ops.PLA:
                 fetchByte(s | 0x100);
                 acc = pop();
                 setZS(acc);
                 break;
-            case PHP:
+            case MOS6510Ops.PHP:
                 brk = true;
                 push(getStatusByte());
                 brk = false;
                 break;
-            case PLP:
+            case MOS6510Ops.PLP:
                 tmp = pop();
                 setStatusByte(tmp);
                 brk = false;
                 checkInterrupt = true;
                 break;
-            case ANC:
+            case MOS6510Ops.ANC:
                 acc = acc & data;
                 setZS(acc);
                 carry = (acc & 0x80) != 0;
                 break;
-            case CMP:
+            case MOS6510Ops.CMP:
                 data = acc - data;
                 carry = data >= 0;
                 setZS((data & 0xff));
                 break;
-            case CPX:
+            case MOS6510Ops.CPX:
                 data = x - data;
                 carry = data >= 0;
                 setZS((data & 0xff));
                 break;
-            case CPY:
+            case MOS6510Ops.CPY:
                 data = y - data;
                 carry = data >= 0;
                 setZS((data & 0xff));
                 break;
             // Branch instructions
-            case BCC:
+            case MOS6510Ops.BCC:
                 branch(!carry, adr, tmp);
                 break;
-            case BCS:
+            case MOS6510Ops.BCS:
                 branch(carry, adr, tmp);
                 break;
-            case BEQ:
+            case MOS6510Ops.BEQ:
                 branch(zero, adr, tmp);
                 break;
-            case BNE:
+            case MOS6510Ops.BNE:
                 branch(!zero, adr, tmp);
                 break;
-            case BVC:
+            case MOS6510Ops.BVC:
                 branch(!overflow, adr, tmp);
                 break;
-            case BVS:
+            case MOS6510Ops.BVS:
                 branch(overflow, adr, tmp);
                 break;
-            case BPL:
+            case MOS6510Ops.BPL:
                 branch(!sign, adr, tmp);
                 break;
-            case BMI:
+            case MOS6510Ops.BMI:
                 branch(sign, adr, tmp);
                 break;
             // Modify flags
-            case CLC:
+            case MOS6510Ops.CLC:
                 carry = false;
                 break;
-            case SEC:
+            case MOS6510Ops.SEC:
                 carry = true;
                 break;
-            case CLD:
+            case MOS6510Ops.CLD:
                 decimal = false;
                 break;
-            case SED:
+            case MOS6510Ops.SED:
                 decimal = true;
                 break;
-            case CLV:
+            case MOS6510Ops.CLV:
                 overflow = false;
                 break;
-            case SEI:
+            case MOS6510Ops.SEI:
                 disableInterupt = true;
                 break;
-            case CLI:
+            case MOS6510Ops.CLI:
                 disableInterupt = false;
                 checkInterrupt = true;
                 break;
             // Load / Store instructions
-            case LDA:
+            case MOS6510Ops.LDA:
                 acc = data;
                 setZS(data);
                 break;
-            case LDX:
+            case MOS6510Ops.LDX:
                 x = data;
                 setZS(data);
                 break;
-            case LDY:
+            case MOS6510Ops.LDY:
                 y = data;
                 setZS(data);
                 break;
-            case STA:
+            case MOS6510Ops.STA:
                 data = acc;
                 break;
-            case STX:
+            case MOS6510Ops.STX:
                 data = x;
                 break;
-            case STY:
+            case MOS6510Ops.STY:
                 data = y;
                 break;
 
             // -------------------------------------------------------------------
             // Undocumented ops
             // -------------------------------------------------------------------
-            case ANE:
+            case MOS6510Ops.ANE:
                 acc = p1 & x & (acc | 0xee);
                 setZS(acc);
                 break;
-            case ARR: // ARR = AND + ROR ??? - not???
+            case MOS6510Ops.ARR: // ARR = AND + ROR ??? - not???
                 // A'la frodo
                 tmp = p1 & acc;
                 acc = (carry ? (tmp >> 1) | 0x80 : tmp >> 1);
@@ -574,7 +574,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 }
                 break;
 
-            case ASR: // AND + LSR
+            case MOS6510Ops.ASR: // AND + LSR
                 acc = acc & data;
                 nxtcarry = (acc & 0x01) != 0;
                 acc = (acc >> 1);
@@ -582,7 +582,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 setZS(acc);
                 break;
 
-            case DCP:
+            case MOS6510Ops.DCP:
                 data = (data - 1) & 0xff;
                 setZS(data);
                 tmp = acc - data;
@@ -590,27 +590,27 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 setZS((tmp & 0xff));
                 break;
 
-            case ISB:
+            case MOS6510Ops.ISB:
                 data = (data + 1) & 0xff;
                 // SBC PART!
                 opSBCimp(data);
                 break;
-            case LAX:
+            case MOS6510Ops.LAX:
                 acc = x = data;
                 setZS(acc);
                 break;
 
-            case LAS: // A,X,S:={adr}&S
+            case MOS6510Ops.LAS: // A,X,S:={adr}&S
                 acc = x = s = (data & s);
                 setZS(acc);
                 break;
 
-            case LXA:
+            case MOS6510Ops.LXA:
                 x = acc = (acc | 0xee) & p1;
                 setZS(acc);
                 break;
 
-            case RLA:
+            case MOS6510Ops.RLA:
                 data = (data << 1) + (carry ? 1 : 0);
                 carry = (data & 0x100) != 0;
                 data = data & 0xff;
@@ -620,7 +620,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 sign = (acc > 0x7f);
                 break;
 
-            case RRA: // RRA ROR + ADC
+            case MOS6510Ops.RRA: // RRA ROR + ADC
                 nxtcarry = (data & 0x01) != 0;
                 data = (data >> 1) + (carry ? 0x80 : 0);
                 carry = nxtcarry;
@@ -628,33 +628,33 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 opADCimp(data);
                 break;
 
-            case SBX:
+            case MOS6510Ops.SBX:
                 x = ((acc & x) - p1);
                 carry = x >= 0;
                 x = x & 0xff;
                 setZS(x);
                 break;
-            case SHA:
+            case MOS6510Ops.SHA:
                 data = acc & x & ((adr >> 8) + 1);
                 break;
 
-            case SHS:
+            case MOS6510Ops.SHS:
                 data = acc & x & ((adr >> 8) + 1);
                 s = acc & x;
                 break;
 
-            case SHX:
+            case MOS6510Ops.SHX:
                 data = x & ((adr >> 8) + 1);
                 break;
-            case SHY:
+            case MOS6510Ops.SHY:
                 data = y & ((adr >> 8) + 1);
                 break;
 
-            case SAX:
+            case MOS6510Ops.SAX:
                 data = acc & x;
                 break;
 
-            case SRE:
+            case MOS6510Ops.SRE:
                 carry = (data & 0x01) != 0;
                 data = data >> 1;
                 // EOR PART
@@ -662,7 +662,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 setZS(acc);
                 break;
 
-            case SLO:
+            case MOS6510Ops.SLO:
                 // ASL
                 setCarry(data);
                 data = (data << 1) & 0xff;
@@ -677,7 +677,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
 
         if (write) {
             writeByte(adr, data);
-        } else if (addrMode == ACCUMULATOR) {
+        } else if (addrMode == MOS6510Ops.ACCUMULATOR) {
             acc = data;
         }
     }
