@@ -137,8 +137,13 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 NMILastLow = NMILow;
                 // Just the interrupt handling... do nothing more...
                 return;
-            } else if ((IRQLow && currentCpuCycles >= irqCycleStart) || brk) {
-                if (!disableInterupt) {
+            }
+
+            if ((IRQLow && currentCpuCycles >= irqCycleStart) || brk) {
+                if (disableInterupt) {
+                    brk = false;
+                    checkInterrupt = (NMILow && !NMILastLow);
+                } else {
                     LOGGER.debug("IRQ interrupt > " + IRQLow + " BRK: " + brk);
                     // checkInterrupt = false; //does not make sense to leave more
                     int status = getStatusByte();
@@ -156,9 +161,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
                     // Remember last NMI state in order to check on next...
                     // NMILastLow = NMILow;
                     return;
-                } else {
-                    brk = false;
-                    checkInterrupt = (NMILow && !NMILastLow);
                 }
             } else if (resetFlag) {
                 doReset();
@@ -682,6 +684,19 @@ public abstract class MOS6510Core extends MOS6510Ops {
         } else if (addrMode == ACCUMULATOR) {
             acc = data;
         }
+    }
+
+    // Reset the MOS6510Core!!!
+    // This can be called with any thread!!!
+    public void reset() {
+        // Clear and copy!
+        // The processor flags
+        NMILow = false;
+        brk = false;
+        IRQLow = false;
+        LOGGER.debug("Set IRQLOW to false...");
+        resetFlag = true;
+        checkInterrupt = true;
     }
 
     protected abstract int fetchByte(int adr);
