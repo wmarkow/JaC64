@@ -112,7 +112,7 @@ public abstract class MOS6510Core extends MOS6510Ops {
         pc += fetchByte(adr);
     }
 
-    protected final int getStatusByte() {
+    private final int getStatusByte() {
         return ((carry ? 0x01 : 0) + (zero ? 0x02 : 0) + (disableInterupt ? 0x04 : 0) + (decimal ? 0x08 : 0)
                 + (brk ? 0x10 : 0) + 0x20 + (overflow ? 0x40 : 0) + (sign ? 0x80 : 0));
     }
@@ -812,19 +812,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
         pc = fetchByte(0xfffc) + (fetchByte(0xfffd) << 8);
 
         LOGGER.debug("Reset to: " + pc);
-    }
-
-    // Reset the MOS6510Core!!!
-    // This can be called with any thread!!!
-    public void reset() {
-        // Clear and copy!
-        // The processor flags
-        NMILow = false;
-        brk = false;
-        IRQLow = false;
-        LOGGER.debug("Set IRQLOW to false...");
-        resetFlag = true;
-        checkInterrupt = true;
     }
 
     public boolean getIRQLow() {
