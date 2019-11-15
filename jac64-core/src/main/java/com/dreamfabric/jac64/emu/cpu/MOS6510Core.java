@@ -58,7 +58,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
     private long nmiCycleStart = 0;
     private long irqCycleStart = 0;
 
-    private int jumpTo = -1;
     protected long currentCpuCycles = 0;
 
     // Some temporary and other variables...
@@ -164,9 +163,6 @@ public abstract class MOS6510Core extends MOS6510Ops {
                 }
             } else if (resetFlag) {
                 doReset();
-            } else if (jumpTo != -1) {
-                pc = jumpTo;
-                jumpTo = -1;
             }
         }
 
