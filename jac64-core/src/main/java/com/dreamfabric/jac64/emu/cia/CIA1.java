@@ -9,7 +9,6 @@ import com.dreamfabric.jac64.emu.cia.keyboard.Joy2KeyListener;
 import com.dreamfabric.jac64.emu.cia.keyboard.KeyListener;
 import com.dreamfabric.jac64.emu.cia.keyboard.Keyboard;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
-import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 
 public class CIA1 extends CIA {
     private static Logger LOGGER = LoggerFactory.getLogger(CIA1.class);
@@ -19,8 +18,8 @@ public class CIA1 extends CIA {
 
     private Keyboard keyboard;
 
-    public CIA1(EventQueue scheduler, ControlBus controlBus) {
-        super(scheduler, START_ADDRESS, controlBus);
+    public CIA1(ControlBus controlBus) {
+        super(START_ADDRESS, controlBus);
 
         write0(DDRA + START_ADDRESS, 0x00); // input
         write0(PRA + START_ADDRESS, 0xFF); // HIGH

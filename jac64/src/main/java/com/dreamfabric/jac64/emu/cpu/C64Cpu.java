@@ -5,9 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.bus.ControlBus;
-import com.dreamfabric.jac64.emu.pla.PLA;
-import com.dreamfabric.jac64.emu.scheduler.EventQueue;
-import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
 import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 public class C64Cpu extends MOS6510Core {
@@ -16,7 +13,6 @@ public class C64Cpu extends MOS6510Core {
     private ControlBus controlBus;
     private AddressableBus addressableBus;
     private C64Screen c64screen = null;
-    private EventQueue scheduler;
 
     public void setControlBus(ControlBus controlBus) {
         this.controlBus = controlBus;
@@ -26,17 +22,12 @@ public class C64Cpu extends MOS6510Core {
         this.addressableBus = addressableBus;
     }
 
-    public void setScheduler(EventQueue eventQueue) {
-        this.scheduler = eventQueue;
-    }
-
     public void setC64Screen(C64Screen c64screen) {
         this.c64screen = c64screen;
     }
 
     public void reset() {
         c64screen.reset();
-        scheduler.empty();
         // this will ensure the correct PLA state
         writeByte(1, 0x7);
     }
@@ -118,17 +109,7 @@ public class C64Cpu extends MOS6510Core {
 
     private void executeFromEventQueue(long currentCpuCycles) {
         c64screen.clock(currentCpuCycles);
-        while (currentCpuCycles >= scheduler.nextTime) {
-            TimeEvent t = scheduler.popFirst();
-            if (t != null) {
-                LOGGER.debug("Executing event: " + t.getShort());
-                // Give it the actual time also!!!
-                t.execute(currentCpuCycles);
-            } else {
-                LOGGER.debug("Nothign to execute...");
-                return;
-            }
-        }
+        controlBus.executeFromEventQueue(currentCpuCycles);
     }
 
     private int getMemory(int address) {

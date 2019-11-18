@@ -1,11 +1,11 @@
 package com.dreamfabric.jac64.emu.cia.timer;
 
-import com.dreamfabric.jac64.emu.scheduler.EventQueue;
+import com.dreamfabric.jac64.emu.bus.ControlBus;
 
 public class TimerB extends Timer {
 
-    public TimerB(String id, boolean uo, Timer other, EventQueue scheduler) {
-        super(id, uo, other, scheduler);
+    public TimerB(String id, boolean uo, Timer other, ControlBus controlBus) {
+        super(id, uo, other, controlBus);
     }
 
     public void setCR(long cycles, int data) {

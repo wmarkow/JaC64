@@ -2,15 +2,14 @@ package com.dreamfabric.jac64.emu.cia;
 
 import com.dreamfabric.jac64.emu.bus.ControlBus;
 import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
-import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 
 public class CIA2 extends CIA {
 
     public final static int START_ADDRESS = 0xDD00;
     public final static int END_ADDRESS = 0xDDFF;
 
-    public CIA2(EventQueue scheduler, ControlBus controlBus) {
-        super(scheduler, START_ADDRESS, controlBus);
+    public CIA2(ControlBus controlBus) {
+        super(START_ADDRESS, controlBus);
     }
 
     @Override

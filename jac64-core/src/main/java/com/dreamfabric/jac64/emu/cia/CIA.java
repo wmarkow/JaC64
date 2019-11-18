@@ -77,15 +77,15 @@ public abstract class CIA extends AddressableChip implements SimulableIf {
      * Creates a new <code>CIA</code> instance.
      *
      */
-    public CIA(EventQueue scheduler, int startAddress, ControlBus controlBus) {
+    public CIA(int startAddress, ControlBus controlBus) {
         super();
         this.startAddress = startAddress;
 
         this.controlBus = controlBus;
-        timerA = new TimerA("TimerA", true, null, scheduler);
-        timerB = new TimerB("TimerB", false, timerA, scheduler);
+        timerA = new TimerA("TimerA", true, null, controlBus);
+        timerB = new TimerB("TimerB", false, timerA, controlBus);
         timerA.setOtherTimer(timerB);
-        rtc = new RealTimeClock(scheduler);
+        rtc = new RealTimeClock(controlBus);
 
         timerA.setTimerListener(new TimerListenerIf() {
 

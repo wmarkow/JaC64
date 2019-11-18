@@ -41,13 +41,13 @@ public class EmulationContext {
     // One InterruptManager per named CPU. For now just one interrupt manager.
     private InterruptManager interruptManager = new InterruptManager(cpu);
     private PLA pla = new PLA();
-    private ControlBus controlBus = new ControlBus(pla, interruptManager, cpu);
+    private ControlBus controlBus = new ControlBus(pla, interruptManager, cpu, scheduler);
 
     private IO io = new IO();
     private SIDIf sid = new RESID(scheduler);
     private C64Screen vic = new C64Screen(monitor, true);
-    private CIA1 cia1 = new CIA1(scheduler, controlBus);
-    private CIA2 cia2 = new CIA2(scheduler, controlBus);
+    private CIA1 cia1 = new CIA1(controlBus);
+    private CIA2 cia2 = new CIA2(controlBus);
 
     private AddressableBus addressableBus = new AddressableBus(cia2);
 
@@ -84,7 +84,6 @@ public class EmulationContext {
         // prepare CPU
         cpu.init();
         cpu.setC64Screen(vic);
-        cpu.setScheduler(scheduler);
         cpu.setControlBus(controlBus);
         cpu.setAddressableBus(addressableBus);
 

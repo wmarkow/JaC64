@@ -1,7 +1,7 @@
 package com.dreamfabric.jac64.emu.cia.timer;
 
 import com.dreamfabric.jac64.emu.SimulableIf;
-import com.dreamfabric.jac64.emu.scheduler.EventQueue;
+import com.dreamfabric.jac64.emu.bus.ControlBus;
 import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
 
 //A timer class for handling the Timer state machines
@@ -26,6 +26,8 @@ public class Timer implements SimulableIf {
     private int latch = 0;
     int timer = 0;
 
+    private ControlBus controlBus;
+
     // When is an update needed for this timer?
     long nextUpdate = 0;
     long nextZero = 0;
@@ -38,15 +40,13 @@ public class Timer implements SimulableIf {
     private boolean countCycles = false;
     private boolean countUnderflow = false;
 
-    private EventQueue scheduler;
-
     TimeEvent updateEvent = new TimeEvent(0) {
         public void execute(long currentCpuCycles) {
             doUpdate(currentCpuCycles);
             if (state != STOP) {
                 // System.out.println(ciaID() + " Adding Timer update event at " + cycles +
                 // " with time: " + nextUpdate + " state: " + state);
-                scheduler.addEvent(this, nextUpdate);
+                controlBus.addEvent(this, nextUpdate);
             }
         }
     };
@@ -58,11 +58,11 @@ public class Timer implements SimulableIf {
     boolean updateOther;
     private TimerListenerIf timerListener;
 
-    public Timer(String id, boolean uo, Timer other, EventQueue scheduler) {
+    public Timer(String id, boolean uo, Timer other, ControlBus controlBus) {
         this.id = id;
         this.otherTimer = other;
         updateOther = uo;
-        this.scheduler = scheduler;
+        this.controlBus = controlBus;
     }
 
     public void setTimerListener(TimerListenerIf timerListener) {
@@ -92,7 +92,7 @@ public class Timer implements SimulableIf {
         nextZero = 0;
         nextUpdate = 0;
         writeCR = -1;
-        scheduler.removeEvent(updateEvent);
+        controlBus.removeEvent(updateEvent);
     }
 
     public int getTimer(long cycles) {
@@ -156,7 +156,7 @@ public class Timer implements SimulableIf {
         writeCR = data;
         if (nextUpdate > currentCpuCycles + 1 || !updateEvent.isScheduled()) {
             nextUpdate = currentCpuCycles + 1;
-            scheduler.addEvent(updateEvent, nextUpdate);
+            controlBus.addEvent(updateEvent, nextUpdate);
         }
     }
 

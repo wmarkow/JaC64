@@ -1,6 +1,7 @@
 package com.dreamfabric.jac64.emu.cia.timer;
 
 import com.dreamfabric.jac64.emu.SimulableIf;
+import com.dreamfabric.jac64.emu.bus.ControlBus;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
 
@@ -14,18 +15,18 @@ public class RealTimeClock implements SimulableIf {
     private int todmin = 0;
     private int todhour = 0;
 
-    private EventQueue scheduler;
+    private ControlBus controlBus;
     private int clocksPerSample = CPUFrq / SAMPLE_RATE;
 
-    public RealTimeClock(EventQueue scheduler) {
-        this.scheduler = scheduler;
+    public RealTimeClock(ControlBus controlBus) {
+        this.controlBus = controlBus;
     }
 
     TimeEvent updateEvent = new TimeEvent(0) {
         public void execute(long currentCpuCycles) {
             RealTimeClock.this.execute();
 
-            scheduler.addEvent(this, currentCpuCycles + clocksPerSample);
+            controlBus.addEvent(this, currentCpuCycles + clocksPerSample);
         }
     };
 
@@ -63,12 +64,12 @@ public class RealTimeClock implements SimulableIf {
 
     @Override
     public void start(long currentCpuCycles) {
-        scheduler.addEvent(updateEvent, currentCpuCycles + clocksPerSample);
+        controlBus.addEvent(updateEvent, currentCpuCycles + clocksPerSample);
     }
 
     @Override
     public void stop() {
-        scheduler.removeEvent(updateEvent);
+        controlBus.removeEvent(updateEvent);
     }
 
     @Override
