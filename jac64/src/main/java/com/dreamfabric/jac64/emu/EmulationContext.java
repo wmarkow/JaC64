@@ -41,7 +41,7 @@ public class EmulationContext {
     // One InterruptManager per named CPU. For now just one interrupt manager.
     private InterruptManager interruptManager = new InterruptManager(cpu);
     private PLA pla = new PLA();
-    private ControlBus controlBus = new ControlBus(pla, interruptManager);
+    private ControlBus controlBus = new ControlBus(pla, interruptManager, cpu);
 
     private IO io = new IO();
     private SIDIf sid = new RESID(scheduler);
@@ -59,7 +59,7 @@ public class EmulationContext {
 
     public EmulationContext() {
         // prepare IO
-        vic.init(cpu, controlBus, cia1);
+        vic.init(controlBus, cia1);
         vic.setCia2(cia2);
         vic.setAddressableBus(addressableBus);
         io.setSid(sid);

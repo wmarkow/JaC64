@@ -195,7 +195,6 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     boolean irqTriggered = false;
     long lastLine = 0;
     long firstLine = 0;
-    long lastIRQ = 0;
 
     int potx = 0;
     int poty = 0;
@@ -204,7 +203,6 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     // a working ISR that is reading the keyboard
     private boolean isrRunning = false;
 
-    private MOS6510Core cpu;
     private AddressableBus addressableBus;
     private ControlBus controlBus;
 
@@ -316,14 +314,9 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
         for (int i = 0, n = 8; i < n; i++) {
             monitor.info("Sprite " + (i + 1) + " pos = " + sprites[i].x + ", " + sprites[i].y);
         }
-
-        monitor.info("CPU IRQLow: " + cpu.getIRQLow());
-        monitor.info("CPU NMILow: " + cpu.getNMILow());
-        monitor.info("Current CPU cycles: " + cpu.getCycles());
     }
 
-    public void init(MOS6510Core cpu, ControlBus controlBus, CIA1 cia1) {
-        this.cpu = cpu;
+    public void init(ControlBus controlBus, CIA1 cia1) {
         this.controlBus = controlBus;
 
         for (int i = 0, n = sprites.length; i < n; i++) {
@@ -538,8 +531,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                     badLine = (displayEnabled && vbeam >= 0x30 && vbeam <= 0xf7) && (vbeam & 0x7) == vScroll;
                     if (oldBadLine != badLine) {
                         LOGGER.debug("#### BadLC diff@" + vbeam + " => " + badLine + " vScroll: " + vScroll + " vmli: "
-                                + vmli + " vc: " + vc + " rc: " + rc + " cyc line: " + (cpu.getCycles() - lastLine)
-                                + " cyc IRQ: " + (cpu.getCycles() - lastIRQ));
+                                + vmli + " vc: " + vc + " rc: " + rc);
                     }
                 }
 
@@ -555,8 +547,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 // System.out.println("Extended set to: " + extended + " at " +
                 // vbeam + " d011: " + Hex.hex2(data));
 
-                LOGGER.debug("d011 = " + data + " at " + vbeam + " => YScroll = " + (data & 0x7) + " cyc since line: "
-                        + (cpu.getCycles() - lastLine) + " cyc since IRQ: " + (cpu.getCycles() - lastIRQ));
+                LOGGER.debug("d011 = " + data + " at " + vbeam + " => YScroll = " + (data & 0x7));
                 LOGGER.debug("Setting raster position (hi) to: " + (data & 0x80));
 
                 break;
@@ -713,9 +704,6 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     }
 
     private void setVideoMem() {
-        LOGGER.debug("setVideoMem() cycles since line: " + (cpu.getCycles() - lastLine) + " cycles since IRQ: "
-                + (cpu.getCycles() - lastIRQ) + " at " + vbeam);
-
         // Set-up vars for screen rendering
         charSetBaseAddress = ((vicMemoryPointers & 0x0e) << 10);
         videoMatrixBaseAddress = ((vicMemoryPointers & 0xf0) << 6);
@@ -760,12 +748,11 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     public final void clock(long currentCpuCycles) {
 
         if (lastCycle + 1 < currentCpuCycles) {
-            LOGGER.debug("More than one cycle passed: " + (currentCpuCycles - lastCycle) + " at " + currentCpuCycles
-                    + " PC: " + Integer.toHexString(cpu.getPc()));
+            LOGGER.debug("More than one cycle passed: " + (currentCpuCycles - lastCycle) + " at " + currentCpuCycles);
 
             if (lastCycle == currentCpuCycles) {
-                LOGGER.debug("No diff since last update!!!: " + (currentCpuCycles - lastCycle) + " at "
-                        + currentCpuCycles + " PC: " + Integer.toHexString(cpu.getPc()));
+                LOGGER.debug(
+                        "No diff since last update!!!: " + (currentCpuCycles - lastCycle) + " at " + currentCpuCycles);
             }
             lastCycle = currentCpuCycles;
         }
@@ -828,17 +815,14 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                         irqFlags |= 0x80;
                         irqTriggered = true;
                         getControlBus().setIRQ(VIC_IRQ);
-                        lastIRQ = cpu.getCycles();
-                        LOGGER.debug(
-                                "Generating IRQ at " + vbeam + " req:" + raster + " IRQs:" + cpu.getInterruptInExec()
-                                        + " flags: " + irqFlags + " delta: " + (cpu.getCycles() - lastLine));
+                        LOGGER.debug("Generating IRQ at " + vbeam + " req:" + raster + " flags: " + irqFlags);
                     }
                 } else {
                     irqTriggered = false;
                 }
                 notVisible = false;
                 if (vPos < 0 || vPos >= 284) {
-                    cpu.baLowUntil = 0;
+                    controlBus.setCpuBALowUntil(0);
                     notVisible = true;
                     LOGGER.debug("FINISH next at " + vbeam);
                     // Jump directly to VS_FINISH and wait for end of line...
@@ -867,7 +851,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                     sprites[3].readSpriteData(); // reads all 3 bytes here (one should be prev).
                 }
                 if (sprites[5].dma) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_SP5;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_SP5);
                 }
                 break;
             case 2:
@@ -878,7 +862,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                     sprites[4].readSpriteData();
                 }
                 if (sprites[6].dma) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_SP6;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_SP6);
                 }
                 break;
             case 4:
@@ -889,7 +873,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                     sprites[5].readSpriteData();
                 }
                 if (sprites[7].dma) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_SP7;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_SP7);
                 }
                 break;
             case 6:
@@ -943,7 +927,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 break;
             case 11: // Set badline fetching...
                 if (badLine) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_BADLINE);
                 }
                 break;
             case 12: // First visible cycle (on screen)
@@ -964,7 +948,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 vc = vcBase;
                 vmli = 0;
                 if (badLine) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_BADLINE);
                     LOGGER.debug("#### RC = 0 (" + rc + ") at " + vbeam + " vc: " + vc);
                     rc = 0;
                 }
@@ -974,7 +958,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 drawSprites();
                 mpos += 8;
                 if (badLine) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_BADLINE);
                 }
                 break;
             case 15:
@@ -984,7 +968,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 mpos += 8;
 
                 if (badLine) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_BADLINE);
                 }
 
                 // Turn off sprite DMA if finished reading!
@@ -999,7 +983,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                     borderState &= 0xfd;
                 }
                 if (badLine) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_BADLINE);
                     // Fetch first char into cache! (for the below draw...)
                     vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + (vcBase & 0x3ff));
                     vicColCache[vmli] = getFromColorRAM(vcBase & 0x3ff);// getMemory(IO_OFFSET + 0xd800 + (vcBase &
@@ -1021,7 +1005,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 }
 
                 if (badLine) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_BADLINE);
                     // Fetch a some chars into cache! (for the below draw...)
                     vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
                     vicColCache[vmli] = getFromColorRAM((vcBase + vmli) & 0x3ff);// getMemory(IO_OFFSET + 0xd800 +
@@ -1035,7 +1019,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
             // Cycle 18 - 53
             default:
                 if (badLine) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_BADLINE);
                     // Fetch a some chars into cache! (for the below draw...)
                     vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
                     vicColCache[vmli] = getFromColorRAM((vcBase + vmli) & 0x3ff);// getMemory(IO_OFFSET + 0xd800 +
@@ -1052,7 +1036,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 // Then Check if it is time to start up the sprites!
                 // Does not matter in which order this is done ?=
                 if (badLine) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_BADLINE);
                     // Fetch a some chars into cache! (for the below draw...)
                     vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
                     vicColCache[vmli] = getFromColorRAM((vcBase + vmli) & 0x3ff);// getMemory(IO_OFFSET + 0xd800 +
@@ -1076,7 +1060,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                     mult = mult << 1;
                 }
                 if (sprites[0].dma) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_SP0;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_SP0);
                 }
 
                 drawGraphics(mpos + horizScroll);
@@ -1091,7 +1075,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                     borderState |= 2;
                 }
                 if (badLine) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_BADLINE;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_BADLINE);
                     // Fetch a some chars into cache! (for the below draw...)
                     vicCharCache[vmli] = getMemory(videoMatrixBaseAddress + ((vcBase + vmli) & 0x3ff));
                     vicColCache[vmli] = getFromColorRAM((vcBase + vmli) & 0x3ff);// getMemory(IO_OFFSET + 0xd800 +
@@ -1128,7 +1112,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 // only use the painting variable for better emulation
                 // Bus not available if sp0 or sp1 is painting
                 if (sprites[1].dma) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_SP1;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_SP1);
                 }
                 break;
             case 57:
@@ -1162,7 +1146,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 }
 
                 if (sprites[2].dma) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_SP2;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_SP2);
                 }
 
                 break;
@@ -1189,7 +1173,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                     sprites[2].readSpriteData();
                 }
                 if (sprites[3].dma) {
-                    cpu.baLowUntil = lastLine + VICConstants.BA_SP3;
+                    controlBus.setCpuBALowUntil(lastLine + VICConstants.BA_SP3);
                 }
                 break;
             case 62:
@@ -1454,7 +1438,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     public void reset() {
         // Clear a lot of stuff...???
         initUpdate();
-        lastLine = cpu.getCycles();
+        lastLine = 0;
 
         for (int i = 0; i < mem.length; i++)
             mem[i] = 0;
