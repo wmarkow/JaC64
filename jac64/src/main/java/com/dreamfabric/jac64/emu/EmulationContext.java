@@ -49,7 +49,7 @@ public class EmulationContext {
     private CIA1 cia1 = new CIA1(scheduler, controlBus);
     private CIA2 cia2 = new CIA2(scheduler, controlBus);
 
-    private AddressableBus addressableBus = new AddressableBus();
+    private AddressableBus addressableBus = new AddressableBus(cia2);
 
     private BasicROM basicROM = new BasicROM();
     private KernalROM kernalROM = new KernalROM();
@@ -60,7 +60,6 @@ public class EmulationContext {
     public EmulationContext() {
         // prepare IO
         vic.init(controlBus, cia1);
-        vic.setCia2(cia2);
         vic.setAddressableBus(addressableBus);
         io.setSid(sid);
         io.setVic(vic);

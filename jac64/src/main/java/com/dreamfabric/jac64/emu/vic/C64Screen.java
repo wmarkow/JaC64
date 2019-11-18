@@ -90,8 +90,6 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     private int reset = 100;
     private C64Canvas canvas;
 
-    private CIA2 cia2;
-
     private int[] cbmcolor = VICConstants.COLOR_SETS[0];
 
     // -------------------------------------------------------------------
@@ -232,10 +230,6 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     public void setAutoscale(boolean val) {
         DOUBLE = val;
         canvas.setAutoscale(val);
-    }
-
-    public void setCia2(CIA2 cia2) {
-        this.cia2 = cia2;
     }
 
     public void setAddressableBus(AddressableBus addressableBus) {
@@ -1447,7 +1441,6 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
         sprCol = 0;
         sprBgCol = 0;
 
-        cia2.reset();
         // c1541.reset();
         isrRunning = false;
     }
@@ -1640,7 +1633,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
 
         setVideoMem();
 
-        return addressableBus.readVicExclusive(cia2.getPRA(), address);
+        return addressableBus.readVicExclusive(address);
     };
 
     protected int getFromColorRAM(int localColorRAMAddress) {

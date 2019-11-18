@@ -3,6 +3,7 @@ package com.dreamfabric.jac64.emu.bus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dreamfabric.jac64.emu.cia.CIA2;
 import com.dreamfabric.jac64.emu.io.IO;
 import com.dreamfabric.jac64.emu.memory.BasicROM;
 import com.dreamfabric.jac64.emu.memory.CharROM;
@@ -21,6 +22,11 @@ public class AddressableBus implements AddressableIf {
     private CharROM charRom;
     private IO io;
     private RAM ram;
+    private CIA2 cia2;
+
+    public AddressableBus(CIA2 cia2) {
+        this.cia2 = cia2;
+    }
 
     public void setBasicRom(BasicROM basicRom) {
         this.basicRom = basicRom;
@@ -86,7 +92,8 @@ public class AddressableBus implements AddressableIf {
         return ram.read(address, currentCpuCycles);
     }
 
-    public int readVicExclusive(int cia2PRA, int addressSeenByVic) {
+    public int readVicExclusive(int addressSeenByVic) {
+        int cia2PRA = cia2.getPRA();
         int vicBankBaseAddress = (~(cia2PRA) & 3) << 14;
 
         boolean va14 = ((vicBankBaseAddress >> 14) & 0x1) == 1 ? true : false;
