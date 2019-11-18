@@ -27,6 +27,7 @@ import com.dreamfabric.jac64.C64Canvas;
 import com.dreamfabric.jac64.IMonitor;
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
+import com.dreamfabric.jac64.emu.bus.ControlBus;
 import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.cia.CIA2;
 import com.dreamfabric.jac64.emu.cpu.MOS6510Core;
@@ -204,8 +205,8 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     private boolean isrRunning = false;
 
     private MOS6510Core cpu;
-    private InterruptManager interruptManager;
     private AddressableBus addressableBus;
+    private ControlBus controlBus;
 
     public C64Screen(IMonitor m, boolean dob) {
         monitor = m;
@@ -316,16 +317,14 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
             monitor.info("Sprite " + (i + 1) + " pos = " + sprites[i].x + ", " + sprites[i].y);
         }
 
-        monitor.info("IRQFlags: " + getInterruptManager().getIRQFlags());
-        monitor.info("NMIFlags: " + getInterruptManager().getNMIFlags());
         monitor.info("CPU IRQLow: " + cpu.getIRQLow());
         monitor.info("CPU NMILow: " + cpu.getNMILow());
         monitor.info("Current CPU cycles: " + cpu.getCycles());
     }
 
-    public void init(MOS6510Core cpu, InterruptManager interruptManager, CIA1 cia1) {
+    public void init(MOS6510Core cpu, ControlBus controlBus, CIA1 cia1) {
         this.cpu = cpu;
-        this.interruptManager = interruptManager;
+        this.controlBus = controlBus;
 
         for (int i = 0, n = sprites.length; i < n; i++) {
             sprites[i] = new Sprite();
@@ -358,9 +357,9 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
 
     public void restoreKey(boolean down) {
         if (down)
-            getInterruptManager().setNMI(InterruptManager.KEYBOARD_NMI);
+            getControlBus().setNMI(InterruptManager.KEYBOARD_NMI);
         else
-            getInterruptManager().clearNMI(InterruptManager.KEYBOARD_NMI);
+            getControlBus().clearNMI(InterruptManager.KEYBOARD_NMI);
     }
 
     // Should be checked up!!!
@@ -624,7 +623,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
 
                 // Is this "flagged" off?
                 if ((irqMask & 0x0f & irqFlags) == 0) {
-                    getInterruptManager().clearIRQ(VIC_IRQ);
+                    getControlBus().clearIRQ(VIC_IRQ);
                 }
             }
                 break;
@@ -634,9 +633,9 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 // Check if IRQ should trigger or clear!
                 if ((irqMask & 0x0f & irqFlags) != 0) {
                     irqFlags |= 0x80;
-                    getInterruptManager().setIRQ(VIC_IRQ);
+                    getControlBus().setIRQ(VIC_IRQ);
                 } else {
-                    getInterruptManager().clearIRQ(VIC_IRQ);
+                    getControlBus().clearIRQ(VIC_IRQ);
                 }
 
                 LOGGER.debug("Changing IRQ mask to: " + Integer.toString(irqMask, 16) + " vbeam: " + vbeam);
@@ -809,12 +808,12 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                 if (((irqMask & 2) != 0) && (sprBgCol != 0) && (irqFlags & 2) == 0) {
                     LOGGER.debug("*** Sprite collission IRQ (d01f): " + sprBgCol + " at " + vbeam);
                     irqFlags |= 82;
-                    getInterruptManager().setIRQ(VIC_IRQ);
+                    getControlBus().setIRQ(VIC_IRQ);
                 }
                 if (((irqMask & 4) != 0) && (sprCol != 0) && (irqFlags & 4) == 0) {
                     LOGGER.debug("*** Sprite collission IRQ (d01e): " + sprCol + " at " + vbeam);
                     irqFlags |= 84;
-                    getInterruptManager().setIRQ(VIC_IRQ);
+                    getControlBus().setIRQ(VIC_IRQ);
                 }
 
                 int irqComp = raster;
@@ -828,7 +827,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
                     if ((irqMask & 1) != 0) {
                         irqFlags |= 0x80;
                         irqTriggered = true;
-                        getInterruptManager().setIRQ(VIC_IRQ);
+                        getControlBus().setIRQ(VIC_IRQ);
                         lastIRQ = cpu.getCycles();
                         LOGGER.debug(
                                 "Generating IRQ at " + vbeam + " req:" + raster + " IRQs:" + cpu.getInterruptInExec()
@@ -1467,8 +1466,6 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
         cia2.reset();
         // c1541.reset();
         isrRunning = false;
-
-        getInterruptManager().reset();
     }
 
     public static final int IMG_TOTWIDTH = SC_WIDTH;
@@ -1668,7 +1665,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
         return addressableBus.readVicExclusiveFromColorRAM(localColorRAMAddress);
     }
 
-    private InterruptManager getInterruptManager() {
-        return interruptManager;
+    private ControlBus getControlBus() {
+        return controlBus;
     }
 }

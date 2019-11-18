@@ -3,6 +3,7 @@ package com.dreamfabric.jac64.emu.cia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dreamfabric.jac64.emu.bus.ControlBus;
 import com.dreamfabric.jac64.emu.cia.keyboard.Joy1KeyListener;
 import com.dreamfabric.jac64.emu.cia.keyboard.Joy2KeyListener;
 import com.dreamfabric.jac64.emu.cia.keyboard.KeyListener;
@@ -18,8 +19,8 @@ public class CIA1 extends CIA {
 
     private Keyboard keyboard;
 
-    public CIA1(EventQueue scheduler, InterruptManager interruptManager) {
-        super(scheduler, START_ADDRESS, interruptManager);
+    public CIA1(EventQueue scheduler, ControlBus controlBus) {
+        super(scheduler, START_ADDRESS, controlBus);
 
         write0(DDRA + START_ADDRESS, 0x00); // input
         write0(PRA + START_ADDRESS, 0xFF); // HIGH
@@ -112,10 +113,10 @@ public class CIA1 extends CIA {
 
             // cpu.log("CIA 1 *** TRIGGERING CIA TIMER!!!: " +
             // ciaie + " " + chips.getIRQFlags() + " " + cpu.getIRQLow());
-            interruptManager.setIRQ(InterruptManager.CIA_TIMER_IRQ);
+            controlBus.setIRQ(InterruptManager.CIA_TIMER_IRQ);
         } else {
             // System.out.println("*** CLEARING CIA TIMER!!!");
-            interruptManager.clearIRQ(InterruptManager.CIA_TIMER_IRQ);
+            controlBus.clearIRQ(InterruptManager.CIA_TIMER_IRQ);
         }
     }
 }

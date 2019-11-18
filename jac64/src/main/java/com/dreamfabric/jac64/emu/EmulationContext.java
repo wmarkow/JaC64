@@ -40,16 +40,16 @@ public class EmulationContext {
     private C64Cpu cpu = new C64Cpu();
     // One InterruptManager per named CPU. For now just one interrupt manager.
     private InterruptManager interruptManager = new InterruptManager(cpu);
-
     private PLA pla = new PLA();
+    private ControlBus controlBus = new ControlBus(pla, interruptManager);
+
     private IO io = new IO();
     private SIDIf sid = new RESID(scheduler);
     private C64Screen vic = new C64Screen(monitor, true);
-    private CIA1 cia1 = new CIA1(scheduler, interruptManager);
-    private CIA2 cia2 = new CIA2(scheduler, interruptManager);
+    private CIA1 cia1 = new CIA1(scheduler, controlBus);
+    private CIA2 cia2 = new CIA2(scheduler, controlBus);
 
     private AddressableBus addressableBus = new AddressableBus();
-    private ControlBus controlBus = new ControlBus(pla);
 
     private BasicROM basicROM = new BasicROM();
     private KernalROM kernalROM = new KernalROM();
@@ -59,7 +59,7 @@ public class EmulationContext {
 
     public EmulationContext() {
         // prepare IO
-        vic.init(cpu, interruptManager, cia1);
+        vic.init(cpu, controlBus, cia1);
         vic.setCia2(cia2);
         vic.setAddressableBus(addressableBus);
         io.setSid(sid);
@@ -94,10 +94,6 @@ public class EmulationContext {
 
     public C64Cpu getCpu() {
         return cpu;
-    }
-
-    public InterruptManager getInterruptManager() {
-        return interruptManager;
     }
 
     public AddressableBus getAddressableBus() {

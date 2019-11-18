@@ -9,13 +9,12 @@ package com.dreamfabric.jac64.emu.cia;
 
 import com.dreamfabric.jac64.emu.SimulableIf;
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
-import com.dreamfabric.jac64.emu.cia.keyboard.Keyboard;
+import com.dreamfabric.jac64.emu.bus.ControlBus;
 import com.dreamfabric.jac64.emu.cia.timer.RealTimeClock;
 import com.dreamfabric.jac64.emu.cia.timer.Timer;
 import com.dreamfabric.jac64.emu.cia.timer.TimerA;
 import com.dreamfabric.jac64.emu.cia.timer.TimerB;
 import com.dreamfabric.jac64.emu.cia.timer.TimerListenerIf;
-import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 
 /**
@@ -72,17 +71,17 @@ public abstract class CIA extends AddressableChip implements SimulableIf {
     private int startAddress;
 
     public int serialFake = 0;
-    protected InterruptManager interruptManager;
+    protected ControlBus controlBus;
 
     /**
      * Creates a new <code>CIA</code> instance.
      *
      */
-    public CIA(EventQueue scheduler, int startAddress, InterruptManager interruptManager) {
+    public CIA(EventQueue scheduler, int startAddress, ControlBus controlBus) {
         super();
         this.startAddress = startAddress;
 
-        this.interruptManager = interruptManager;
+        this.controlBus = controlBus;
         timerA = new TimerA("TimerA", true, null, scheduler);
         timerB = new TimerB("TimerB", false, timerA, scheduler);
         timerA.setOtherTimer(timerB);
