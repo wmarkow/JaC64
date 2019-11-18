@@ -1,6 +1,7 @@
 package com.dreamfabric.jac64.emu.sid;
 
 import com.dreamfabric.jac64.emu.bus.AddressableChip;
+import com.dreamfabric.jac64.emu.bus.ControlBus;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
 import com.dreamfabric.resid.ISIDDefs;
@@ -32,9 +33,9 @@ public class RESID extends AddressableChip implements SIDIf {
     private int clocksPerSample = CPUFrq / SAMPLE_RATE;
     private int pos = 0;
     private AudioDriver audioDriver;
-    private EventQueue scheduler;
+    private ControlBus controlBus;
 
-    public RESID(EventQueue scheduler) {
+    public RESID(ControlBus controlBus) {
         audioDriver = new AudioDriverSE();
         audioDriver.init(44000, 22000);
         audioDriver.setSoundOn(true);
@@ -44,14 +45,14 @@ public class RESID extends AddressableChip implements SIDIf {
         sid.set_sampling_parameters(CPUFrq, sampling_method.SAMPLE_FAST, SAMPLE_RATE, -1, 0.97);
         setChipVersion(RESID_6581);
 
-        this.scheduler = scheduler;
+        this.controlBus = controlBus;
     }
 
     TimeEvent updateEvent = new TimeEvent(0) {
         public void execute(long currentCpuCycles) {
             RESID.this.execute();
 
-            scheduler.addEvent(this, currentCpuCycles + clocksPerSample);
+            controlBus.addEvent(this, currentCpuCycles + clocksPerSample);
         }
     };
 
@@ -82,18 +83,18 @@ public class RESID extends AddressableChip implements SIDIf {
 
     @Override
     public void start(long currentCpuCycles) {
-        scheduler.addEvent(updateEvent, currentCpuCycles + clocksPerSample);
+        controlBus.addEvent(updateEvent, currentCpuCycles + clocksPerSample);
     }
 
     @Override
     public void stop() {
-        scheduler.removeEvent(updateEvent);
+        controlBus.removeEvent(updateEvent);
     }
 
     @Override
     public void reset() {
         sid.reset();
-        scheduler.addEvent(updateEvent, clocksPerSample);
+        controlBus.addEvent(updateEvent, clocksPerSample);
     }
 
     public void setChipVersion(int version) {

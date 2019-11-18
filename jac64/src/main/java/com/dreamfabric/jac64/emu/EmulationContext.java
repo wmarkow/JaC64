@@ -44,7 +44,7 @@ public class EmulationContext {
     private ControlBus controlBus = new ControlBus(pla, interruptManager, cpu, scheduler);
 
     private IO io = new IO();
-    private SIDIf sid = new RESID(scheduler);
+    private SIDIf sid = new RESID(controlBus);
     private C64Screen vic = new C64Screen(monitor, true);
     private CIA1 cia1 = new CIA1(controlBus);
     private CIA2 cia2 = new CIA2(controlBus);
@@ -96,6 +96,10 @@ public class EmulationContext {
 
     public AddressableBus getAddressableBus() {
         return addressableBus;
+    }
+
+    public ControlBus getControlBus() {
+        return controlBus;
     }
 
     public SIDIf getSid() {

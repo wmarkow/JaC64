@@ -391,7 +391,7 @@ public class JaC64 implements ActionListener, KeyEventDispatcher {
                     ((RESID) getSid()).setChipVersion(sid);
                 } else {
                     getSid().stop();
-                    RESID newSid = new RESID(emulationContext.getScheduler());
+                    RESID newSid = new RESID(emulationContext.getControlBus());
                     newSid.setChipVersion(sid);
                     newSid.start(emulationContext.getCpu().getCycles());
 
