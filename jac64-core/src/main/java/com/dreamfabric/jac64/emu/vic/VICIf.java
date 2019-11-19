@@ -18,4 +18,5 @@ public interface VICIf extends AddressableIf, SimulableIf {
         return END_ADDRESS;
     }
 
+    public void clock(long currentCpuCycles);
 }

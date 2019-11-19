@@ -8,6 +8,7 @@ import com.dreamfabric.jac64.emu.interrupt.InterruptManager;
 import com.dreamfabric.jac64.emu.pla.PLA;
 import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 import com.dreamfabric.jac64.emu.scheduler.TimeEvent;
+import com.dreamfabric.jac64.emu.vic.VICIf;
 
 public class ControlBus {
     private static Logger LOGGER = LoggerFactory.getLogger(ControlBus.class);
@@ -16,12 +17,14 @@ public class ControlBus {
     private InterruptManager interruptManager;
     private MOS6510Core cpu;
     private EventQueue scheduler;
+    private VICIf vic;
 
-    public ControlBus(PLA pla, InterruptManager interruptManager, MOS6510Core cpu, EventQueue scheduler) {
+    public ControlBus(PLA pla, InterruptManager interruptManager, MOS6510Core cpu, EventQueue scheduler, VICIf vic) {
         this.pla = pla;
         this.interruptManager = interruptManager;
         this.cpu = cpu;
         this.scheduler = scheduler;
+        this.vic = vic;
     }
 
     public void setCharenHiramLoram(int byteValue) {
@@ -68,5 +71,9 @@ public class ControlBus {
 
     public boolean removeEvent(TimeEvent event) {
         return scheduler.removeEvent(event);
+    }
+
+    public void clock(long currentCpuCycles) {
+        vic.clock(currentCpuCycles);
     }
 }

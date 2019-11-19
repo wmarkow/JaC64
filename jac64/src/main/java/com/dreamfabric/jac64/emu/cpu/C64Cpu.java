@@ -12,7 +12,6 @@ public class C64Cpu extends MOS6510Core {
 
     private ControlBus controlBus;
     private AddressableBus addressableBus;
-    private C64Screen c64screen = null;
 
     public void setControlBus(ControlBus controlBus) {
         this.controlBus = controlBus;
@@ -22,12 +21,7 @@ public class C64Cpu extends MOS6510Core {
         this.addressableBus = addressableBus;
     }
 
-    public void setC64Screen(C64Screen c64screen) {
-        this.c64screen = c64screen;
-    }
-
     public void reset() {
-        c64screen.reset();
         // this will ensure the correct PLA state
         writeByte(1, 0x7);
     }
@@ -108,7 +102,7 @@ public class C64Cpu extends MOS6510Core {
     }
 
     private void executeFromEventQueue(long currentCpuCycles) {
-        c64screen.clock(currentCpuCycles);
+        controlBus.clock(currentCpuCycles);
         controlBus.executeFromEventQueue(currentCpuCycles);
     }
 

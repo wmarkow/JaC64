@@ -739,7 +739,8 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
     private int xPos = 0;
     private long lastCycle = 0;
 
-    public final void clock(long currentCpuCycles) {
+    @Override
+    public void clock(long currentCpuCycles) {
 
         if (lastCycle + 1 < currentCpuCycles) {
             LOGGER.debug("More than one cycle passed: " + (currentCpuCycles - lastCycle) + " at " + currentCpuCycles);

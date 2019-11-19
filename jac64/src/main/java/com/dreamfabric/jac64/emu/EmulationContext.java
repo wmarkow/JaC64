@@ -38,14 +38,15 @@ public class EmulationContext {
     private Debugger monitor = new Debugger();
     private EventQueue scheduler = new EventQueue();
     private C64Cpu cpu = new C64Cpu();
+
     // One InterruptManager per named CPU. For now just one interrupt manager.
     private InterruptManager interruptManager = new InterruptManager(cpu);
     private PLA pla = new PLA();
-    private ControlBus controlBus = new ControlBus(pla, interruptManager, cpu, scheduler);
+    private C64Screen vic = new C64Screen(monitor, true);
+    private ControlBus controlBus = new ControlBus(pla, interruptManager, cpu, scheduler, vic);
 
     private IO io = new IO();
     private SIDIf sid = new RESID(controlBus);
-    private C64Screen vic = new C64Screen(monitor, true);
     private CIA1 cia1 = new CIA1(controlBus);
     private CIA2 cia2 = new CIA2(controlBus);
 
@@ -59,7 +60,7 @@ public class EmulationContext {
 
     public EmulationContext() {
         // prepare IO
-        vic.init(controlBus, cia1);
+        vic.init(controlBus, cia1); // FIXME: vic should not use cia1 directly
         vic.setAddressableBus(addressableBus);
         io.setSid(sid);
         io.setVic(vic);
@@ -83,7 +84,6 @@ public class EmulationContext {
 
         // prepare CPU
         cpu.init();
-        cpu.setC64Screen(vic);
         cpu.setControlBus(controlBus);
         cpu.setAddressableBus(addressableBus);
 

@@ -25,4 +25,8 @@ public class VoidVIC extends AddressableVoid implements VICIf {
         // nothing to do here
     }
 
+    @Override
+    public void clock(long currentCpuCycles) {
+        // nothing to do here
+    }
 }
