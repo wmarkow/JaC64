@@ -310,7 +310,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
         }
     }
 
-    public void init(ControlBus controlBus, CIA1 cia1) {
+    public void init(ControlBus controlBus) {
         this.controlBus = controlBus;
 
         for (int i = 0, n = sprites.length; i < n; i++) {
@@ -318,7 +318,7 @@ public class C64Screen extends AddressableChip implements VICIf, MouseMotionList
             sprites[i].spriteNo = i;
         }
 
-        canvas = new C64Canvas(this, DOUBLE, cia1);
+        canvas = new C64Canvas(this, DOUBLE, controlBus);
         canvas.addMouseMotionListener(this);
 
         for (int i = 0; i < SC_WIDTH * SC_HEIGHT; i++) {

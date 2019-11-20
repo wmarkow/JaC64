@@ -59,8 +59,10 @@ public class EmulationContext {
     private ColorRAM colorRAM = new ColorRAM();
 
     public EmulationContext() {
+        controlBus.setCIA1(cia1);
+
         // prepare IO
-        vic.init(controlBus, cia1); // FIXME: vic should not use cia1 directly
+        vic.init(controlBus); // FIXME: vic should not use cia1 directly
         vic.setAddressableBus(addressableBus);
         io.setSid(sid);
         io.setVic(vic);

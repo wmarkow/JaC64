@@ -18,6 +18,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JPanel;
 
 import com.dreamfabric.jac64.emu.EmulationContext;
+import com.dreamfabric.jac64.emu.bus.ControlBus;
 import com.dreamfabric.jac64.emu.cia.CIA1;
 import com.dreamfabric.jac64.emu.keyboard.Joy1KeyListenerAdapter;
 import com.dreamfabric.jac64.emu.keyboard.Joy2KeyListenerAdapter;
@@ -44,7 +45,7 @@ public class C64Canvas extends JPanel implements KeyListener, FocusListener {
     int w;
     int h;
 
-    public C64Canvas(C64Screen screen, boolean dob, CIA1 cia1) {
+    public C64Canvas(C64Screen screen, boolean dob, ControlBus controlBus) {
         super();
         autoScale = dob;
         scr = screen;
@@ -53,9 +54,9 @@ public class C64Canvas extends JPanel implements KeyListener, FocusListener {
         addFocusListener(this);
         addKeyListener(this);
 
-        keyboardAdapter = new KeyListenerAdapter(cia1.getKeyListener());
-        joy1KeyListenerAdapter = new Joy1KeyListenerAdapter(cia1.getJoy1KeyListener());
-        joy2KeyListenerAdapter = new Joy2KeyListenerAdapter(cia1.getJoy2KeyListener());
+        keyboardAdapter = new KeyListenerAdapter(controlBus);
+        joy1KeyListenerAdapter = new Joy1KeyListenerAdapter(controlBus);
+        joy2KeyListenerAdapter = new Joy2KeyListenerAdapter(controlBus);
     }
 
     public void setAutoscale(boolean val) {
