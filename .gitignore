@@ -1,4 +1,2 @@
-*.class
-*.jar
-roms/*
-sounds/*
+.project
+.settings/
