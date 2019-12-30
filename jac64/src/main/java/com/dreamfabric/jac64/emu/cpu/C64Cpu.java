@@ -5,13 +5,14 @@ import org.slf4j.LoggerFactory;
 
 import com.dreamfabric.jac64.emu.bus.AddressableBus;
 import com.dreamfabric.jac64.emu.bus.ControlBus;
-import com.dreamfabric.jac64.emu.vic.C64Screen;
 
 public class C64Cpu extends MOS6510Core {
     private static Logger LOGGER = LoggerFactory.getLogger(C64Cpu.class);
 
     private ControlBus controlBus;
     private AddressableBus addressableBus;
+
+    private long lastStatictiscDumpCpuCycles = 0;
 
     public void setControlBus(ControlBus controlBus) {
         this.controlBus = controlBus;
@@ -39,6 +40,12 @@ public class C64Cpu extends MOS6510Core {
     protected final int fetchByte(int adr) {
         /* a cycles passes for this read */
         currentCpuCycles++;
+
+        if (currentCpuCycles - lastStatictiscDumpCpuCycles >= 1000000) {
+            addressableBus.dumpUsage(currentCpuCycles);
+            
+            lastStatictiscDumpCpuCycles = currentCpuCycles;
+        }
 
         /* Chips work first, then CPU */
         executeFromEventQueue(currentCpuCycles);

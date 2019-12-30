@@ -24,6 +24,10 @@ public class AddressableBus implements AddressableIf {
     private RAM ram;
     private CIA2 cia2;
 
+    // statistics
+    private long readCount = 0;
+    private long writeCount = 0;
+
     public AddressableBus(CIA2 cia2) {
         this.cia2 = cia2;
     }
@@ -54,6 +58,8 @@ public class AddressableBus implements AddressableIf {
 
     @Override
     public boolean write(int address, int data, long currentCpuCycles) {
+        writeCount++;
+
         boolean result = false;
 
         // it makes no point to write to ROMs
@@ -67,6 +73,8 @@ public class AddressableBus implements AddressableIf {
 
     @Override
     public Integer read(int address, long currentCpuCycles) {
+        readCount++;
+
         Integer result = null;
 
         result = basicRom.read(address, currentCpuCycles);
@@ -140,6 +148,21 @@ public class AddressableBus implements AddressableIf {
     public boolean isEnabled() {
         // always true
         return true;
+    }
+
+    public long getReadCount() {
+        return readCount;
+    }
+
+    public long getWriteCount() {
+        return writeCount;
+    }
+
+    public void dumpUsage(long currentCpuCycles) {
+        LOGGER.info(String.format("Was %s TOTAL operations per second.",
+                1000000 * (readCount + writeCount) / currentCpuCycles));
+        LOGGER.info(String.format("Was %s   CIA operations per second.",
+                1000000 * (io.getCia1().getReadCount() + io.getCia1().getWriteCount()) / currentCpuCycles));
     }
 
     /***

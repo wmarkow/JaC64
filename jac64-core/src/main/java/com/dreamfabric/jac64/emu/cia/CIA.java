@@ -15,7 +15,6 @@ import com.dreamfabric.jac64.emu.cia.timer.Timer;
 import com.dreamfabric.jac64.emu.cia.timer.TimerA;
 import com.dreamfabric.jac64.emu.cia.timer.TimerB;
 import com.dreamfabric.jac64.emu.cia.timer.TimerListenerIf;
-import com.dreamfabric.jac64.emu.scheduler.EventQueue;
 
 /**
  * CIA emulation for JaC64.
@@ -72,6 +71,9 @@ public abstract class CIA extends AddressableChip implements SimulableIf {
 
     public int serialFake = 0;
     protected ControlBus controlBus;
+
+    private long readCount = 0;
+    private long writeCount = 0;
 
     /**
      * Creates a new <code>CIA</code> instance.
@@ -139,6 +141,8 @@ public abstract class CIA extends AddressableChip implements SimulableIf {
         if (result == false) {
             return false;
         }
+
+        writeCount++;
 
         int localAddress = address - getStartAddress();
         switch (localAddress) {
@@ -209,6 +213,8 @@ public abstract class CIA extends AddressableChip implements SimulableIf {
             return null;
         }
 
+        readCount++;
+
         int localAddress = address - getStartAddress();
         switch (localAddress) {
             case PRA:
@@ -277,5 +283,13 @@ public abstract class CIA extends AddressableChip implements SimulableIf {
         // // System.out.println("Timer B Interrupt: " + timerBTrigg);
         // System.out.println("Timer B Latch: " + timerB.getLatch());
         // System.out.println("--------------------------");
+    }
+
+    public long getReadCount() {
+        return readCount;
+    }
+
+    public long getWriteCount() {
+        return writeCount;
     }
 }

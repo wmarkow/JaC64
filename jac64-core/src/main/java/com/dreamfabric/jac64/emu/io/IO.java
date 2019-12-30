@@ -30,6 +30,10 @@ public class IO extends AddressableVoid {
         this.cia1 = cia1;
     }
 
+    public CIA1 getCia1() {
+        return this.cia1;
+    }
+
     public void setCia2(CIA2 cia2) {
         this.cia2 = cia2;
     }
