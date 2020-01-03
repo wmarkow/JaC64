@@ -23,3 +23,8 @@ With this rework the following are possible:
  * implement a blind **VIC** which will generate no graphic
  * support for using external cartdrige
  * port the Java code into Arduino (like ESP8266), performance is a key word here
+
+
+Useful links:
+
+[C64-Wiki](https://www.c64-wiki.com/) Just type a word in the search panel to find some information, like typig **pla** will show you the information about [PLA chip](https://www.c64-wiki.com/wiki/PLA_(C64_chip)) .
